@@ -22,8 +22,12 @@ export default function DocumentationPage() {
     setIsLoggedIn(isAuthenticated());
   }, []);
 
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
   if (!isLoggedIn) {
-    return <LoginForm />;
+    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
