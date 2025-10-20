@@ -39,7 +39,7 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
   const weeklyHighScoreLeads = currentWeekData.filter(item => item.score >= 70).length;
 
   // Weekly Goals (you can customize these)
-  const weeklyGoal = 12;
+  const weeklyGoal = 5;
   const conversionGoal = 8;
   const qualityGoal = 10;
 
@@ -57,24 +57,21 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
       color: 'blue',
       icon: CalendarIcon,
       description: 'This week',
+      showGoal: true,
+      showOver: true,
+      showProgressBar: true,
     },
     {
-      label: 'Weekly Conversion Goal',
+      label: 'Weekly Lead Conversion',
       current: weeklyReadyToEngage,
       goal: conversionGoal,
       percentage: conversionProgress,
       color: 'emerald',
       icon: TrophyIcon,
       description: 'Ready to engage',
-    },
-    {
-      label: 'Weekly Quality Goal',
-      current: weeklyHighScoreLeads,
-      goal: qualityGoal,
-      percentage: qualityProgress,
-      color: 'amber',
-      icon: ChartBarIcon,
-      description: 'Score ≥ 70',
+      showGoal: false,
+      showOver: false,
+      showProgressBar: false,
     },
   ];
 
@@ -129,27 +126,32 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-gray-900">
-                    {item.current}<span className="text-sm text-gray-400">/{item.goal}</span>
+                    {item.current}{item.showGoal && item.showOver && <span className="text-sm text-gray-400"> over /{item.goal}</span>}
+                    {item.showGoal && !item.showOver && <span className="text-sm text-gray-400">/{item.goal}</span>}
                   </div>
-                  <div className={`text-xs font-semibold ${isComplete ? 'text-emerald-600' : getColorClasses(item.color, 'text')}`}>
-                    {item.percentage.toFixed(0)}%
-                  </div>
+                  {item.showGoal && (
+                    <div className={`text-xs font-semibold ${isComplete ? 'text-emerald-600' : getColorClasses(item.color, 'text')}`}>
+                      {item.percentage.toFixed(0)}%
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${getColorClasses(item.color, 'bg')} transition-all duration-500 ease-out rounded-full`}
-                  style={{ width: `${item.percentage}%` }}
-                >
-                  {/* Animated shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+              {item.showProgressBar && (
+                <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${getColorClasses(item.color, 'bg')} transition-all duration-500 ease-out rounded-full`}
+                    style={{ width: `${item.percentage}%` }}
+                  >
+                    {/* Animated shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Status badge */}
-              {isComplete && (
+              {isComplete && item.showProgressBar && (
                 <div className="absolute -top-1 -right-1">
                   <div className="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center gap-1">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
