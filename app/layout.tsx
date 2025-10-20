@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Dashboard for All",
-  description: "Real-time tracking and analytics",
+  description: "Unified business intelligence platform with real-time analytics, multi-department dashboards, and actionable insights across your organization",
 };
 
 export default function RootLayout({
