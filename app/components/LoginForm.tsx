@@ -80,7 +80,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/login.png"
+            src="/gif/Login.gif"
             alt="Dashboard Illustration"
             fill
             unoptimized
