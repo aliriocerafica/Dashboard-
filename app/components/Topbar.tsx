@@ -8,7 +8,10 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
   CogIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ComputerDesktopIcon,
+  HomeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { logout } from '../lib/auth';
@@ -57,6 +60,13 @@ export default function Topbar() {
       description: 'Process management',
       color: 'bg-emerald-50 text-emerald-600'
     },
+    { 
+      name: 'IT', 
+      href: '/it', 
+      icon: ComputerDesktopIcon, 
+      description: 'Infrastructure and systems',
+      color: 'bg-purple-50 text-purple-600'
+    },
   ];
 
   return (
@@ -74,15 +84,33 @@ export default function Topbar() {
             </div>
           </Link>
 
-          {/* Department Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+          {/* Navigation Links */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/home"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <span className="text-sm font-medium text-gray-700">Departments</span>
-              <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+              <HomeIcon className="w-5 h-5" />
+              <span className="hidden md:inline">Home</span>
+            </Link>
+            
+            <Link
+              href="/documentation"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <DocumentTextIcon className="w-5 h-5" />
+              <span className="hidden md:inline">Documentation</span>
+            </Link>
+
+            {/* Department Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <span className="text-sm font-medium text-gray-700">Departments</span>
+                <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
@@ -114,17 +142,18 @@ export default function Topbar() {
                 </div>
               </div>
             )}
-          </div>
+            </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Logout"
-          >
-            <ArrowRightOnRectangleIcon className="w-5 h-5" />
-            <span className="hidden md:inline">Logout</span>
-          </button>
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Logout"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              <span className="hidden md:inline">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </nav>

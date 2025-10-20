@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sales Pipeline Dashboard",
-  description: "Real-time sales pipeline tracking and analytics",
+  title: "Dashboard for All",
+  description: "Real-time tracking and analytics",
 };
 
 export default function RootLayout({

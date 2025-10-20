@@ -10,7 +10,8 @@ import {
   CurrencyDollarIcon, 
   UserGroupIcon,
   CogIcon,
-  ArrowRightIcon 
+  ArrowRightIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import { isAuthenticated } from '../lib/auth';
 import LoginForm from '../components/LoginForm';
@@ -71,6 +72,14 @@ export default function HomePage() {
       description: 'Process optimization and efficiency',
       color: 'from-emerald-500 to-emerald-600',
       stats: 'Process Metrics'
+    },
+    {
+      name: 'IT',
+      href: '/it',
+      icon: ComputerDesktopIcon,
+      description: 'Infrastructure and system management',
+      color: 'from-purple-500 to-purple-600',
+      stats: 'System Status'
     }
   ];
 
@@ -123,7 +132,7 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Quick Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">5</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">6</div>
               <div className="text-sm text-gray-600">Departments</div>
             </div>
             <div className="text-center">
