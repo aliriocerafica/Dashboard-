@@ -84,14 +84,14 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
       <Topbar />
       
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to Business Dashboard
+            Welcome to Dashboard For All
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Access real-time analytics and insights across all departments. 

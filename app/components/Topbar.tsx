@@ -75,7 +75,7 @@ export default function Topbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div className="w-10 h-10 bg-[#ff6d74] rounded-xl flex items-center justify-center text-white shadow-lg">
               <ChartBarIcon className="w-6 h-6" />
             </div>
             <div>

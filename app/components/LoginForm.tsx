@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { LockClosedIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { LockClosedIcon, LockOpenIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -11,8 +12,22 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('dashboard_username');
+    const savedPassword = localStorage.getItem('dashboard_password');
+    const savedRememberMe = localStorage.getItem('dashboard_rememberMe') === 'true';
+
+    if (savedUsername && savedPassword && savedRememberMe) {
+      setUsername(savedUsername);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +46,18 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
       const data = await response.json();
 
       if (data.success) {
+        // Handle "Remember Me" functionality
+        if (rememberMe) {
+          localStorage.setItem('dashboard_username', username);
+          localStorage.setItem('dashboard_password', password);
+          localStorage.setItem('dashboard_rememberMe', 'true');
+        } else {
+          // Clear saved credentials if "Remember Me" is unchecked
+          localStorage.removeItem('dashboard_username');
+          localStorage.removeItem('dashboard_password');
+          localStorage.removeItem('dashboard_rememberMe');
+        }
+
         sessionStorage.setItem('authenticated', 'true');
         onLoginSuccess();
       } else {
@@ -43,21 +70,58 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     }
   };
 
+  // Check if both fields are filled
+  const isFormFilled = username.trim() !== '' && password.trim() !== '';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-emerald-50 px-4">
-      <div className="max-w-md w-full">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
-            <LockClosedIcon className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to access your dashboard</p>
+    <div className="min-h-screen flex">
+      {/* Left Column - GIF with Gradient Overlay */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center p-8 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/gif/login.gif"
+            alt="Dashboard Illustration"
+            fill
+            unoptimized
+            priority
+            className="object-cover"
+          />
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Gradient Overlay - Red Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6d74]/85 via-[#ff6d74]/80 to-red-500/80 z-10"></div>
+
+        {/* Content */}
+        <div className="relative z-20 max-w-md w-full text-white text-center">
+          <h2 className="text-4xl font-bold mb-4">
+            Welcome to Dashboard For All
+          </h2>
+          <p className="text-lg text-white/90 leading-relaxed">
+            Access powerful business intelligence and real-time analytics across all your departments. 
+            Manage, monitor, and drive better decisions with our comprehensive dashboard.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Column - Login Form */}
+      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center px-4 py-8">
+        <div className="max-w-md w-full">
+          {/* Form Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-[#ff6d74] rounded-xl mb-4 shadow-lg transition-all duration-300">
+              {isFormFilled ? (
+                <LockOpenIcon className="w-7 h-7 text-white animate-pulse" />
+              ) : (
+                <LockClosedIcon className="w-7 h-7 text-white" />
+              )}
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">User Login</h1>
+            <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
@@ -72,7 +136,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
+                  className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6d74] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
                   placeholder="Enter your username"
                   required
                   autoComplete="username"
@@ -94,7 +158,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
+                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6d74] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
@@ -113,9 +177,27 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
               </div>
             </div>
 
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 accent-[#ff6d74]"
+                style={{accentColor: '#ff6d74'}}
+              />
+              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600 cursor-pointer">
+                Remember me
+              </label>
+              <a href="#" className="ml-auto text-sm text-[#ff6d74] hover:text-red-600">
+                Forgot password?
+              </a>
+            </div>
+
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -124,10 +206,10 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-lg text-white font-semibold transition-all duration-200 ${
+              className={`w-full py-2.5 px-4 rounded-lg text-white font-semibold transition-all duration-200 ${
                 isLoading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                  : 'bg-[#ff6d74] hover:bg-red-600 shadow-md hover:shadow-lg'
               }`}
             >
               {isLoading ? (
@@ -139,17 +221,17 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                   Signing in...
                 </span>
               ) : (
-                'Sign In'
+                'LOGIN'
               )}
             </button>
           </form>
-        </div>
 
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Protected Dashboard • Contact administrator for access
-          </p>
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              Protected Dashboard • Contact administrator for access
+            </p>
+          </div>
         </div>
       </div>
     </div>
