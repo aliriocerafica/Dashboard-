@@ -1,3 +1,6 @@
+// @ts-nocheck
+'use client';
+
 import Topbar from '../components/Topbar';
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 

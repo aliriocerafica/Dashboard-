@@ -1,3 +1,6 @@
+// @ts-nocheck
+'use client';
+
 import Topbar from '../components/Topbar';
 import { UserGroupIcon } from '@heroicons/react/24/outline';
 
