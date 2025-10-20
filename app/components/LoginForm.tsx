@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { LockClosedIcon, LockOpenIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface LoginFormProps {
@@ -74,17 +75,25 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Column - Red Gradient Background */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#ff6d74] via-red-500 to-red-600 items-center justify-center p-8 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-60 h-60 bg-white/5 rounded-full blur-3xl"></div>
+      {/* Left Column - GIF Background with Red Gradient Overlay */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center p-8 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/login.png"
+            alt="Dashboard Illustration"
+            fill
+            unoptimized
+            priority
+            className="object-cover"
+          />
         </div>
+        {/* Gradient Overlay - Red Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6d74]/85 via-[#ff6d74]/80 to-red-500/80 z-10"></div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-md w-full text-white text-center">
-          <h2 className="text-4xl font-bold mb-6">
+        <div className="relative z-20 max-w-md w-full text-white text-center">
+          <h2 className="text-4xl font-bold mb-4">
             Welcome to Dashboard For All
           </h2>
           <p className="text-lg text-white/90 leading-relaxed">
