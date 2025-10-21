@@ -361,10 +361,10 @@ export default function Topbar() {
       {/* Logout Confirmation Modal - Outside Nav */}
       {isLogoutConfirmOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center p-4 pt-32 animate-in fade-in duration-200 overflow-y-auto"
-          style={{ zIndex: 9999 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-start p-4 animate-in fade-in duration-200 overflow-y-auto"
+          style={{ zIndex: 9999, paddingTop: '120px' }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200 my-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
