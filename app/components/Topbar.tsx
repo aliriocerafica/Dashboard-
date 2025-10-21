@@ -16,11 +16,9 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
-import ProfileModal from './ProfileModal';
 
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [username, setUsername] = useState<string>('admin');
 
   useEffect(() => {
@@ -167,14 +165,14 @@ export default function Topbar() {
             </div>
 
             {/* Profile Button */}
-            <button
-              onClick={() => setIsProfileOpen(true)}
+            <Link
+              href="/profile"
               className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-transparent hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-indigo-200"
               title="Profile Settings"
             >
               <UserCircleIcon className="w-5 h-5 transition-transform duration-300" />
               <span className="hidden md:inline">Profile</span>
-            </button>
+            </Link>
 
             {/* Logout Button */}
             <button
@@ -188,13 +186,6 @@ export default function Topbar() {
           </div>
         </div>
       </div>
-
-      {/* Profile Modal */}
-      <ProfileModal 
-        isOpen={isProfileOpen} 
-        onClose={() => setIsProfileOpen(false)}
-        username={username}
-      />
     </nav>
   );
 }
