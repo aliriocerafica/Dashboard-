@@ -23,6 +23,7 @@ export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [username, setUsername] = useState<string>('admin');
 
   useEffect(() => {
@@ -38,8 +39,17 @@ export default function Topbar() {
   }, []);
 
   const handleLogout = () => {
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const confirmLogout = () => {
+    setIsLogoutConfirmOpen(false);
     logout();
     window.location.href = '/home'; // Redirect to home page which will show login
+  };
+
+  const cancelLogout = () => {
+    setIsLogoutConfirmOpen(false);
   };
 
   const departments = [
@@ -334,6 +344,42 @@ export default function Topbar() {
               >
                 <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {isLogoutConfirmOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in scale-in duration-200">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <ArrowRightOnRectangleIcon className="w-6 h-6 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">Confirm Logout</h2>
+            </div>
+
+            {/* Message */}
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to log out? You will need to log in again to access the dashboard.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelLogout}
+                className="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-6 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95"
+              >
+                Logout
               </button>
             </div>
           </div>
