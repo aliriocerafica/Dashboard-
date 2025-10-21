@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function SplashScreen() {
           }`}
         >
           <div className="w-24 h-24 md:w-32 md:h-32 bg-[#ff6d74] rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
-            <SparklesIcon className="w-12 h-12 md:w-16 md:h-16 text-white" />
+            <Image src="/Logo.png" alt="Logo" width={50} height={50} />
           </div>
         </div>
 

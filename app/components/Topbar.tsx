@@ -17,6 +17,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import Image from 'next/image';
 import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
 
 export default function Topbar() {
@@ -107,8 +108,8 @@ export default function Topbar() {
               href="/" 
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
             >
-              <div className="w-10 h-10 bg-[#ff6d74] rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
-                <ChartBarIcon className="w-6 h-6" />
+              <div className="w-10 h-10 flex items-center justify-center hover:scale-110 transition-all duration-300">
+                <Image src="/Logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>

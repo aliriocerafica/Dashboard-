@@ -40,7 +40,15 @@ export default function ITAssetRequestForm() {
   ];
 
   const handleMouseDown = () => setIsDrawing(true);
-  const handleMouseUp = () => setIsDrawing(false);
+  const handleMouseUp = () => {
+    setIsDrawing(false);
+    // Save the signature when user finishes drawing
+    if (signatureCanvasRef.current) {
+      // Convert to JPEG with lower quality to reduce size
+      const signatureDataUrl = signatureCanvasRef.current.toDataURL('image/jpeg', 0.7);
+      setSignature(signatureDataUrl);
+    }
+  };
 
   const handleSignatureCanvas = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
@@ -69,6 +77,12 @@ export default function ITAssetRequestForm() {
 
   const handleCanvasTouchEnd = () => {
     setIsDrawing(false);
+    // Save the signature when user finishes drawing on touch device
+    if (signatureCanvasRef.current) {
+      // Convert to JPEG with lower quality to reduce size
+      const signatureDataUrl = signatureCanvasRef.current.toDataURL('image/jpeg', 0.7);
+      setSignature(signatureDataUrl);
+    }
   };
 
   const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
@@ -97,6 +111,19 @@ export default function ITAssetRequestForm() {
       }
     }
     setSignature('');
+  };
+
+  const initializeCanvas = () => {
+    const canvas = document.getElementById('signatureCanvas') as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#000000';
+      }
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,6 +349,7 @@ export default function ITAssetRequestForm() {
               onClick={() => {
                 setSignatureMethod('draw');
                 setError('');
+                initializeCanvas();
               }}
               className={`flex items-center gap-2 px-4 py-2 font-medium transition-all border-b-2 ${
                 signatureMethod === 'draw'

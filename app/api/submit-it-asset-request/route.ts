@@ -55,8 +55,20 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
+    // Create signature reference - store only a hash to avoid exceeding Google Sheets cell limit (50k chars)
+    // Full base64 can be hundreds of KB
+    let signatureRef = 'Signed';
+    if (signature && signature.startsWith('data:')) {
+      // It's a base64 image, just store a reference
+      signatureRef = `Signed-${new Date().getTime()}`;
+      console.log('Signature data received (base64 format, size:', Math.round(signature.length / 1024), 'KB)');
+    } else if (signature) {
+      // It's typed or uploaded, store as-is
+      signatureRef = signature.substring(0, 100); // Limit length
+    }
+
     // Prepare data for Google Sheets
-    const values = [[requestId, name, email, department, asset, reason, signature, 'Pending', timestamp]];
+    const values = [[requestId, name, email, department, asset, reason, signatureRef, 'Pending', timestamp]];
 
     const sheetId = process.env.GOOGLE_SHEET_ID_IT_ASSETS;
     
