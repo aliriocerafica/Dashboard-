@@ -358,10 +358,13 @@ export default function Topbar() {
 
       {/* Logout Confirmation Modal */}
       {isLogoutConfirmOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in scale-in duration-200">
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center p-4 pt-32 animate-in fade-in duration-200 overflow-y-auto"
+          style={{ zIndex: 9999 }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200 my-auto">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                 <ArrowRightOnRectangleIcon className="w-6 h-6 text-red-600" />
               </div>
@@ -369,7 +372,7 @@ export default function Topbar() {
             </div>
 
             {/* Message */}
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-8 leading-relaxed">
               Are you sure you want to log out? You will need to log in again to access the dashboard.
             </p>
 
