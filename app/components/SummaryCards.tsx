@@ -37,6 +37,11 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
   const weeklyConverted = weeklyData.filter(item => item.fitLevel === 'Ready to Engage').length;
   const weeklyRate = weeklyNew > 0 ? Math.round((weeklyConverted / weeklyNew) * 100) : 0;
 
+  // New: Count Cold/Warm/Hot leads for current week
+  const weeklyCold = weeklyData.filter(item => item.leadStatus === 'Cold').length;
+  const weeklyWarm = weeklyData.filter(item => item.leadStatus === 'Warm').length;
+  const weeklyHot = weeklyData.filter(item => item.leadStatus === 'Hot').length;
+
   return (
     <div className="grid grid-cols-1 gap-2">
       {/* Month Tile */}
@@ -91,6 +96,33 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
           <div className="bg-amber-50 rounded-md py-2 border border-amber-100">
             <div className="text-lg font-bold text-amber-600">{weeklyRate}%</div>
             <div className="text-[10px] text-gray-600">Rate</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lead Status Tile - Cold/Warm/Hot */}
+      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <span className="text-xs font-bold">🔥</span>
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-gray-900">Lead Status</div>
+            <div className="text-xs text-gray-500">This Week</div>
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-blue-50 rounded-md py-2 border border-blue-100">
+            <div className="text-lg font-bold text-blue-600">{weeklyCold}</div>
+            <div className="text-[10px] text-gray-600">Cold</div>
+          </div>
+          <div className="bg-amber-50 rounded-md py-2 border border-amber-100">
+            <div className="text-lg font-bold text-amber-600">{weeklyWarm}</div>
+            <div className="text-[10px] text-gray-600">Warm</div>
+          </div>
+          <div className="bg-red-50 rounded-md py-2 border border-red-100">
+            <div className="text-lg font-bold text-red-600">{weeklyHot}</div>
+            <div className="text-[10px] text-gray-600">Hot</div>
           </div>
         </div>
       </div>

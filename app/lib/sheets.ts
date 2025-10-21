@@ -14,6 +14,7 @@ export interface SalesData {
   touchPoint: string;
   leadResponse: string;
   note: string;
+  leadStatus: string; // New field for Cold/Warm/Hot status (Column P)
 }
 
 export interface DashboardStats {
@@ -134,6 +135,7 @@ export async function fetchSheetData(sheetUrl: string): Promise<SalesData[]> {
         touchPoint: columns[12]?.trim() || '',
         leadResponse: columns[13]?.trim() || '',
         note: columns[14]?.trim() || '',
+        leadStatus: columns[15]?.trim() || '', // New field for Cold/Warm/Hot status (Column P)
       });
     }
     
