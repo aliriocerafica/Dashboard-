@@ -38,3 +38,21 @@ export function logout(): void {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem('authenticated');
 }
+
+// Get current username from session (client-side)
+export function getCurrentUsername(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('username') || null;
+}
+
+// Set username in session (client-side)
+export function setCurrentUsername(username: string): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem('username', username);
+}
+
+// Store new password temporarily (for verification - in production use secure cookies)
+export function updateStoredPassword(password: string): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem('currentPassword', password);
+}

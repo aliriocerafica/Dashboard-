@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (isValid) {
       console.log('Login successful');
       return NextResponse.json(
-        { success: true, message: 'Login successful' },
+        { success: true, message: 'Login successful', username },
         { status: 200 }
       );
     } else {

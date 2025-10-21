@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { LockClosedIcon, LockOpenIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { setCurrentUsername } from '../lib/auth';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -58,6 +59,8 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
           localStorage.removeItem('dashboard_rememberMe');
         }
 
+        // Store username in session
+        setCurrentUsername(username);
         sessionStorage.setItem('authenticated', 'true');
         onLoginSuccess();
       } else {
