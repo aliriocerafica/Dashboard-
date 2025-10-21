@@ -1,27 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
-import LoginForm from '../components/LoginForm';
 import ITAssetRequestForm from '../components/ITAssetRequestForm';
-import { isAuthenticated, setAuthenticated } from '../lib/auth';
 
 export default function ITAssetRequestPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setIsLoggedIn(isAuthenticated());
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-    setAuthenticated(true);
-  };
-
-  if (!isLoggedIn) {
-    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Topbar />

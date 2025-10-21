@@ -1,10 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Topbar from '../components/Topbar';
-import LoginForm from '../components/LoginForm';
-import { isAuthenticated, setAuthenticated } from '../lib/auth';
 import { 
   ArrowRightIcon, 
   DocumentIcon,
@@ -16,18 +12,6 @@ import {
 import Link from 'next/link';
 
 export default function FormsPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    setIsLoggedIn(isAuthenticated());
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-    setAuthenticated(true);
-  };
-
   const forms = [
     {
       id: 1,
@@ -102,10 +86,6 @@ export default function FormsPage() {
       submissions: 0,
     },
   ];
-
-  if (!isLoggedIn) {
-    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
