@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ChevronDownIcon,
   ChartBarIcon,
@@ -19,7 +19,13 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
-import { logout, getCurrentUsername, setCurrentUsername } from "../lib/auth";
+import {
+  logout,
+  getCurrentUsername,
+  setCurrentUsername,
+  isAdmin,
+  initializeAdminUser,
+} from "../lib/auth";
 
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -27,17 +33,59 @@ export default function Topbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [username, setUsername] = useState<string>("admin");
+  const [userRole, setUserRole] = useState<string>("user");
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Initialize admin user data first
+    initializeAdminUser();
+
     // Get username from session or use default
     const storedUsername = getCurrentUsername();
     if (storedUsername) {
       setUsername(storedUsername);
+      const isUserAdmin = isAdmin(storedUsername);
+      setUserRole(isUserAdmin ? "admin" : "user");
     } else {
       // Set default username
       setCurrentUsername("admin");
       setUsername("admin");
+      setUserRole("admin");
     }
+  }, []);
+
+  // Force refresh when user role changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUsername = getCurrentUsername();
+      if (storedUsername) {
+        const isUserAdmin = isAdmin(storedUsername);
+        setUserRole(isUserAdmin ? "admin" : "user");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Mouse tracking effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (navRef.current) {
+        const navLinks = navRef.current.querySelectorAll(".nav-mouse-follow");
+        navLinks.forEach((link) => {
+          const rect = link.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+          (link as HTMLElement).style.setProperty("--mouse-x", `${x}%`);
+          (link as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
+        });
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => document.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   const handleLogout = () => {
@@ -132,24 +180,21 @@ export default function Topbar() {
             </Link>
 
             {/* Navigation Links - Desktop */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div ref={navRef} className="hidden lg:flex items-center gap-2">
               <Link
                 href="/home"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
-                style={{
-                  perspective: "1000px",
-                }}
+                className="nav-mouse-follow flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                <HomeIcon className="w-5 h-5 transition-transform duration-300" />
-                <span>Home</span>
+                <HomeIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                <span className="relative z-10">Home</span>
               </Link>
 
               <Link
                 href="/documentation"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
+                className="nav-mouse-follow flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:text-emerald-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-                <span>Documentation</span>
+                <DocumentTextIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                <span className="relative z-10">Documentation</span>
               </Link>
 
               {/* Processes Dropdown */}
@@ -159,10 +204,12 @@ export default function Topbar() {
                     setIsProcessesOpen(!isProcessesOpen);
                     setIsDropdownOpen(false);
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-transparent hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-orange-200"
+                  className="nav-mouse-follow flex items-center space-x-2 px-4 py-2 bg-transparent text-gray-700 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                 >
                   <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-                  <span className="text-sm font-medium">Processes</span>
+                  <span className="text-sm font-medium relative z-10">
+                    Processes
+                  </span>
                   <ChevronDownIcon
                     className={`w-4 h-4 text-gray-500 transition-all duration-300 ${
                       isProcessesOpen ? "rotate-180" : ""
@@ -213,6 +260,26 @@ export default function Topbar() {
                         <div className="text-xs text-gray-500">Admin panel</div>
                       </div>
                     </Link>
+
+                    {userRole === "admin" && (
+                      <Link
+                        href="/admin/user-management"
+                        className="flex items-center space-x-3 px-4 py-3 mx-2 hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 group"
+                        onClick={() => setIsProcessesOpen(false)}
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center transition-all duration-300 group-hover:scale-120 group-hover:shadow-lg">
+                          <UserGroupIcon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900">
+                            User Management
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Manage users and permissions
+                          </div>
+                        </div>
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
@@ -224,9 +291,11 @@ export default function Topbar() {
                     setIsDropdownOpen(!isDropdownOpen);
                     setIsProcessesOpen(false);
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 text-gray-700 hover:text-purple-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-purple-200"
+                  className="nav-mouse-follow flex items-center space-x-2 px-4 py-2 bg-gray-50 text-gray-700 hover:text-purple-600 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  <span className="text-sm font-medium">Departments</span>
+                  <span className="text-sm font-medium relative z-10">
+                    Departments
+                  </span>
                   <ChevronDownIcon
                     className={`w-4 h-4 text-gray-500 transition-all duration-300 ${
                       isDropdownOpen ? "rotate-180" : ""
@@ -279,21 +348,21 @@ export default function Topbar() {
               {/* Profile Button */}
               <Link
                 href="/profile"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-transparent hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-indigo-200"
+                className="nav-sliding-bg flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                 title="Profile Settings"
               >
                 <UserCircleIcon className="w-5 h-5 transition-transform duration-300" />
-                <span>Profile</span>
+                <span className="relative z-10">Profile</span>
               </Link>
 
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-transparent hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-red-200"
+                className="nav-sliding-bg flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-transparent hover:text-red-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                 title="Logout"
               >
                 <ArrowRightOnRectangleIcon className="w-5 h-5 transition-transform duration-300" />
-                <span>Logout</span>
+                <span className="relative z-10">Logout</span>
               </button>
             </div>
 
@@ -318,21 +387,21 @@ export default function Topbar() {
               {/* Home Link */}
               <Link
                 href="/home"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+                className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg transition-all"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <HomeIcon className="w-5 h-5" />
-                <span>Home</span>
+                <span className="relative z-10">Home</span>
               </Link>
 
               {/* Documentation Link */}
               <Link
                 href="/documentation"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all"
+                className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-emerald-600 rounded-lg transition-all"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <DocumentTextIcon className="w-5 h-5" />
-                <span>Documentation</span>
+                <span className="relative z-10">Documentation</span>
               </Link>
 
               {/* Processes Section */}
@@ -342,19 +411,19 @@ export default function Topbar() {
                 </div>
                 <Link
                   href="/forms"
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all"
+                  className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-orange-600 rounded-lg transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <DocumentTextIcon className="w-5 h-5" />
-                  <span>Forms</span>
+                  <span className="relative z-10">Forms</span>
                 </Link>
                 <Link
                   href="/admin/it-requests"
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-all"
+                  className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-purple-600 rounded-lg transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <CogIcon className="w-5 h-5" />
-                  <span>Manage Request</span>
+                  <span className="relative z-10">Manage Request</span>
                 </Link>
               </div>
 
@@ -369,11 +438,11 @@ export default function Topbar() {
                     <Link
                       key={dept.name}
                       href={dept.href}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-all"
+                      className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg transition-all"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <IconComponent className="w-5 h-5" />
-                      <span>{dept.name}</span>
+                      <span className="relative z-10">{dept.name}</span>
                     </Link>
                   );
                 })}
@@ -383,21 +452,21 @@ export default function Topbar() {
               <div className="border-t border-gray-100 pt-2 space-y-2">
                 <Link
                   href="/profile"
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all"
+                  className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-lg transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <UserCircleIcon className="w-5 h-5" />
-                  <span>Profile</span>
+                  <span className="relative z-10">Profile</span>
                 </Link>
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all text-left"
+                  className="nav-sliding-bg w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-red-600 rounded-lg transition-all text-left"
                 >
                   <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                  <span>Logout</span>
+                  <span className="relative z-10">Logout</span>
                 </button>
               </div>
             </div>

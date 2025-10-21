@@ -9,6 +9,9 @@ import {
   setAuthenticated,
   getCurrentUsername,
   logout,
+  getUserByUsername,
+  isAdmin,
+  User,
 } from "../lib/auth";
 import {
   EyeIcon,
@@ -16,11 +19,16 @@ import {
   ArrowLeftIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  UserGroupIcon,
+  ShieldCheckIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("admin");
+  const [user, setUser] = useState<User | null>(null);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const router = useRouter();
 
   // Password change form states
@@ -43,6 +51,11 @@ export default function ProfilePage() {
       const storedUsername = getCurrentUsername();
       if (storedUsername) {
         setUsername(storedUsername);
+        const userData = getUserByUsername(storedUsername);
+        if (userData) {
+          setUser(userData);
+          setIsUserAdmin(isAdmin(storedUsername));
+        }
       }
     }
   }, []);
@@ -135,11 +148,15 @@ export default function ProfilePage() {
 
               {/* User Info */}
               <div className="text-center mb-6 border-b border-gray-200 pb-6">
-                <h2 className="text-2xl font-bold text-gray-900">{username}</h2>
-                <p className="text-sm text-gray-600 mt-1">Administrator</p>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {user?.fullName || username}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {user?.email || "No email"}
+                </p>
                 <div className="inline-flex items-center gap-2 mt-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                   <div className="w-2 h-2 rounded-full bg-green-600"></div>
-                  Active
+                  {user?.isActive ? "Active" : "Inactive"}
                 </div>
               </div>
 
@@ -147,11 +164,41 @@ export default function ProfilePage() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Account Type</span>
-                  <span className="font-semibold text-gray-900">Admin</span>
+                  <span
+                    className={`font-semibold flex items-center gap-1 ${
+                      isUserAdmin ? "text-purple-600" : "text-blue-600"
+                    }`}
+                  >
+                    {isUserAdmin ? (
+                      <>
+                        <ShieldCheckIcon className="w-4 h-4" />
+                        Admin
+                      </>
+                    ) : (
+                      <>
+                        <UserIcon className="w-4 h-4" />
+                        User
+                      </>
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Status</span>
-                  <span className="font-semibold text-green-600">Active</span>
+                  <span
+                    className={`font-semibold ${
+                      user?.isActive ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {user?.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Last Login</span>
+                  <span className="font-semibold text-gray-900">
+                    {user?.lastLogin
+                      ? new Date(user.lastLogin).toLocaleDateString()
+                      : "Never"}
+                  </span>
                 </div>
               </div>
 
@@ -314,6 +361,36 @@ export default function ProfilePage() {
                 </div>
               </form>
             </div>
+
+            {/* Admin Features */}
+            {isUserAdmin && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Admin Features
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <UserGroupIcon className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">
+                        User Management
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Manage user accounts, roles, and permissions
+                      </p>
+                      <button
+                        onClick={() => router.push("/admin/user-management")}
+                        className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                      >
+                        Go to User Management →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Additional Info Card */}
             <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">

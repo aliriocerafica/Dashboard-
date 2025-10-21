@@ -14,15 +14,30 @@ import {
   ComputerDesktopIcon,
   BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
-import { isAuthenticated } from "../lib/auth";
+import {
+  isAuthenticated,
+  initializeAdminUser,
+  isAdmin,
+  getCurrentUsername,
+  setCurrentUsername,
+} from "../lib/auth";
 import LoginForm from "../components/LoginForm";
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    setIsLoggedIn(isAuthenticated());
+    const authenticated = isAuthenticated();
+    setIsLoggedIn(authenticated);
+
+    if (authenticated) {
+      const username = getCurrentUsername();
+      if (username) {
+        setIsAdminUser(isAdmin(username));
+      }
+    }
   }, []);
 
   const handleLoginSuccess = () => {
@@ -102,7 +117,7 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Welcome to Dashboard For All
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             Access real-time analytics and insights across all departments.
             Choose a department below to view its dedicated dashboard.
           </p>
@@ -110,32 +125,51 @@ export default function HomePage() {
 
         {/* Department Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {departments.map((dept) => (
+          {departments.map((dept, index) => (
             <Link
               key={dept.name}
               href={dept.href}
-              className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="group flowing-hover bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden"
+              style={{
+                transitionDelay: `${index * 50}ms`,
+              }}
             >
-              <div className="flex items-center justify-between mb-6">
-                <div
-                  className={`w-16 h-16 bg-gradient-to-br ${dept.color} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <dept.icon className="w-8 h-8" />
+              {/* Animated background gradient on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out rounded-2xl" />
+
+              {/* Content with relative positioning */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <div
+                    className={`icon-float w-16 h-16 bg-gradient-to-br ${dept.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-500 ease-in-out`}
+                    style={{
+                      transitionDelay: `${index * 50 + 100}ms`,
+                    }}
+                  >
+                    <dept.icon className="w-8 h-8 transition-transform duration-300" />
+                  </div>
+                  <ArrowRightIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-500 ease-in-out" />
                 </div>
-                <ArrowRightIcon className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all duration-300" />
+
+                <h3 className="text-glow text-2xl font-bold text-gray-900 mb-2 transition-colors duration-300">
+                  {dept.name}
+                </h3>
+                <p className="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
+                  {dept.description}
+                </p>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
+                    {dept.stats}
+                  </span>
+                  <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 group-hover:font-bold transition-all duration-300">
+                    View Dashboard →
+                  </span>
+                </div>
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {dept.name}
-              </h3>
-              <p className="text-gray-600 mb-4">{dept.description}</p>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">{dept.stats}</span>
-                <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900">
-                  View Dashboard →
-                </span>
-              </div>
+              {/* Animated border effect */}
+              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-200 transition-all duration-500 ease-in-out" />
             </Link>
           ))}
         </div>
