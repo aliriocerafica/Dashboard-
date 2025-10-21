@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Topbar from "../components/Topbar";
 import StatsCards from "../components/StatsCards";
 import SummaryCards from "../components/SummaryCards";
 import Charts from "../components/Charts";
