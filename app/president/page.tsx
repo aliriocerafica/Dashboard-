@@ -106,18 +106,28 @@ export default function PresidentPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-600 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Error Loading Data
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={fetchDashboardData}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
-          >
-            Try Again
-          </button>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={fetchDashboardData}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => {
+                window.location.href = "/home";
+              }}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
     );
