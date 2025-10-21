@@ -1,0 +1,62 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Topbar from '../components/Topbar';
+import LoginForm from '../components/LoginForm';
+import ITAssetRequestForm from '../components/ITAssetRequestForm';
+import { isAuthenticated, setAuthenticated } from '../lib/auth';
+
+export default function ITAssetRequestPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setAuthenticated(true);
+  };
+
+  if (!isLoggedIn) {
+    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Topbar />
+      
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        {/* Page Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">IT Asset Request</h1>
+          <p className="text-gray-600">Request IT equipment and resources needed for your work</p>
+        </div>
+
+        {/* Form */}
+        <ITAssetRequestForm />
+
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="text-2xl mb-2">⏱️</div>
+            <h3 className="font-bold text-gray-900 mb-2">Quick Processing</h3>
+            <p className="text-sm text-gray-600">Most requests are processed within 2-3 business days</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="text-2xl mb-2">📋</div>
+            <h3 className="font-bold text-gray-900 mb-2">Track Status</h3>
+            <p className="text-sm text-gray-600">Use your Request ID to track the status of your request</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="text-2xl mb-2">📞</div>
+            <h3 className="font-bold text-gray-900 mb-2">Need Help?</h3>
+            <p className="text-sm text-gray-600">Contact IT Department if you have any questions</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
