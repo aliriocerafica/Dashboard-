@@ -38,21 +38,25 @@ export default function AdminRequestsPage() {
   // Sample data - in a real app, this would fetch from your Google Sheet or database
   useEffect(() => {
     if (isLoggedIn) {
-      // Fetch requests from Google Sheets or API
-      // For now, showing sample structure
-      setRequests([
-        {
-          id: 'REQ-1729517893000',
-          name: 'Alejandro Cerafica Jr',
-          email: 'alejandro@company.com',
-          department: 'IT Department',
-          asset: 'Mouse',
-          reason: 'Broken mouse age 1 year',
-          status: 'Pending',
-          timestamp: '10/21/2025, 2:58:13 PM',
-        },
-      ]);
-      setLoading(false);
+      // Fetch requests from Google Sheets
+      const fetchRequests = async () => {
+        try {
+          const response = await fetch('/api/get-it-requests');
+          const data = await response.json();
+
+          if (data.success) {
+            setRequests(data.requests);
+          } else {
+            console.error('Failed to fetch requests:', data.message);
+          }
+        } catch (error) {
+          console.error('Error fetching requests:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchRequests();
     }
   }, [isLoggedIn]);
 
@@ -150,40 +154,60 @@ export default function AdminRequestsPage() {
                 </tr>
               </thead>
               <tbody>
-                {requests.map((request) => (
-                  <tr key={request.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-900 font-mono">{request.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{request.name}</td>
-                    <td className="px-6 py-4 text-sm text-blue-600 underline">{request.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{request.department}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">{request.asset}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                        statusColors[request.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {request.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        {statuses.filter(s => s !== request.status).map((status) => (
-                          <button
-                            key={status}
-                            onClick={() => handleStatusUpdate(request.id, status)}
-                            disabled={sendingEmail && selectedRequestId === request.id}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                              sendingEmail && selectedRequestId === request.id
-                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
-                            }`}
-                          >
-                            {sendingEmail && selectedRequestId === request.id ? '...' : status}
-                          </button>
-                        ))}
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <svg className="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p className="text-gray-600">Loading requests...</p>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : requests.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <p className="text-gray-600">No IT asset requests found</p>
+                    </td>
+                  </tr>
+                ) : (
+                  requests.map((request) => (
+                    <tr key={request.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-gray-900 font-mono">{request.id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{request.name}</td>
+                      <td className="px-6 py-4 text-sm text-blue-600 underline">{request.email}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{request.department}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{request.asset}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                          statusColors[request.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {request.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          {statuses.filter(s => s !== request.status).map((status) => (
+                            <button
+                              key={status}
+                              onClick={() => handleStatusUpdate(request.id, status)}
+                              disabled={sendingEmail && selectedRequestId === request.id}
+                              className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                                sendingEmail && selectedRequestId === request.id
+                                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
+                              }`}
+                            >
+                              {sendingEmail && selectedRequestId === request.id ? '...' : status}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
