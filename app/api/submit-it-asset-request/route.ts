@@ -23,14 +23,14 @@ const getManillaTime = (): string => {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, department, asset, reason, signature } = body;
+    const { name, email, department, asset, reason, signature } = body;
 
-    console.log('IT Asset Request received:', { name, department, asset, reason });
+    console.log('IT Asset Request received:', { name, email, department, asset, reason });
 
     // Validation
-    if (!name || !department || !asset || !reason || !signature) {
+    if (!name || !email || !department || !asset || !reason || !signature) {
       return NextResponse.json(
-        { success: false, message: 'All fields including signature are required' },
+        { success: false, message: 'All fields including email and signature are required' },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const sheets = google.sheets({ version: 'v4', auth });
 
     // Prepare data for Google Sheets
-    const values = [[requestId, name, department, asset, reason, signature, 'Pending', timestamp]];
+    const values = [[requestId, name, email, department, asset, reason, signature, 'Pending', timestamp]];
 
     const sheetId = process.env.GOOGLE_SHEET_ID_IT_ASSETS;
     
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Append data to sheet
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: 'Sheet1!A:H',
+      range: 'Sheet1!A:I',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,

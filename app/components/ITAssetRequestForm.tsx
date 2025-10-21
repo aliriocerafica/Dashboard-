@@ -10,6 +10,7 @@ export default function ITAssetRequestForm() {
   
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     department: '',
     asset: '',
     reason: '',
@@ -146,8 +147,15 @@ export default function ITAssetRequestForm() {
     setSuccess('');
 
     // Validate form
-    if (!formData.name || !formData.department || !formData.asset || !formData.reason) {
+    if (!formData.name || !formData.email || !formData.department || !formData.asset || !formData.reason) {
       setError('Please fill in all required fields');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
       return;
     }
 
@@ -167,6 +175,7 @@ export default function ITAssetRequestForm() {
         },
         body: JSON.stringify({
           name: formData.name,
+          email: formData.email,
           department: formData.department,
           asset: formData.asset,
           reason: formData.reason,
@@ -183,6 +192,7 @@ export default function ITAssetRequestForm() {
         // Reset form
         setFormData({
           name: '',
+          email: '',
           department: '',
           asset: '',
           reason: '',
@@ -242,6 +252,22 @@ export default function ITAssetRequestForm() {
             onChange={handleInputChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
             placeholder="e.g., IT Department, Sales Team"
+            required
+          />
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Email Address <span className="text-red-600">*</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+            placeholder="your.email@company.com"
             required
           />
         </div>
