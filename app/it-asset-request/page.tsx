@@ -1,13 +1,10 @@
-'use client';
+"use client";
 
-import Topbar from '../components/Topbar';
-import ITAssetRequestForm from '../components/ITAssetRequestForm';
+import ITAssetRequestForm from "../components/ITAssetRequestForm";
 
 export default function ITAssetRequestPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Topbar />
-      
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Form */}
         <ITAssetRequestForm />
@@ -17,19 +14,25 @@ export default function ITAssetRequestPage() {
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="text-2xl mb-2">⏱️</div>
             <h3 className="font-bold text-gray-900 mb-2">Quick Processing</h3>
-            <p className="text-sm text-gray-600">Most requests are processed within 2-3 business days</p>
+            <p className="text-sm text-gray-600">
+              Most requests are processed within 2-3 business days
+            </p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="text-2xl mb-2">📋</div>
             <h3 className="font-bold text-gray-900 mb-2">Track Status</h3>
-            <p className="text-sm text-gray-600">Use your Request ID to track the status of your request</p>
+            <p className="text-sm text-gray-600">
+              Use your Request ID to track the status of your request
+            </p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="text-2xl mb-2">📞</div>
             <h3 className="font-bold text-gray-900 mb-2">Need Help?</h3>
-            <p className="text-sm text-gray-600">Contact IT Department if you have any questions</p>
+            <p className="text-sm text-gray-600">
+              Contact IT Department if you have any questions
+            </p>
           </div>
         </div>
       </div>

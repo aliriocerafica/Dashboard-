@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Topbar from "../components/Topbar";
 import LoginForm from "../components/LoginForm";
 import { isAuthenticated } from "../lib/auth";
 import {
@@ -32,7 +31,6 @@ export default function DocumentationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Topbar />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 text-white shadow-xl">

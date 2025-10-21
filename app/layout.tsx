@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import InactivityMonitor from "./components/InactivityMonitor";
+import ConditionalLayout from "./components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Dashboard for All",
-  description: "Unified business intelligence platform with real-time analytics, multi-department dashboards, and actionable insights across your organization",
+  description:
+    "Unified business intelligence platform with real-time analytics, multi-department dashboards, and actionable insights across your organization",
 };
 
 export default function RootLayout({
@@ -30,7 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <InactivityMonitor />
-        {children}
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );

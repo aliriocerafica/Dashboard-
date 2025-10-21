@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Topbar from "../components/Topbar";
 import LoginForm from "../components/LoginForm";
 import {
   isAuthenticated,
@@ -113,7 +112,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Topbar />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}

@@ -1,13 +1,11 @@
 // @ts-nocheck
 "use client";
 
-import Topbar from "../components/Topbar";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 
 export default function HRPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Topbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         <div className="text-center">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Topbar from "../components/Topbar";
 import Link from "next/link";
 import {
   ChartBarIcon,
@@ -109,15 +108,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Topbar />
-
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Welcome Section */}
-        <div className="text-center mb-12">
+        <div className="text-start mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Welcome to Dashboard For All
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
+          <p className="text-xl text-gray-600 max-w-2xl mb-6">
             Access real-time analytics and insights across all departments.
             Choose a department below to view its dedicated dashboard.
           </p>

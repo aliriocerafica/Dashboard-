@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Topbar from "../components/Topbar";
 import {
   BuildingOffice2Icon,
   ChartBarIcon,
@@ -135,7 +134,6 @@ export default function PresidentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Topbar />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Page Header */}
