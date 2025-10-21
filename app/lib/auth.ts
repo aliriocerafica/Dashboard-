@@ -8,6 +8,12 @@ export function validateCredentials(username: string, password: string): boolean
   const validUsername = process.env.DASHBOARD_USERNAME || 'admin';
   const validPassword = process.env.DASHBOARD_PASSWORD || 'admin123';
   
+  // Debug logging (remove in production)
+  console.log('Validating credentials...');
+  console.log('Expected username:', validUsername);
+  console.log('Received username:', username);
+  console.log('Password match:', password === validPassword);
+  
   return username === validUsername && password === validPassword;
 }
 
@@ -32,4 +38,3 @@ export function logout(): void {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem('authenticated');
 }
-
