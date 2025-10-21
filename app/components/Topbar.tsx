@@ -122,6 +122,15 @@ export default function Topbar() {
               <span className="hidden md:inline">Documentation</span>
             </Link>
 
+            {/* Forms Link */}
+            <Link
+              href="/forms"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
+            >
+              <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
+              <span className="hidden md:inline">Forms</span>
+            </Link>
+
             {/* Department Dropdown */}
             <div className="relative">
               <button

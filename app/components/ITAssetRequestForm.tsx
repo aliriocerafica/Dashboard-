@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ExclamationTriangleIcon, PencilIcon, PhotoIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 export default function ITAssetRequestForm() {
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -15,6 +16,9 @@ export default function ITAssetRequestForm() {
   });
 
   const [signature, setSignature] = useState<string>('');
+  const [signatureMethod, setSignatureMethod] = useState<'draw' | 'upload' | 'type'>('draw'); // 'draw', 'upload', or 'type'
+  const [typedSignature, setTypedSignature] = useState('');
+  const [uploadedSignatureName, setUploadedSignatureName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [requestId, setRequestId] = useState('');
@@ -38,7 +42,7 @@ export default function ITAssetRequestForm() {
   const handleMouseUp = () => setIsDrawing(false);
 
   const handleSignatureCanvas = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !signatureCanvasRef.current) return;
+    if (!isDrawing) return;
 
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
@@ -83,7 +87,7 @@ export default function ITAssetRequestForm() {
     ctx.stroke();
   };
 
-  const clearSignature = () => {
+  const clearDrawnSignature = () => {
     const canvas = document.getElementById('signatureCanvas') as HTMLCanvasElement;
     if (canvas) {
       const ctx = canvas.getContext('2d');
@@ -92,6 +96,40 @@ export default function ITAssetRequestForm() {
       }
     }
     setSignature('');
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setSignature(event.target?.result as string);
+      setUploadedSignatureName(file.name);
+      setError('');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleTypedSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTypedSignature(e.target.value);
+    if (e.target.value.trim()) {
+      setSignature(e.target.value);
+    } else {
+      setSignature('');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -113,23 +151,12 @@ export default function ITAssetRequestForm() {
       return;
     }
 
-    // Get signature
-    const canvas = document.getElementById('signatureCanvas') as HTMLCanvasElement;
-    if (!canvas) {
-      setError('Signature canvas not found');
+    // Validate signature
+    if (!signature) {
+      setError('Please provide a signature (draw, upload, or type)');
       return;
     }
 
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
-    const isCanvasBlank = imageData?.data.every((pixel) => pixel === 0);
-
-    if (isCanvasBlank) {
-      setError('Please provide a signature');
-      return;
-    }
-
-    const signatureData = canvas.toDataURL('image/png');
     setIsLoading(true);
 
     try {
@@ -143,7 +170,7 @@ export default function ITAssetRequestForm() {
           department: formData.department,
           asset: formData.asset,
           reason: formData.reason,
-          signature: signatureData,
+          signature: signature,
         }),
       });
 
@@ -160,7 +187,10 @@ export default function ITAssetRequestForm() {
           asset: '',
           reason: '',
         });
-        clearSignature();
+        setSignature('');
+        setTypedSignature('');
+        setUploadedSignatureName('');
+        clearDrawnSignature();
 
         // Clear success message after 5 seconds
         setTimeout(() => {
@@ -194,7 +224,7 @@ export default function ITAssetRequestForm() {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
             placeholder="Enter your full name"
             required
           />
@@ -210,7 +240,7 @@ export default function ITAssetRequestForm() {
             name="department"
             value={formData.department}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
             placeholder="e.g., IT Department, Sales Team"
             required
           />
@@ -225,7 +255,7 @@ export default function ITAssetRequestForm() {
             name="asset"
             value={formData.asset}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white text-gray-900"
             required
           >
             <option value="">Select an asset</option>
@@ -247,44 +277,139 @@ export default function ITAssetRequestForm() {
             value={formData.reason}
             onChange={handleInputChange}
             rows={4}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none text-gray-900"
             placeholder="Please explain why you need this asset"
             required
           />
         </div>
 
-        {/* Signature */}
+        {/* Signature Section */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Digital Signature <span className="text-red-600">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            Signature <span className="text-red-600">*</span>
           </label>
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden mb-3 bg-gray-50">
-            <canvas
-              id="signatureCanvas"
-              ref={signatureCanvasRef}
-              width={500}
-              height={150}
-              className="w-full cursor-crosshair bg-white"
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onMouseMove={handleSignatureCanvas}
-              onTouchStart={handleCanvasTouchStart}
-              onTouchEnd={handleCanvasTouchEnd}
-              onTouchMove={handleCanvasTouchMove}
-              style={{
-                touchAction: 'none',
+
+          {/* Signature Method Tabs */}
+          <div className="flex gap-2 mb-4 border-b border-gray-200">
+            <button
+              type="button"
+              onClick={() => {
+                setSignatureMethod('draw');
+                setError('');
               }}
-            />
+              className={`flex items-center gap-2 px-4 py-2 font-medium transition-all border-b-2 ${
+                signatureMethod === 'draw'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <PencilIcon className="w-4 h-4" />
+              <span className="text-sm">Draw</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSignatureMethod('upload');
+                setError('');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-medium transition-all border-b-2 ${
+                signatureMethod === 'upload'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <PhotoIcon className="w-4 h-4" />
+              <span className="text-sm">Upload</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSignatureMethod('type');
+                setError('');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-medium transition-all border-b-2 ${
+                signatureMethod === 'type'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <CheckIcon className="w-4 h-4" />
+              <span className="text-sm">Type</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={clearSignature}
-            className="text-sm text-gray-600 hover:text-gray-900 underline mb-2"
-          >
-            Clear Signature
-          </button>
-          <p className="text-xs text-gray-500">
-            ✓ I hereby consent to submit this IT asset request form with my digital signature.
+
+          {/* Draw Signature */}
+          {signatureMethod === 'draw' && (
+            <div>
+              <div className="border-2 border-gray-300 rounded-lg overflow-hidden mb-3 bg-gray-50">
+                <canvas
+                  id="signatureCanvas"
+                  ref={signatureCanvasRef}
+                  width={500}
+                  height={150}
+                  className="w-full cursor-crosshair bg-white"
+                  onMouseDown={handleMouseDown}
+                  onMouseUp={handleMouseUp}
+                  onMouseMove={handleSignatureCanvas}
+                  onTouchStart={handleCanvasTouchStart}
+                  onTouchEnd={handleCanvasTouchEnd}
+                  onTouchMove={handleCanvasTouchMove}
+                  style={{
+                    touchAction: 'none',
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={clearDrawnSignature}
+                className="text-sm text-gray-600 hover:text-gray-900 underline mb-2"
+              >
+                Clear Signature
+              </button>
+            </div>
+          )}
+
+          {/* Upload Signature */}
+          {signatureMethod === 'upload' && (
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2 mb-2"
+              >
+                <PhotoIcon className="w-6 h-6 text-gray-400" />
+                <span className="text-sm font-medium text-gray-700">Click to upload signature image</span>
+                <span className="text-xs text-gray-500">(Max 5MB, PNG/JPG/GIF)</span>
+              </button>
+              {uploadedSignatureName && (
+                <p className="text-sm text-green-600">✓ Uploaded: {uploadedSignatureName}</p>
+              )}
+            </div>
+          )}
+
+          {/* Type Signature */}
+          {signatureMethod === 'type' && (
+            <div>
+              <input
+                type="text"
+                value={typedSignature}
+                onChange={handleTypedSignatureChange}
+                placeholder="Type your signature name"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-script text-2xl text-gray-900"
+              />
+              <p className="text-xs text-gray-500 mt-2">Type your name as you would sign it</p>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 mt-2">
+            ✓ I hereby consent to submit this IT asset request form with my signature.
           </p>
         </div>
 
