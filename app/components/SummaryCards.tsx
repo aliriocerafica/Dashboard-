@@ -38,9 +38,9 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
   const weeklyRate = weeklyNew > 0 ? Math.round((weeklyConverted / weeklyNew) * 100) : 0;
 
   // New: Count Cold/Warm/Hot leads for current week
-  const weeklyCold = weeklyData.filter(item => item.leadStatus === 'Cold').length;
-  const weeklyWarm = weeklyData.filter(item => item.leadStatus === 'Warm').length;
-  const weeklyHot = weeklyData.filter(item => item.leadStatus === 'Hot').length;
+  const weeklyCold = weeklyData.filter(item => item.leadStatus?.toUpperCase() === 'COLD').length;
+  const weeklyWarm = weeklyData.filter(item => item.leadStatus?.toUpperCase() === 'WARM').length;
+  const weeklyHot = weeklyData.filter(item => item.leadStatus?.toUpperCase() === 'HOT').length;
 
   return (
     <div className="grid grid-cols-1 gap-2">
