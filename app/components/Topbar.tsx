@@ -12,7 +12,9 @@ import {
   ComputerDesktopIcon,
   HomeIcon,
   DocumentTextIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
@@ -20,6 +22,7 @@ import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [username, setUsername] = useState<string>('admin');
 
   useEffect(() => {
@@ -102,8 +105,8 @@ export default function Topbar() {
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-2">
+          {/* Navigation Links - Desktop */}
+          <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/home"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
@@ -112,7 +115,7 @@ export default function Topbar() {
               }}
             >
               <HomeIcon className="w-5 h-5 transition-transform duration-300" />
-              <span className="hidden md:inline">Home</span>
+              <span>Home</span>
             </Link>
             
             <Link
@@ -120,7 +123,7 @@ export default function Topbar() {
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
             >
               <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-              <span className="hidden md:inline">Documentation</span>
+              <span>Documentation</span>
             </Link>
 
             {/* Processes Dropdown */}
@@ -130,7 +133,7 @@ export default function Topbar() {
                 className="flex items-center space-x-2 px-4 py-2 bg-transparent hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-orange-200"
               >
                 <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-                <span className="text-sm font-medium hidden md:inline">Processes</span>
+                <span className="text-sm font-medium">Processes</span>
                 <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-all duration-300 ${isProcessesOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -220,7 +223,7 @@ export default function Topbar() {
               title="Profile Settings"
             >
               <UserCircleIcon className="w-5 h-5 transition-transform duration-300" />
-              <span className="hidden md:inline">Profile</span>
+              <span>Profile</span>
             </Link>
 
             {/* Logout Button */}
@@ -230,11 +233,112 @@ export default function Topbar() {
               title="Logout"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5 transition-transform duration-300" />
-              <span className="hidden md:inline">Logout</span>
+              <span>Logout</span>
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+          >
+            {isMobileMenuOpen ? (
+              <XMarkIcon className="w-6 h-6" />
+            ) : (
+              <Bars3Icon className="w-6 h-6" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="px-4 py-3 space-y-2">
+            {/* Home Link */}
+            <Link
+              href="/home"
+              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <HomeIcon className="w-5 h-5" />
+              <span>Home</span>
+            </Link>
+
+            {/* Documentation Link */}
+            <Link
+              href="/documentation"
+              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <DocumentTextIcon className="w-5 h-5" />
+              <span>Documentation</span>
+            </Link>
+
+            {/* Processes Section */}
+            <div className="border-t border-gray-100 pt-2">
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Processes</div>
+              <Link
+                href="/forms"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <DocumentTextIcon className="w-5 h-5" />
+                <span>Forms</span>
+              </Link>
+              <Link
+                href="/admin/it-requests"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-all"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <CogIcon className="w-5 h-5" />
+                <span>Manage Request</span>
+              </Link>
+            </div>
+
+            {/* Departments Section */}
+            <div className="border-t border-gray-100 pt-2">
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Departments</div>
+              {departments.map((dept) => {
+                const IconComponent = dept.icon;
+                return (
+                  <Link
+                    key={dept.name}
+                    href={dept.href}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-all"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    <span>{dept.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* User Actions */}
+            <div className="border-t border-gray-100 pt-2 space-y-2">
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <UserCircleIcon className="w-5 h-5" />
+                <span>Profile</span>
+              </Link>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all text-left"
+              >
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
