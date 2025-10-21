@@ -9,12 +9,12 @@ export interface SalesData {
   engagement: number;
   stability: number;
   retention: number;
+  references: number;
   score: number;
   fitLevel: string;
   touchPoint: string;
   leadResponse: string;
-  note: string;
-  leadStatus: string; // New field for Cold/Warm/Hot status (Column P)
+  leadStatus: string; // Cold/Warm/Hot status (Column P)
 }
 
 export interface DashboardStats {
@@ -108,7 +108,7 @@ export async function fetchSheetData(sheetUrl: string): Promise<SalesData[]> {
       const columns = parseCSVLine(line);
       
       // Skip empty rows or header-like rows
-      if (columns.length < 15 || !columns[1]?.trim()) {
+      if (columns.length < 16 || !columns[1]?.trim()) {
         continue;
       }
       
@@ -130,11 +130,11 @@ export async function fetchSheetData(sheetUrl: string): Promise<SalesData[]> {
         engagement: parseInt(columns[7]?.trim() || '0') || 0,
         stability: parseInt(columns[8]?.trim() || '0') || 0,
         retention: parseInt(columns[9]?.trim() || '0') || 0,
-        score: parseInt(columns[10]?.trim() || '0') || 0,
-        fitLevel: columns[11]?.trim() || '',
-        touchPoint: columns[12]?.trim() || '',
-        leadResponse: columns[13]?.trim() || '',
-        note: columns[14]?.trim() || '',
+        references: parseInt(columns[10]?.trim() || '0') || 0,
+        score: parseInt(columns[11]?.trim() || '0') || 0,
+        fitLevel: columns[12]?.trim() || '',
+        touchPoint: columns[13]?.trim() || '',
+        leadResponse: columns[14]?.trim() || '',
         leadStatus: columns[15]?.trim() || '', // New field for Cold/Warm/Hot status (Column P)
       });
     }
