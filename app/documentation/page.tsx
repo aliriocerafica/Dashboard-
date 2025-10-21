@@ -355,7 +355,7 @@ export default function DocumentationPage() {
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <ClockIcon className="w-5 h-5 text-purple-200" />
-              <span className="text-sm">Support Hours: Mon-Fri, 8AM-5PM</span>
+              <span className="text-sm">Support Hours: Mon-Fri 10 PM to 7 AM</span>
             </div>
           </div>
         </div>
