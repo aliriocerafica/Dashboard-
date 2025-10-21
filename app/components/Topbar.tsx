@@ -19,6 +19,7 @@ import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
 
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProcessesOpen, setIsProcessesOpen] = useState(false);
   const [username, setUsername] = useState<string>('admin');
 
   useEffect(() => {
@@ -122,14 +123,53 @@ export default function Topbar() {
               <span className="hidden md:inline">Documentation</span>
             </Link>
 
-            {/* Forms Link */}
-            <Link
-              href="/forms"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
-            >
-              <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-              <span className="hidden md:inline">Forms</span>
-            </Link>
+            {/* Processes Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProcessesOpen(!isProcessesOpen)}
+                className="flex items-center space-x-2 px-4 py-2 bg-transparent hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-orange-200"
+              >
+                <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
+                <span className="text-sm font-medium hidden md:inline">Processes</span>
+                <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-all duration-300 ${isProcessesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Processes Dropdown Menu */}
+              {isProcessesOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900">Processes</h3>
+                    <p className="text-xs text-gray-500">Manage company processes</p>
+                  </div>
+                  <Link
+                    href="/forms"
+                    className="flex items-center space-x-3 px-4 py-3 mx-2 hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 group"
+                    onClick={() => setIsProcessesOpen(false)}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center transition-all duration-300 group-hover:scale-120 group-hover:shadow-lg">
+                      <DocumentTextIcon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">Forms</div>
+                      <div className="text-xs text-gray-500">Submit requests</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/admin/it-requests"
+                    className="flex items-center space-x-3 px-4 py-3 mx-2 hover:bg-gradient-to-r hover:from-gray-50 hover:to-purple-50 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 group"
+                    onClick={() => setIsProcessesOpen(false)}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center transition-all duration-300 group-hover:scale-120 group-hover:shadow-lg">
+                      <CogIcon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">Manage Request</div>
+                      <div className="text-xs text-gray-500">Admin panel</div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Department Dropdown */}
             <div className="relative">
