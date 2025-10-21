@@ -139,7 +139,10 @@ export default function Topbar() {
             {/* Processes Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setIsProcessesOpen(!isProcessesOpen)}
+                onClick={() => {
+                  setIsProcessesOpen(!isProcessesOpen);
+                  setIsDropdownOpen(false);
+                }}
                 className="flex items-center space-x-2 px-4 py-2 bg-transparent hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-orange-200"
               >
                 <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
@@ -187,7 +190,10 @@ export default function Topbar() {
             {/* Department Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onClick={() => {
+                  setIsDropdownOpen(!isDropdownOpen);
+                  setIsProcessesOpen(false);
+                }}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 text-gray-700 hover:text-purple-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-purple-200"
               >
                 <span className="text-sm font-medium">Departments</span>
