@@ -1,33 +1,44 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Topbar from '../components/Topbar';
-import LoginForm from '../components/LoginForm';
-import { isAuthenticated, setAuthenticated, getCurrentUsername, logout } from '../lib/auth';
-import { EyeIcon, EyeSlashIcon, ArrowLeftIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Topbar from "../components/Topbar";
+import LoginForm from "../components/LoginForm";
+import {
+  isAuthenticated,
+  setAuthenticated,
+  getCurrentUsername,
+  logout,
+} from "../lib/auth";
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState("admin");
   const router = useRouter();
 
   // Password change form states
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
     const authenticated = isAuthenticated();
     setIsLoggedIn(authenticated);
-    
+
     if (authenticated) {
       const storedUsername = getCurrentUsername();
       if (storedUsername) {
@@ -43,15 +54,15 @@ export default function ProfilePage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/change-password', {
-        method: 'POST',
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username,
@@ -64,20 +75,20 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Password changed successfully!');
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        
+        setSuccess("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+
         // Reset after 3 seconds
         setTimeout(() => {
-          setSuccess('');
+          setSuccess("");
         }, 3000);
       } else {
-        setError(data.message || 'Failed to change password');
+        setError(data.message || "Failed to change password");
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +101,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Topbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <button
@@ -103,8 +114,12 @@ export default function ProfilePage() {
 
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-          <p className="text-gray-600">Manage your account and change your password</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-gray-600">
+            Manage your account and change your password
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -144,7 +159,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => {
                   logout();
-                  router.push('/home');
+                  router.push("/home");
                 }}
                 className="w-full mt-6 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
               >
@@ -156,7 +171,9 @@ export default function ProfilePage() {
           {/* Right: Change Password Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Change Password</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Change Password
+              </h3>
 
               <form onSubmit={handleChangePassword} className="space-y-6">
                 {/* Current Password */}
@@ -166,16 +183,18 @@ export default function ProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showCurrentPassword ? 'text' : 'password'}
+                      type={showCurrentPassword ? "text" : "password"}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                       placeholder="Enter your current password"
                       required
                     />
                     <button
                       type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      onClick={() =>
+                        setShowCurrentPassword(!showCurrentPassword)
+                      }
                       className="absolute right-4 top-3.5"
                     >
                       {showCurrentPassword ? (
@@ -194,10 +213,10 @@ export default function ProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showNewPassword ? 'text' : 'password'}
+                      type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                       placeholder="Enter your new password"
                       required
                     />
@@ -222,16 +241,18 @@ export default function ProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                       placeholder="Confirm your new password"
                       required
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-4 top-3.5"
                     >
                       {showConfirmPassword ? (
@@ -267,7 +288,9 @@ export default function ProfilePage() {
 
                 {/* Password Requirements */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-900 mb-2">Password Requirements:</h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">
+                    Password Requirements:
+                  </h4>
                   <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Minimum 6 characters</li>
                     <li>• Must be different from current password</li>
@@ -282,11 +305,11 @@ export default function ProfilePage() {
                     disabled={isLoading}
                     className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
                       isLoading
-                        ? 'bg-gray-400 text-white cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 text-white active:scale-95"
                     }`}
                   >
-                    {isLoading ? 'Updating Password...' : 'Change Password'}
+                    {isLoading ? "Updating Password..." : "Change Password"}
                   </button>
                 </div>
               </form>
@@ -294,15 +317,21 @@ export default function ProfilePage() {
 
             {/* Additional Info Card */}
             <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Account Security</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Account Security
+              </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <CheckCircleIcon className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Two-Factor Authentication</h4>
-                    <p className="text-sm text-gray-600">Available for enhanced security</p>
+                    <h4 className="font-semibold text-gray-900">
+                      Two-Factor Authentication
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Available for enhanced security
+                    </p>
                   </div>
                 </div>
               </div>

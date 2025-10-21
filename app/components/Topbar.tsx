@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  ChevronDownIcon, 
+import { useState, useEffect } from "react";
+import {
+  ChevronDownIcon,
   ChartBarIcon,
   MegaphoneIcon,
   CurrencyDollarIcon,
@@ -14,18 +14,19 @@ import {
   DocumentTextIcon,
   UserCircleIcon,
   Bars3Icon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import Image from 'next/image';
-import { logout, getCurrentUsername, setCurrentUsername } from '../lib/auth';
+  XMarkIcon,
+  BuildingOffice2Icon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import Image from "next/image";
+import { logout, getCurrentUsername, setCurrentUsername } from "../lib/auth";
 
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [username, setUsername] = useState<string>('admin');
+  const [username, setUsername] = useState<string>("admin");
 
   useEffect(() => {
     // Get username from session or use default
@@ -34,8 +35,8 @@ export default function Topbar() {
       setUsername(storedUsername);
     } else {
       // Set default username
-      setCurrentUsername('admin');
-      setUsername('admin');
+      setCurrentUsername("admin");
+      setUsername("admin");
     }
   }, []);
 
@@ -46,7 +47,7 @@ export default function Topbar() {
   const confirmLogout = () => {
     setIsLogoutConfirmOpen(false);
     logout();
-    window.location.href = '/home'; // Redirect to home page which will show login
+    window.location.href = "/home"; // Redirect to home page which will show login
   };
 
   const cancelLogout = () => {
@@ -54,47 +55,54 @@ export default function Topbar() {
   };
 
   const departments = [
-    { 
-      name: 'Sales', 
-      href: '/sales', 
-      icon: ChartBarIcon, 
-      description: 'Sales pipeline and leads',
-      color: 'bg-blue-50 text-blue-600'
+    {
+      name: "Sales",
+      href: "/sales",
+      icon: ChartBarIcon,
+      description: "Sales pipeline and leads",
+      color: "bg-blue-50 text-blue-600",
     },
-    { 
-      name: 'Marketing', 
-      href: '/marketing', 
-      icon: MegaphoneIcon, 
-      description: 'Campaigns and analytics',
-      color: 'bg-emerald-50 text-emerald-600'
+    {
+      name: "Marketing",
+      href: "/marketing",
+      icon: MegaphoneIcon,
+      description: "Campaigns and analytics",
+      color: "bg-emerald-50 text-emerald-600",
     },
-    { 
-      name: 'Finance', 
-      href: '/finance', 
-      icon: CurrencyDollarIcon, 
-      description: 'Revenue and expenses',
-      color: 'bg-amber-50 text-amber-600'
+    {
+      name: "Finance",
+      href: "/finance",
+      icon: CurrencyDollarIcon,
+      description: "Revenue and expenses",
+      color: "bg-amber-50 text-amber-600",
     },
-    { 
-      name: 'HR', 
-      href: '/hr', 
-      icon: UserGroupIcon, 
-      description: 'Employee management',
-      color: 'bg-blue-50 text-blue-600'
+    {
+      name: "HR",
+      href: "/hr",
+      icon: UserGroupIcon,
+      description: "Employee management",
+      color: "bg-blue-50 text-blue-600",
     },
-    { 
-      name: 'Operations', 
-      href: '/operations', 
-      icon: CogIcon, 
-      description: 'Process management',
-      color: 'bg-emerald-50 text-emerald-600'
+    {
+      name: "Operations",
+      href: "/operations",
+      icon: CogIcon,
+      description: "Process management",
+      color: "bg-emerald-50 text-emerald-600",
     },
-    { 
-      name: 'IT', 
-      href: '/it', 
-      icon: ComputerDesktopIcon, 
-      description: 'Infrastructure and systems',
-      color: 'bg-purple-50 text-purple-600'
+    {
+      name: "IT",
+      href: "/it",
+      icon: ComputerDesktopIcon,
+      description: "Infrastructure and systems",
+      color: "bg-purple-50 text-purple-600",
+    },
+    {
+      name: "Office of the President",
+      href: "/president",
+      icon: BuildingOffice2Icon,
+      description: "Executive initiatives",
+      color: "bg-red-50 text-red-600",
     },
   ];
 
@@ -104,12 +112,18 @@ export default function Topbar() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
             >
               <div className="w-10 h-10 flex items-center justify-center hover:scale-110 transition-all duration-300">
-                <Image src="/Logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
+                <Image
+                  src="/Logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
@@ -123,13 +137,13 @@ export default function Topbar() {
                 href="/home"
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
                 style={{
-                  perspective: '1000px'
+                  perspective: "1000px",
                 }}
               >
                 <HomeIcon className="w-5 h-5 transition-transform duration-300" />
                 <span>Home</span>
               </Link>
-              
+
               <Link
                 href="/documentation"
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-transparent hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95"
@@ -149,15 +163,23 @@ export default function Topbar() {
                 >
                   <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
                   <span className="text-sm font-medium">Processes</span>
-                  <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-all duration-300 ${isProcessesOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon
+                    className={`w-4 h-4 text-gray-500 transition-all duration-300 ${
+                      isProcessesOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {/* Processes Dropdown Menu */}
                 {isProcessesOpen && (
                   <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <h3 className="text-sm font-semibold text-gray-900">Processes</h3>
-                      <p className="text-xs text-gray-500">Manage company processes</p>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Processes
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Manage company processes
+                      </p>
                     </div>
                     <Link
                       href="/forms"
@@ -168,8 +190,12 @@ export default function Topbar() {
                         <DocumentTextIcon className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">Forms</div>
-                        <div className="text-xs text-gray-500">Submit requests</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          Forms
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Submit requests
+                        </div>
                       </div>
                     </Link>
                     <Link
@@ -181,7 +207,9 @@ export default function Topbar() {
                         <CogIcon className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">Manage Request</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          Manage Request
+                        </div>
                         <div className="text-xs text-gray-500">Admin panel</div>
                       </div>
                     </Link>
@@ -199,39 +227,53 @@ export default function Topbar() {
                   className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 text-gray-700 hover:text-purple-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-md active:scale-95 border border-transparent hover:border-purple-200"
                 >
                   <span className="text-sm font-medium">Departments</span>
-                  <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon
+                    className={`w-4 h-4 text-gray-500 transition-all duration-300 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-900">Select Department</h3>
-                    <p className="text-xs text-gray-500">Choose a department to view its dashboard</p>
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Select Department
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Choose a department to view its dashboard
+                      </p>
+                    </div>
+                    <div className="py-2">
+                      {departments.map((dept) => {
+                        const IconComponent = dept.icon;
+                        return (
+                          <Link
+                            key={dept.name}
+                            href={dept.href}
+                            className="flex items-center space-x-3 px-4 py-3 mx-2 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 group"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-lg ${dept.color} flex items-center justify-center transition-all duration-300 group-hover:scale-120 group-hover:shadow-lg`}
+                            >
+                              <IconComponent className="w-5 h-5 transition-transform duration-300" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900 group-hover:text-gray-950">
+                                {dept.name}
+                              </div>
+                              <div className="text-xs text-gray-500 group-hover:text-gray-600">
+                                {dept.description}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="py-2">
-                    {departments.map((dept) => {
-                      const IconComponent = dept.icon;
-                      return (
-                        <Link
-                          key={dept.name}
-                          href={dept.href}
-                          className="flex items-center space-x-3 px-4 py-3 mx-2 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md active:scale-95 group"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <div className={`w-10 h-10 rounded-lg ${dept.color} flex items-center justify-center transition-all duration-300 group-hover:scale-120 group-hover:shadow-lg`}>
-                            <IconComponent className="w-5 h-5 transition-transform duration-300" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900 group-hover:text-gray-950">{dept.name}</div>
-                            <div className="text-xs text-gray-500 group-hover:text-gray-600">{dept.description}</div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                )}
               </div>
 
               {/* Profile Button */}
@@ -295,7 +337,9 @@ export default function Topbar() {
 
               {/* Processes Section */}
               <div className="border-t border-gray-100 pt-2">
-                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Processes</div>
+                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                  Processes
+                </div>
                 <Link
                   href="/forms"
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-all"
@@ -316,7 +360,9 @@ export default function Topbar() {
 
               {/* Departments Section */}
               <div className="border-t border-gray-100 pt-2">
-                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Departments</div>
+                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                  Departments
+                </div>
                 {departments.map((dept) => {
                   const IconComponent = dept.icon;
                   return (
@@ -361,9 +407,9 @@ export default function Topbar() {
 
       {/* Logout Confirmation Modal - Outside Nav */}
       {isLogoutConfirmOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-md flex flex-col items-center justify-start p-4 animate-in fade-in duration-200 overflow-y-auto"
-          style={{ zIndex: 9999, paddingTop: '120px' }}
+          style={{ zIndex: 9999, paddingTop: "120px" }}
         >
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200">
             {/* Header */}
@@ -371,12 +417,15 @@ export default function Topbar() {
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                 <ArrowRightOnRectangleIcon className="w-6 h-6 text-red-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Confirm Logout</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Confirm Logout
+              </h2>
             </div>
 
             {/* Message */}
             <p className="text-gray-600 mb-8 leading-relaxed">
-              Are you sure you want to log out? You will need to log in again to access the dashboard.
+              Are you sure you want to log out? You will need to log in again to
+              access the dashboard.
             </p>
 
             {/* Buttons */}
