@@ -3,14 +3,8 @@
 import { useState, useRef } from 'react';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
-interface SignatureCanvasRef {
-  clear: () => void;
-  toDataURL: () => string;
-  isEmpty: () => boolean;
-}
-
 export default function ITAssetRequestForm() {
-  const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
+  const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -64,7 +58,7 @@ export default function ITAssetRequestForm() {
     }
   };
 
-  const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+  const handleCanvasTouchStart = () => {
     setIsDrawing(true);
   };
 
@@ -73,7 +67,7 @@ export default function ITAssetRequestForm() {
   };
 
   const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !signatureCanvasRef.current) return;
+    if (!isDrawing) return;
 
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
