@@ -355,45 +355,45 @@ export default function Topbar() {
           </div>
         </div>
       )}
+    </nav>
 
-      {/* Logout Confirmation Modal */}
-      {isLogoutConfirmOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center p-4 pt-32 animate-in fade-in duration-200 overflow-y-auto"
-          style={{ zIndex: 9999 }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200 my-auto">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <ArrowRightOnRectangleIcon className="w-6 h-6 text-red-600" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">Confirm Logout</h2>
+    {/* Logout Confirmation Modal - Outside Nav */}
+    {isLogoutConfirmOpen && (
+      <div 
+        className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center p-4 pt-32 animate-in fade-in duration-200 overflow-y-auto"
+        style={{ zIndex: 9999 }}
+      >
+        <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 animate-in scale-in duration-200 my-auto">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <ArrowRightOnRectangleIcon className="w-6 h-6 text-red-600" />
             </div>
+            <h2 className="text-xl font-bold text-gray-900">Confirm Logout</h2>
+          </div>
 
-            {/* Message */}
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Are you sure you want to log out? You will need to log in again to access the dashboard.
-            </p>
+          {/* Message */}
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Are you sure you want to log out? You will need to log in again to access the dashboard.
+          </p>
 
-            {/* Buttons */}
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={cancelLogout}
-                className="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
-                className="px-6 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95"
-              >
-                Logout
-              </button>
-            </div>
+          {/* Buttons */}
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={cancelLogout}
+              className="px-6 py-2.5 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="px-6 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition-all active:scale-95"
+            >
+              Logout
+            </button>
           </div>
         </div>
-      )}
-    </nav>
+      </div>
+    )}
   );
 }
