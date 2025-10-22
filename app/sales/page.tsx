@@ -17,6 +17,7 @@ import {
 import { isAuthenticated, setAuthenticated } from "../lib/auth";
 import { cache } from "../lib/cache";
 import LoadingSpinner from "../components/LoadingSpinner";
+import AuthGuard from "../lib/auth-guard";
 
 const GOOGLE_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1_sQb1x5vGjUtxTegjCLyDFi3MgfaG_hxu0x7rxXyArI/edit?gid=0#gid=0";

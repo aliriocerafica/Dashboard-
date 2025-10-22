@@ -142,7 +142,11 @@ export default function PresidentDashboard() {
         <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg border border-gray-700">
           <p className="font-semibold text-white">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-white">
+            <p
+              key={index}
+              style={{ color: entry.color }}
+              className="text-white"
+            >
               {`${entry.dataKey}: ${entry.value}`}
             </p>
           ))}

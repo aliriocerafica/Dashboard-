@@ -70,6 +70,8 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         // Store username in session
         setCurrentUsername(username);
         sessionStorage.setItem("authenticated", "true");
+        // Also set cookie for server-side authentication
+        document.cookie = "authenticated=true; path=/; max-age=86400"; // 24 hours
 
         // Trigger auth change event to update all components immediately
         triggerAuthChange();

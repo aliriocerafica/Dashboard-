@@ -164,8 +164,12 @@ export function setAuthenticated(value: boolean): void {
   if (typeof window === "undefined") return;
   if (value) {
     sessionStorage.setItem("authenticated", "true");
+    // Also set cookie for server-side authentication
+    document.cookie = "authenticated=true; path=/; max-age=86400"; // 24 hours
   } else {
     sessionStorage.removeItem("authenticated");
+    // Remove cookie
+    document.cookie = "authenticated=; path=/; max-age=0";
   }
   // Clear cache when auth status changes
   authCache = null;
@@ -176,6 +180,8 @@ export function setAuthenticated(value: boolean): void {
 export function logout(): void {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("authenticated");
+  // Remove cookie
+  document.cookie = "authenticated=; path=/; max-age=0";
   // Clear cache on logout
   authCache = null;
   authCacheTime = 0;
