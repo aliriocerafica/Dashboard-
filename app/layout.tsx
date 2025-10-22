@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import InactivityMonitor from "./components/InactivityMonitor";
 import ConditionalLayout from "./components/ConditionalLayout";
+import PerformanceMonitor from "./components/PerformanceMonitor";
+import HeroUIProvider from "./components/HeroUIProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,12 +29,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <InactivityMonitor />
-        <ConditionalLayout>{children}</ConditionalLayout>
+        <HeroUIProvider>
+          <PerformanceMonitor />
+          <InactivityMonitor />
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </HeroUIProvider>
       </body>
     </html>
   );

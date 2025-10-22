@@ -1,10 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { logout } from '../lib/auth';
-import { resetInactivityTimer, clearInactivityTimer, INACTIVITY_TIMEOUT } from '../lib/inactivity';
-import { ExclamationTriangleIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { logout } from "../lib/auth";
+import {
+  resetInactivityTimer,
+  clearInactivityTimer,
+  INACTIVITY_TIMEOUT,
+} from "../lib/inactivity";
+import {
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 
 export default function InactivityMonitor() {
   const router = useRouter();
@@ -13,7 +21,7 @@ export default function InactivityMonitor() {
   const [remainingSeconds, setRemainingSeconds] = useState(60);
 
   // Pages that don't require authentication (shouldn't trigger inactivity)
-  const publicPages = ['/', '/home', '/splash', '/documentation'];
+  const publicPages = ["/", "/home", "/splash", "/documentation"];
   const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {
@@ -27,30 +35,42 @@ export default function InactivityMonitor() {
 
     const handleLogout = () => {
       logout();
-      router.push('/home');
+      router.push("/home");
     };
 
-    // Setup activity listeners
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    // Setup activity listeners with throttling
+    const events = ["mousedown", "keydown", "scroll", "touchstart", "click"];
+    let activityThrottle: NodeJS.Timeout;
 
     const handleActivity = () => {
-      setShowWarning(false);
-      resetInactivityTimer(handleWarning, handleLogout);
+      if (activityThrottle) return;
+
+      activityThrottle = setTimeout(() => {
+        setShowWarning(false);
+        resetInactivityTimer(handleWarning, handleLogout);
+        activityThrottle = null as any;
+      }, 1000); // Throttle activity detection to once per second
     };
 
     // Initial setup
     resetInactivityTimer(handleWarning, handleLogout);
 
-    // Add event listeners
+    // Add event listeners with passive option for better performance
     events.forEach((event) => {
-      document.addEventListener(event, handleActivity, true);
+      document.addEventListener(event, handleActivity, {
+        passive: true,
+        capture: true,
+      });
     });
 
     return () => {
       events.forEach((event) => {
-        document.removeEventListener(event, handleActivity, true);
+        document.removeEventListener(event, handleActivity, {
+          capture: true,
+        });
       });
       clearInactivityTimer();
+      if (activityThrottle) clearTimeout(activityThrottle);
     };
   }, [pathname, router, isPublicPage]);
 
@@ -62,7 +82,7 @@ export default function InactivityMonitor() {
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
           logout();
-          router.push('/home');
+          router.push("/home");
           return 0;
         }
         return prev - 1;
@@ -89,7 +109,9 @@ export default function InactivityMonitor() {
                 <ExclamationTriangleIcon className="w-8 h-8 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Session Timeout Warning</h3>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Session Timeout Warning
+                </h3>
                 <p className="text-sm text-gray-600 mt-1">
                   You will be logged out due to inactivity
                 </p>
@@ -100,13 +122,11 @@ export default function InactivityMonitor() {
           {/* Body */}
           <div className="p-6">
             <div className="mb-6">
-              <p className="text-gray-700 mb-4">
-                Your session will expire in:
-              </p>
+              <p className="text-gray-700 mb-4">Your session will expire in:</p>
               <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg p-4 text-center">
                 <div className="text-4xl font-bold text-amber-600 font-mono">
-                  {String(Math.floor(remainingSeconds / 60)).padStart(2, '0')}:
-                  {String(remainingSeconds % 60).padStart(2, '0')}
+                  {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
+                  {String(remainingSeconds % 60).padStart(2, "0")}
                 </div>
                 <p className="text-sm text-amber-700 mt-2">seconds remaining</p>
               </div>
@@ -114,7 +134,8 @@ export default function InactivityMonitor() {
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-gray-700">
-                <strong>💡 Tip:</strong> Click anywhere on the page to stay logged in and reset the timer.
+                <strong>💡 Tip:</strong> Click anywhere on the page to stay
+                logged in and reset the timer.
               </p>
             </div>
 
@@ -122,7 +143,7 @@ export default function InactivityMonitor() {
               <button
                 onClick={() => {
                   logout();
-                  router.push('/home');
+                  router.push("/home");
                 }}
                 className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors duration-200"
               >
@@ -138,7 +159,7 @@ export default function InactivityMonitor() {
                     () => setShowWarning(true),
                     () => {
                       logout();
-                      router.push('/home');
+                      router.push("/home");
                     }
                   );
                 }}

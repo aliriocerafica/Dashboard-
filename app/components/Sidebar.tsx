@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -27,8 +27,10 @@ import {
   isAdmin,
   initializeAdminUser,
 } from "../lib/auth";
+import { useAuth } from "../lib/useAuth";
 
 export default function Sidebar() {
+  const { username, isAdminUser, isLoading: authLoading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(true);
   const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(true);
@@ -36,60 +38,45 @@ export default function Sidebar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [username, setUsername] = useState<string>("admin");
-  const [userRole, setUserRole] = useState<string>("user");
   const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initialize admin user data first
-    initializeAdminUser();
-
-    // Get username from session or use default
-    const storedUsername = getCurrentUsername();
-    if (storedUsername) {
-      setUsername(storedUsername);
-      const isUserAdmin = isAdmin(storedUsername);
-      setUserRole(isUserAdmin ? "admin" : "user");
-    } else {
-      // Set default username
-      setCurrentUsername("admin");
-      setUsername("admin");
-      setUserRole("admin");
-    }
-  }, []);
-
-  // Force refresh when user role changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const storedUsername = getCurrentUsername();
-      if (storedUsername) {
-        const isUserAdmin = isAdmin(storedUsername);
-        setUserRole(isUserAdmin ? "admin" : "user");
-      }
+    // Initialize admin user data in the background
+    // This doesn't need to block the sidebar rendering
+    const initAdmin = async () => {
+      initializeAdminUser();
     };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    initAdmin();
   }, []);
 
-  // Mouse tracking effect
+  // Mouse tracking effect - optimized with throttling
   useEffect(() => {
+    let throttleTimeout: NodeJS.Timeout;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (navRef.current) {
-        const navLinks = navRef.current.querySelectorAll(".nav-mouse-follow");
-        navLinks.forEach((link) => {
-          const rect = link.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
+      if (throttleTimeout) return;
 
-          (link as HTMLElement).style.setProperty("--mouse-x", `${x}%`);
-          (link as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
-        });
-      }
+      throttleTimeout = setTimeout(() => {
+        if (navRef.current) {
+          const navLinks = navRef.current.querySelectorAll(".nav-mouse-follow");
+          navLinks.forEach((link) => {
+            const rect = link.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+            (link as HTMLElement).style.setProperty("--mouse-x", `${x}%`);
+            (link as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
+          });
+        }
+        throttleTimeout = null as any;
+      }, 16); // ~60fps throttling
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => document.removeEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      if (throttleTimeout) clearTimeout(throttleTimeout);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -122,62 +109,79 @@ export default function Sidebar() {
     setIsLogoutConfirmOpen(false);
   };
 
-  const departments = [
-    {
-      name: "Sales",
-      href: "/sales",
-      icon: ChartBarIcon,
-      description: "Sales pipeline and leads",
-      color: "bg-blue-50 text-blue-600",
-    },
-    {
-      name: "Marketing",
-      href: "/marketing",
-      icon: MegaphoneIcon,
-      description: "Campaigns and analytics",
-      color: "bg-emerald-50 text-emerald-600",
-    },
-    {
-      name: "Finance",
-      href: "/finance",
-      icon: CurrencyDollarIcon,
-      description: "Revenue and expenses",
-      color: "bg-amber-50 text-amber-600",
-    },
-    {
-      name: "HR",
-      href: "/hr",
-      icon: UserGroupIcon,
-      description: "Employee management",
-      color: "bg-blue-50 text-blue-600",
-    },
-    {
-      name: "Operations",
-      href: "/operations",
-      icon: CogIcon,
-      description: "Process management",
-      color: "bg-emerald-50 text-emerald-600",
-    },
-    {
-      name: "IT",
-      href: "/it",
-      icon: ComputerDesktopIcon,
-      description: "Infrastructure and systems",
-      color: "bg-purple-50 text-purple-600",
-    },
-    {
-      name: "Office of the President",
-      href: "/president",
-      icon: BuildingOffice2Icon,
-      description: "Executive initiatives",
-      color: "bg-red-50 text-red-600",
-    },
-  ];
+  const departments = useMemo(
+    () => [
+      {
+        name: "Sales",
+        href: "/sales",
+        icon: ChartBarIcon,
+        description: "Sales pipeline and leads",
+        color: "bg-blue-50 text-blue-600",
+      },
+      {
+        name: "Marketing",
+        href: "/marketing",
+        icon: MegaphoneIcon,
+        description: "Campaigns and analytics",
+        color: "bg-emerald-50 text-emerald-600",
+      },
+      {
+        name: "Finance",
+        href: "/finance",
+        icon: CurrencyDollarIcon,
+        description: "Revenue and expenses",
+        color: "bg-amber-50 text-amber-600",
+      },
+      {
+        name: "HR",
+        href: "/hr",
+        icon: UserGroupIcon,
+        description: "Employee management",
+        color: "bg-blue-50 text-blue-600",
+      },
+      {
+        name: "Operations",
+        href: "/operations",
+        icon: CogIcon,
+        description: "Process management",
+        color: "bg-emerald-50 text-emerald-600",
+      },
+      {
+        name: "IT",
+        href: "/it",
+        icon: ComputerDesktopIcon,
+        description: "Infrastructure and systems",
+        color: "bg-purple-50 text-purple-600",
+      },
+      {
+        name: "Office of the President",
+        href: "/president",
+        icon: BuildingOffice2Icon,
+        description: "Executive initiatives",
+        color: "bg-red-50 text-red-600",
+      },
+    ],
+    []
+  );
+
+  // Show loading state while initializing (with shorter timeout)
+  if (authLoading) {
+    return (
+      <div className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:z-50 md:w-64 lg:w-80">
+        <div className="relative flex flex-col bg-white/95 border-r border-gray-200 shadow-sm backdrop-blur-sm h-full">
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       {/* Desktop Sidebar */}
       <div
+        data-sidebar="true"
         className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:z-50 transition-all duration-300 ${
           isSidebarCollapsed ? "md:w-16 lg:w-16" : "md:w-64 lg:w-80"
         }`}
@@ -346,7 +350,7 @@ export default function Sidebar() {
                       <span className="relative z-10">Manage Request</span>
                     )}
                   </Link>
-                  {userRole === "admin" && (
+                  {isAdminUser && (
                     <Link
                       href="/admin/user-management"
                       className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
@@ -380,7 +384,7 @@ export default function Sidebar() {
                     <CogIcon className="w-5 h-5 transition-transform duration-300" />
                     <span className="relative z-10">Manage Request</span>
                   </Link>
-                  {userRole === "admin" && (
+                  {isAdminUser && (
                     <Link
                       href="/admin/user-management"
                       className="nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
@@ -478,7 +482,7 @@ export default function Sidebar() {
                       {username}
                     </div>
                     <div className="text-xs text-gray-500 capitalize">
-                      {userRole} User
+                      {isAdminUser ? "Admin" : "User"}
                     </div>
                   </div>
                 </Link>
@@ -533,7 +537,7 @@ export default function Sidebar() {
                     {username}
                   </div>
                   <div className="text-xs text-gray-500 capitalize">
-                    {userRole} User
+                    {isAdminUser ? "Admin" : "User"}
                   </div>
                 </div>
               </Link>
@@ -659,7 +663,7 @@ export default function Sidebar() {
                         <CogIcon className="w-5 h-5" />
                         <span className="relative z-10">Manage Request</span>
                       </Link>
-                      {userRole === "admin" && (
+                      {isAdminUser && (
                         <Link
                           href="/admin/user-management"
                           className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-lg transition-all"
@@ -718,7 +722,7 @@ export default function Sidebar() {
                       {username}
                     </div>
                     <div className="text-xs text-gray-500 capitalize">
-                      {userRole} User
+                      {isAdminUser ? "Admin" : "User"}
                     </div>
                   </div>
                 </div>

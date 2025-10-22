@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
-import { isAuthenticated } from "../lib/auth";
+import LoadingSpinner from "./LoadingSpinner";
+import { useAuth } from "../lib/useAuth";
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -12,38 +12,22 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({
   children,
 }: ConditionalLayoutProps) {
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { authenticated, isLoading } = useAuth();
   const pathname = usePathname();
-
-  useEffect(() => {
-    // Check authentication status
-    const checkAuth = () => {
-      const authenticated = isAuthenticated();
-      setShowSidebar(authenticated);
-      setIsLoading(false);
-    };
-
-    checkAuth();
-
-    // Listen for storage changes (login/logout)
-    const handleStorageChange = () => {
-      checkAuth();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
 
   // Pages that should never show sidebar
   const noSidebarPages = ["/splash"];
 
   // Check if current page should show sidebar
-  const shouldShowSidebar = showSidebar && !noSidebarPages.includes(pathname);
+  const shouldShowSidebar = authenticated && !noSidebarPages.includes(pathname);
 
   // Show loading state briefly to prevent flash
   if (isLoading) {
-    return <div className="min-h-screen bg-gray-50">{children}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading dashboard..." />
+      </div>
+    );
   }
 
   // If sidebar should be shown, use sidebar layout

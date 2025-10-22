@@ -140,10 +140,23 @@ export function initializeAdminUser(): void {
   saveUsers(defaultUsers);
 }
 
-// Check if user is authenticated (client-side)
+// Check if user is authenticated (client-side) - with caching
+let authCache: boolean | null = null;
+let authCacheTime = 0;
+const AUTH_CACHE_DURATION = 500; // 500ms cache for faster response
+
 export function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return sessionStorage.getItem("authenticated") === "true";
+
+  const now = Date.now();
+  if (authCache !== null && now - authCacheTime < AUTH_CACHE_DURATION) {
+    return authCache;
+  }
+
+  const authenticated = sessionStorage.getItem("authenticated") === "true";
+  authCache = authenticated;
+  authCacheTime = now;
+  return authenticated;
 }
 
 // Set authentication status
@@ -154,12 +167,23 @@ export function setAuthenticated(value: boolean): void {
   } else {
     sessionStorage.removeItem("authenticated");
   }
+  // Clear cache when auth status changes
+  authCache = null;
+  authCacheTime = 0;
 }
 
 // Logout
 export function logout(): void {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("authenticated");
+  // Clear cache on logout
+  authCache = null;
+  authCacheTime = 0;
+
+  // Trigger auth change event
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth-change"));
+  }
 }
 
 // Get current username from session (client-side)

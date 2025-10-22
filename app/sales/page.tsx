@@ -15,6 +15,8 @@ import {
   DashboardStats,
 } from "../lib/sheets";
 import { isAuthenticated, setAuthenticated } from "../lib/auth";
+import { cache } from "../lib/cache";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const GOOGLE_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1_sQb1x5vGjUtxTegjCLyDFi3MgfaG_hxu0x7rxXyArI/edit?gid=0#gid=0";
@@ -42,9 +44,24 @@ export default function SalesPage() {
     try {
       setLoading(true);
       setError(null);
+
+      // Check cache first
+      const cacheKey = `sales-data-${GOOGLE_SHEET_URL}`;
+      const cachedData = cache.get<SalesData[]>(cacheKey);
+
+      if (cachedData) {
+        setData(cachedData);
+        setStats(calculateStats(cachedData));
+        setLoading(false);
+        return;
+      }
+
       const sheetData = await fetchSheetData(GOOGLE_SHEET_URL);
       setData(sheetData);
       setStats(calculateStats(sheetData));
+
+      // Cache the data for 5 minutes
+      cache.set(cacheKey, sheetData, 5 * 60 * 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
       console.error("Error loading data:", err);
@@ -72,10 +89,7 @@ export default function SalesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading sales dashboard...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading sales dashboard..." />
       </div>
     );
   }
@@ -112,7 +126,6 @@ export default function SalesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Page Header */}
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -213,7 +226,7 @@ export default function SalesPage() {
           </div>
         </div>
 
-        {/* Row 4: Recent leads + Table */}
+        {/* Row 5: Recent leads + Table */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <div className="lg:col-span-1 bg-white rounded-xl p-3 sm:p-4 shadow-lg border border-gray-100">
             <div className="flex justify-between items-center mb-3">

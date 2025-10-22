@@ -1,27 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { LockClosedIcon, LockOpenIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { setCurrentUsername } from '../lib/auth';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import {
+  LockClosedIcon,
+  LockOpenIcon,
+  UserIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/outline";
+import { setCurrentUsername } from "../lib/auth";
+import { triggerAuthChange } from "../lib/useAuth";
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
 }
 
 export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Load saved credentials on mount
   useEffect(() => {
-    const savedUsername = localStorage.getItem('dashboard_username');
-    const savedPassword = localStorage.getItem('dashboard_password');
-    const savedRememberMe = localStorage.getItem('dashboard_rememberMe') === 'true';
+    const savedUsername = localStorage.getItem("dashboard_username");
+    const savedPassword = localStorage.getItem("dashboard_password");
+    const savedRememberMe =
+      localStorage.getItem("dashboard_rememberMe") === "true";
 
     if (savedUsername && savedPassword && savedRememberMe) {
       setUsername(savedUsername);
@@ -32,14 +40,14 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
       });
@@ -49,32 +57,36 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
       if (data.success) {
         // Handle "Remember Me" functionality
         if (rememberMe) {
-          localStorage.setItem('dashboard_username', username);
-          localStorage.setItem('dashboard_password', password);
-          localStorage.setItem('dashboard_rememberMe', 'true');
+          localStorage.setItem("dashboard_username", username);
+          localStorage.setItem("dashboard_password", password);
+          localStorage.setItem("dashboard_rememberMe", "true");
         } else {
           // Clear saved credentials if "Remember Me" is unchecked
-          localStorage.removeItem('dashboard_username');
-          localStorage.removeItem('dashboard_password');
-          localStorage.removeItem('dashboard_rememberMe');
+          localStorage.removeItem("dashboard_username");
+          localStorage.removeItem("dashboard_password");
+          localStorage.removeItem("dashboard_rememberMe");
         }
 
         // Store username in session
         setCurrentUsername(username);
-        sessionStorage.setItem('authenticated', 'true');
+        sessionStorage.setItem("authenticated", "true");
+
+        // Trigger auth change event to update all components immediately
+        triggerAuthChange();
+
         onLoginSuccess();
       } else {
-        setError(data.message || 'Invalid credentials');
+        setError(data.message || "Invalid credentials");
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   // Check if both fields are filled
-  const isFormFilled = username.trim() !== '' && password.trim() !== '';
+  const isFormFilled = username.trim() !== "" && password.trim() !== "";
 
   return (
     <div className="min-h-screen flex">
@@ -100,8 +112,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             Welcome to Dashboard For All
           </h2>
           <p className="text-lg text-white/90 leading-relaxed">
-            Access powerful business intelligence and real-time analytics across all your departments. 
-            Manage, monitor, and drive better decisions with our comprehensive dashboard.
+            Access powerful business intelligence and real-time analytics across
+            all your departments. Manage, monitor, and drive better decisions
+            with our comprehensive dashboard.
           </p>
         </div>
       </div>
@@ -119,14 +132,19 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
               )}
             </div>
             <h1 className="text-2xl font-bold text-gray-900">User Login</h1>
-            <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Sign in to your account
+            </p>
           </div>
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Username
               </label>
               <div className="relative">
@@ -148,7 +166,10 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -157,7 +178,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                 </div>
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6d74] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
@@ -187,12 +208,18 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 accent-[#ff6d74]"
-                style={{accentColor: '#ff6d74'}}
+                style={{ accentColor: "#ff6d74" }}
               />
-              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600 cursor-pointer">
+              <label
+                htmlFor="rememberMe"
+                className="ml-2 text-sm text-gray-600 cursor-pointer"
+              >
                 Remember me
               </label>
-              <a href="#" className="ml-auto text-sm text-[#ff6d74] hover:text-red-600">
+              <a
+                href="#"
+                className="ml-auto text-sm text-[#ff6d74] hover:text-red-600"
+              >
                 Forgot password?
               </a>
             </div>
@@ -210,20 +237,36 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
               disabled={isLoading}
               className={`w-full py-2.5 px-4 rounded-lg text-white font-semibold transition-all duration-200 ${
                 isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#ff6d74] hover:bg-red-600 shadow-md hover:shadow-lg'
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#ff6d74] hover:bg-red-600 shadow-md hover:shadow-lg"
               }`}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Signing in...
                 </span>
               ) : (
-                'LOGIN'
+                "LOGIN"
               )}
             </button>
           </form>
@@ -239,4 +282,3 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     </div>
   );
 }
-
