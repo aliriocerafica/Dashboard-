@@ -149,7 +149,7 @@ export default function PresidentDashboard() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -163,7 +163,7 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -177,7 +177,7 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -191,7 +191,7 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -209,7 +209,7 @@ export default function PresidentDashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Office Performance Chart */}
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900">Office Performance Scores</h3>
             </CardHeader>
@@ -233,7 +233,7 @@ export default function PresidentDashboard() {
           </Card>
 
           {/* Weekly Trends Chart */}
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900">Weekly Commitment Trends</h3>
             </CardHeader>
@@ -268,7 +268,7 @@ export default function PresidentDashboard() {
 
         {/* Unit Performance Table */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900">Unit Performance Scores</h3>
             </CardHeader>
@@ -287,13 +287,11 @@ export default function PresidentDashboard() {
                       />
                     </div>
                     <div className="ml-4">
-                      <Chip
-                        size="sm"
-                        color={unit.score >= 60 ? "success" : unit.score >= 40 ? "warning" : "danger"}
-                        variant="flat"
-                      >
+                      <span className={`text-sm font-bold ${
+                        unit.score >= 60 ? "text-green-700" : unit.score >= 40 ? "text-orange-700" : "text-red-700"
+                      }`}>
                         {unit.score}%
-                      </Chip>
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -302,7 +300,7 @@ export default function PresidentDashboard() {
           </Card>
 
           {/* Recent Commitments */}
-          <Card className="bg-white">
+          <Card className="bg-white shadow-lg border border-gray-100">
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900">Recent Commitments</h3>
             </CardHeader>
@@ -311,14 +309,14 @@ export default function PresidentDashboard() {
                 {recentCommitments.map((commitment, index) => (
                   <div key={index} className="border-l-4 border-blue-500 pl-4">
                     <div className="flex items-center justify-between mb-2">
-                      <Chip
-                        size="sm"
-                        color={commitment.status === "Completed" ? "success" : "warning"}
-                        variant="flat"
-                      >
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                        commitment.status === "Completed" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-orange-100 text-orange-800"
+                      }`}>
                         {commitment.status}
-                      </Chip>
-                      <span className="text-xs text-gray-500">{commitment.dueDate}</span>
+                      </span>
+                      <span className="text-xs text-gray-800 font-semibold">{commitment.dueDate}</span>
                     </div>
                     <p className="text-sm font-medium text-gray-900 mb-1">
                       {commitment.department}
@@ -334,7 +332,7 @@ export default function PresidentDashboard() {
         </div>
 
         {/* Department Performance Trends */}
-        <Card className="bg-white">
+        <Card className="bg-white shadow-lg border border-gray-100">
           <CardHeader>
             <h3 className="text-lg font-semibold text-gray-900">Department Performance Trends</h3>
           </CardHeader>
