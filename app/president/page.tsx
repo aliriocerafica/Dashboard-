@@ -14,6 +14,13 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Select,
+  SelectItem,
 } from "@heroui/react";
 import {
   BarChart,
@@ -73,6 +80,9 @@ export default function PresidentDashboard() {
   const [data, setData] = useState<WIGDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedChart, setSelectedChart] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState('30d');
+  const [chartType, setChartType] = useState('bar');
 
   useEffect(() => {
     const fetchWIGData = async () => {
@@ -232,10 +242,19 @@ export default function PresidentDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Office Performance Chart */}
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
                 Office Performance Scores
               </h3>
+              <Button
+                size="sm"
+                color="primary"
+                variant="flat"
+                onPress={() => setSelectedChart('office-performance')}
+                className="text-xs"
+              >
+                View More
+              </Button>
             </CardHeader>
             <CardBody>
               <ResponsiveContainer width="100%" height={300}>
@@ -258,10 +277,19 @@ export default function PresidentDashboard() {
 
           {/* Weekly Trends Chart */}
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
                 Weekly Commitment Trends
               </h3>
+              <Button
+                size="sm"
+                color="primary"
+                variant="flat"
+                onPress={() => setSelectedChart('weekly-trends')}
+                className="text-xs"
+              >
+                View More
+              </Button>
             </CardHeader>
             <CardBody>
               <ResponsiveContainer width="100%" height={300}>
@@ -420,6 +448,200 @@ export default function PresidentDashboard() {
             </div>
           </CardBody>
         </Card>
+
+        {/* Full View Modal */}
+        <Modal 
+          isOpen={selectedChart !== null} 
+          onClose={() => setSelectedChart(null)}
+          size="5xl"
+          scrollBehavior="inside"
+          className="max-w-7xl"
+        >
+          <ModalContent>
+            <ModalHeader className="flex flex-col gap-1">
+              <h3 className="text-2xl font-bold">
+                {selectedChart === 'office-performance' && 'Office Performance Analysis'}
+                {selectedChart === 'weekly-trends' && 'Weekly Commitment Trends Analysis'}
+              </h3>
+              <p className="text-sm text-gray-600">Detailed chart analysis with interactive controls</p>
+            </ModalHeader>
+            <ModalBody>
+              <div className="flex flex-col gap-6">
+                {/* Chart Controls */}
+                <div className="flex gap-4 items-center">
+                  <Select
+                    label="Date Range"
+                    placeholder="Select date range"
+                    selectedKeys={[dateRange]}
+                    onSelectionChange={(keys) => setDateRange(Array.from(keys)[0] as string)}
+                    className="max-w-xs"
+                  >
+                    <SelectItem key="7d">Last 7 days</SelectItem>
+                    <SelectItem key="30d">Last 30 days</SelectItem>
+                    <SelectItem key="90d">Last 90 days</SelectItem>
+                    <SelectItem key="1y">Last year</SelectItem>
+                  </Select>
+                  
+                  <Select
+                    label="Chart Type"
+                    placeholder="Select chart type"
+                    selectedKeys={[chartType]}
+                    onSelectionChange={(keys) => setChartType(Array.from(keys)[0] as string)}
+                    className="max-w-xs"
+                  >
+                    <SelectItem key="bar">Bar Chart</SelectItem>
+                    <SelectItem key="line">Line Chart</SelectItem>
+                    <SelectItem key="area">Area Chart</SelectItem>
+                    <SelectItem key="pie">Pie Chart</SelectItem>
+                  </Select>
+                </div>
+
+                {/* Enhanced Chart Display */}
+                <div className="h-[500px] bg-gray-50 rounded-lg p-6 border border-gray-200">
+                  {selectedChart === 'office-performance' && (
+                    <div className="h-full">
+                      <h4 className="text-lg font-semibold mb-4">Office Performance Scores - Full View</h4>
+                      <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={officeScores}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                          <XAxis
+                            dataKey="office"
+                            tick={{ fontSize: 12 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={120}
+                          />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="score" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                      
+                      {/* Detailed Data Table */}
+                      <div className="mt-6">
+                        <h5 className="text-md font-semibold mb-3">Detailed Performance Data</h5>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-2">Office</th>
+                                <th className="text-right py-2">Score</th>
+                                <th className="text-right py-2">Status</th>
+                                <th className="text-right py-2">Trend</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {officeScores.map((office, index) => (
+                                <tr key={index} className="border-b border-gray-100">
+                                  <td className="py-2 font-medium">{office.office}</td>
+                                  <td className="text-right py-2 font-bold">{office.score}%</td>
+                                  <td className="text-right py-2">
+                                    <Chip
+                                      size="sm"
+                                      color={office.score >= 60 ? "success" : office.score >= 40 ? "warning" : "danger"}
+                                      variant="flat"
+                                    >
+                                      {office.score >= 60 ? "Excellent" : office.score >= 40 ? "Good" : "Needs Improvement"}
+                                    </Chip>
+                                  </td>
+                                  <td className="text-right py-2">
+                                    {office.score >= 60 ? (
+                                      <ArrowTrendingUpIcon className="w-4 h-4 text-green-600 inline" />
+                                    ) : (
+                                      <ArrowTrendingDownIcon className="w-4 h-4 text-red-600 inline" />
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedChart === 'weekly-trends' && (
+                    <div className="h-full">
+                      <h4 className="text-lg font-semibold mb-4">Weekly Commitment Trends - Full View</h4>
+                      <ResponsiveContainer width="100%" height={400}>
+                        <LineChart data={trends.weeklyCommitments}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                          <XAxis dataKey="week" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Line
+                            type="monotone"
+                            dataKey="commitments"
+                            stroke="#3B82F6"
+                            strokeWidth={4}
+                            dot={{ fill: "#3B82F6", strokeWidth: 2, r: 6 }}
+                            activeDot={{ r: 8, stroke: "#3B82F6", strokeWidth: 2 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="completed"
+                            stroke="#10B981"
+                            strokeWidth={4}
+                            dot={{ fill: "#10B981", strokeWidth: 2, r: 6 }}
+                            activeDot={{ r: 8, stroke: "#10B981", strokeWidth: 2 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                      
+                      {/* Weekly Data Table */}
+                      <div className="mt-6">
+                        <h5 className="text-md font-semibold mb-3">Weekly Performance Data</h5>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-2">Week</th>
+                                <th className="text-right py-2">Total Commitments</th>
+                                <th className="text-right py-2">Completed</th>
+                                <th className="text-right py-2">Completion Rate</th>
+                                <th className="text-right py-2">Performance</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {trends.weeklyCommitments.map((week, index) => {
+                                const completionRate = ((week.completed / week.commitments) * 100).toFixed(1);
+                                return (
+                                  <tr key={index} className="border-b border-gray-100">
+                                    <td className="py-2 font-medium">{week.week}</td>
+                                    <td className="text-right py-2 font-bold">{week.commitments}</td>
+                                    <td className="text-right py-2 font-bold text-green-600">{week.completed}</td>
+                                    <td className="text-right py-2 font-bold">{completionRate}%</td>
+                                    <td className="text-right py-2">
+                                      <Chip
+                                        size="sm"
+                                        color={parseFloat(completionRate) >= 70 ? "success" : parseFloat(completionRate) >= 50 ? "warning" : "danger"}
+                                        variant="flat"
+                                      >
+                                        {parseFloat(completionRate) >= 70 ? "Excellent" : parseFloat(completionRate) >= 50 ? "Good" : "Needs Improvement"}
+                                      </Chip>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="light" onPress={() => setSelectedChart(null)}>
+                Close
+              </Button>
+              <Button color="primary">
+                Export Data
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </div>
     </div>
   );
