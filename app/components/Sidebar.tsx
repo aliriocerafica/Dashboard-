@@ -112,6 +112,13 @@ export default function Sidebar() {
   const departments = useMemo(
     () => [
       {
+        name: "President",
+        href: "/president",
+        icon: BuildingOffice2Icon,
+        description: "WIG Dashboard & Executive",
+        color: "bg-purple-50 text-purple-600",
+      },
+      {
         name: "Sales",
         href: "/sales",
         icon: ChartBarIcon,
