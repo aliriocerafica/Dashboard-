@@ -49,14 +49,14 @@ export default function ConditionalLayout({
       const redirectTimer = setTimeout(() => {
         router.push("/login");
         setRedirectAttempts((prev) => prev + 1);
-      }, 50);
+      }, 100);
       return () => clearTimeout(redirectTimer);
     }
   }, [authenticated, isLoading, requiresAuth, router, pathname]);
 
   // Recovery mechanism for stuck authentication
   useEffect(() => {
-    if (redirectAttempts > 3) {
+    if (redirectAttempts > 5) {
       // Clear all auth data and force refresh
       clearAllAuthData();
       window.location.reload();
@@ -79,10 +79,9 @@ export default function ConditionalLayout({
         <div className="text-center">
           <LoadingSpinner size="lg" text="Redirecting to login..." />
           <p className="mt-4 text-sm text-gray-600">
-            If this takes too long, please clear your browser data and try
-            again.
+            Please wait while we redirect you to the login page.
           </p>
-          {redirectAttempts > 1 && (
+          {redirectAttempts > 2 && (
             <button
               onClick={() => {
                 clearAllAuthData();

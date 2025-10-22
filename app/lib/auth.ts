@@ -153,7 +153,11 @@ export function isAuthenticated(): boolean {
     return authCache;
   }
 
-  const authenticated = sessionStorage.getItem("authenticated") === "true";
+  // Check both sessionStorage and cookies for authentication
+  const sessionAuth = sessionStorage.getItem("authenticated") === "true";
+  const cookieAuth = document.cookie.includes("authenticated=true");
+  const authenticated = sessionAuth || cookieAuth;
+
   authCache = authenticated;
   authCacheTime = now;
   return authenticated;

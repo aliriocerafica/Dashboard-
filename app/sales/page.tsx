@@ -132,7 +132,7 @@ export default function SalesPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
         {/* Page Header */}
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -180,7 +180,7 @@ export default function SalesPage() {
 
         {/* Row 1: KPI tiles (4 cols) */}
         <div className="mb-4 sm:mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <StatsCards stats={stats} />
           </div>
         </div>
