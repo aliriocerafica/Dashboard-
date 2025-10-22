@@ -9,15 +9,15 @@ export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Show splash for 2.5 seconds, then redirect to login
+    // Show splash for 1.5 seconds, then redirect to login
     const timer = setTimeout(() => {
       setIsVisible(false);
 
-      // After fade-out animation (500ms), redirect to login
+      // After fade-out animation (300ms), redirect to login
       setTimeout(() => {
         router.push("/login");
-      }, 500);
-    }, 2500); // 2.5 seconds
+      }, 300);
+    }, 1500); // 1.5 seconds for faster flow
 
     return () => clearTimeout(timer);
   }, [router]);

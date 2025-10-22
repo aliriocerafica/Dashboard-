@@ -487,13 +487,11 @@ export default function Sidebar() {
           </div>
 
           {/* Spacer */}
-          <div className="flex-shrink-0 h-4"></div>
+          <div className="shrink-0 h-4"></div>
 
           {/* User Section */}
           <div
-            className={`flex-shrink-0 mt-6 ${
-              isSidebarCollapsed ? "p-2" : "p-4"
-            }`}
+            className={`shrink-0 mt-6 ${isSidebarCollapsed ? "p-2" : "p-4"}`}
           >
             {!isSidebarCollapsed ? (
               <>
@@ -588,7 +586,7 @@ export default function Sidebar() {
       )}
 
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="flex items-center gap-2 px-3 py-2 text-gray-700 bg-white/95 backdrop-blur-sm hover:bg-gray-100 rounded-lg transition-all shadow-lg border border-gray-200"
@@ -603,12 +601,12 @@ export default function Sidebar() {
 
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40">
+        <div className="md:hidden fixed inset-0 z-40">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200 shadow-xl animate-in slide-in-from-left duration-300">
+          <div className="fixed inset-y-0 left-0 w-72 sm:w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200 shadow-xl animate-in slide-in-from-left duration-300">
             <div className="flex flex-col h-full">
               {/* Mobile Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -752,7 +750,7 @@ export default function Sidebar() {
               </div>
 
               {/* Mobile User Section */}
-              <div className="flex-shrink-0 border-t border-gray-200 p-4">
+              <div className="shrink-0 border-t border-gray-200 p-4">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                     <UserCircleIcon className="w-6 h-6 text-indigo-600" />

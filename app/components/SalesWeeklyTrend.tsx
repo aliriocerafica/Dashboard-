@@ -11,8 +11,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Select,
-  SelectItem,
   Chip,
 } from "@heroui/react";
 import {
@@ -25,12 +23,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState } from "react";
-import {
-  ChartBarIcon,
-  EyeIcon,
-  DocumentArrowDownIcon,
-  ArrowTrendingUpIcon,
-} from "@heroicons/react/24/outline";
+import { ChartBarIcon, ArrowTrendingUpIcon } from "@heroicons/react/24/outline";
 
 interface SalesWeeklyTrendProps {
   data: SalesData[];
@@ -38,8 +31,6 @@ interface SalesWeeklyTrendProps {
 
 export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
-  const [exportFormat, setExportFormat] = useState("png");
-  const [dateRange, setDateRange] = useState("30d");
 
   // Process data to get weekly trends
   const getWeeklyData = () => {
@@ -93,16 +84,12 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
     return null;
   };
 
-  const handleExport = () => {
-    console.log("Exporting weekly trend chart in", exportFormat, "format");
-  };
-
   return (
     <>
       <Card className="bg-white">
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <ChartBarIcon className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -115,11 +102,13 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
             </div>
           </div>
           <Button
-            isIconOnly
-            variant="light"
+            size="sm"
+            color="primary"
+            variant="solid"
             onPress={() => setSelectedChart("weekly-trend")}
+            className="text-xs bg-blue-600 text-white hover:bg-blue-700"
           >
-            <EyeIcon className="w-4 h-4" />
+            View More
           </Button>
         </CardHeader>
         <CardBody>
@@ -256,47 +245,28 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
         onClose={() => setSelectedChart(null)}
         size="5xl"
         scrollBehavior="inside"
+        backdrop="blur"
+        placement="center"
+        className="max-w-7xl"
+        classNames={{
+          base: "bg-white",
+          backdrop: "bg-black/50 backdrop-blur-md",
+          header: "bg-white",
+          body: "bg-white",
+          footer: "bg-white",
+        }}
       >
-        <ModalContent>
+        <ModalContent className="bg-white">
           <ModalHeader className="flex flex-col gap-1">
-            <h3 className="text-xl font-bold">Weekly Growth Trend Analysis</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-2xl font-bold text-gray-900">
+              Weekly Growth Trend Analysis
+            </h3>
+            <p className="text-sm text-gray-700 font-medium">
               Detailed weekly performance metrics and export options
             </p>
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-col gap-4">
-              {/* Chart controls */}
-              <div className="flex gap-4 items-center">
-                <Select
-                  label="Date Range"
-                  placeholder="Select date range"
-                  selectedKeys={[dateRange]}
-                  onSelectionChange={(keys) =>
-                    setDateRange(Array.from(keys)[0] as string)
-                  }
-                >
-                  <SelectItem key="7d">Last 7 days</SelectItem>
-                  <SelectItem key="30d">Last 30 days</SelectItem>
-                  <SelectItem key="90d">Last 90 days</SelectItem>
-                  <SelectItem key="1y">Last year</SelectItem>
-                </Select>
-
-                <Select
-                  label="Export Format"
-                  placeholder="Select format"
-                  selectedKeys={[exportFormat]}
-                  onSelectionChange={(keys) =>
-                    setExportFormat(Array.from(keys)[0] as string)
-                  }
-                >
-                  <SelectItem key="png">PNG Image</SelectItem>
-                  <SelectItem key="pdf">PDF Document</SelectItem>
-                  <SelectItem key="svg">SVG Vector</SelectItem>
-                  <SelectItem key="csv">CSV Data</SelectItem>
-                </Select>
-              </div>
-
               {/* Enhanced chart display */}
               <div className="h-[500px] bg-white rounded-lg p-4 border border-gray-200">
                 <ResponsiveContainer width="100%" height="100%">
@@ -397,15 +367,12 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button variant="light" onPress={() => setSelectedChart(null)}>
-              Close
-            </Button>
             <Button
-              color="primary"
-              startContent={<DocumentArrowDownIcon className="w-4 h-4" />}
-              onPress={handleExport}
+              variant="light"
+              onPress={() => setSelectedChart(null)}
+              className="text-black"
             >
-              Export Chart
+              Close
             </Button>
           </ModalFooter>
         </ModalContent>

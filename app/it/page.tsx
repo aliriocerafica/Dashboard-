@@ -159,7 +159,7 @@ export default function ITPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Page Header */}
         <div className="mb-4 flex items-center justify-between">
@@ -202,7 +202,7 @@ export default function ITPage() {
         {/* Row 1: KPI tiles (4 cols) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
           {/* Total Tickets */}
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
+          <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
             <div className="flex items-center justify-between mb-2">
               <TicketIcon className="w-8 h-8 opacity-80" />
               <div className="text-sm font-medium opacity-90">
@@ -442,7 +442,7 @@ export default function ITPage() {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-2xl">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-purple-50 to-purple-100 rounded-t-2xl">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
                     All IT Tickets
@@ -604,7 +604,7 @@ export default function ITPage() {
                   </p>
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Close
                   </button>

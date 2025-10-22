@@ -19,8 +19,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Select,
-  SelectItem,
 } from "@heroui/react";
 import {
   BarChart,
@@ -81,8 +79,56 @@ export default function PresidentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState("30d");
-  const [chartType, setChartType] = useState("bar");
+
+  // Export functions
+  const exportToCSV = (data: any[], filename: string) => {
+    const csvContent = [
+      Object.keys(data[0]).join(","),
+      ...data.map((row) => Object.values(row).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${filename}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToExcel = (data: any[], filename: string) => {
+    // For Excel export, we'll use a simple CSV format that Excel can open
+    const csvContent = [
+      Object.keys(data[0]).join(","),
+      ...data.map((row) => Object.values(row).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "application/vnd.ms-excel;charset=utf-8;",
+    });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${filename}.xls`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportData = () => {
+    if (!data) return;
+
+    if (selectedChart === "office-performance") {
+      exportToCSV(data.officeScores, "office-performance-scores");
+      exportToExcel(data.officeScores, "office-performance-scores");
+    } else if (selectedChart === "weekly-trends") {
+      exportToCSV(data.trends.weeklyCommitments, "weekly-commitment-trends");
+      exportToExcel(data.trends.weeklyCommitments, "weekly-commitment-trends");
+    }
+  };
 
   useEffect(() => {
     const fetchWIGData = async () => {
@@ -119,7 +165,7 @@ export default function PresidentDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Error Loading WIG Data
           </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-900 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
@@ -157,22 +203,22 @@ export default function PresidentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
             WIG Dashboard - Office of the President
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-900">
             Wildly Important Goals tracking and performance metrics
           </p>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-6">
+            <CardBody className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">
@@ -190,7 +236,7 @@ export default function PresidentDashboard() {
           </Card>
 
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-6">
+            <CardBody className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">Completed</p>
@@ -206,7 +252,7 @@ export default function PresidentDashboard() {
           </Card>
 
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-6">
+            <CardBody className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">
@@ -224,7 +270,7 @@ export default function PresidentDashboard() {
           </Card>
 
           <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-6">
+            <CardBody className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">
@@ -253,9 +299,9 @@ export default function PresidentDashboard() {
               <Button
                 size="sm"
                 color="primary"
-                variant="flat"
+                variant="solid"
                 onPress={() => setSelectedChart("office-performance")}
-                className="text-xs"
+                className="text-xs bg-blue-600 text-white hover:bg-blue-700"
               >
                 View More
               </Button>
@@ -288,9 +334,9 @@ export default function PresidentDashboard() {
               <Button
                 size="sm"
                 color="primary"
-                variant="flat"
+                variant="solid"
                 onPress={() => setSelectedChart("weekly-trends")}
-                className="text-xs"
+                className="text-xs bg-blue-600 text-white hover:bg-blue-700"
               >
                 View More
               </Button>
@@ -402,7 +448,7 @@ export default function PresidentDashboard() {
                     <p className="text-sm font-medium text-gray-900 mb-1">
                       {commitment.department}
                     </p>
-                    <p className="text-xs text-gray-700 line-clamp-2">
+                    <p className="text-xs text-gray-900 line-clamp-2">
                       {commitment.leadStatement}
                     </p>
                   </div>
@@ -441,7 +487,7 @@ export default function PresidentDashboard() {
                         ? "text-green-600"
                         : dept.change < 0
                         ? "text-red-600"
-                        : "text-gray-600"
+                        : "text-gray-900"
                     }`}
                   >
                     {dept.change > 0 ? "+" : ""}
@@ -462,59 +508,33 @@ export default function PresidentDashboard() {
           backdrop="blur"
           placement="center"
           className="max-w-7xl"
+          classNames={{
+            base: "bg-white",
+            backdrop: "bg-black/50 backdrop-blur-md",
+            header: "bg-white",
+            body: "bg-white",
+            footer: "bg-white",
+          }}
         >
-          <ModalContent>
+          <ModalContent className="bg-white">
             <ModalHeader className="flex flex-col gap-1">
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold text-gray-900">
                 {selectedChart === "office-performance" &&
                   "Office Performance Analysis"}
                 {selectedChart === "weekly-trends" &&
                   "Weekly Commitment Trends Analysis"}
               </h3>
-              <p className="text-sm text-gray-800 font-medium">
+              <p className="text-sm text-gray-700 font-medium">
                 Detailed chart analysis with interactive controls
               </p>
             </ModalHeader>
             <ModalBody>
               <div className="flex flex-col gap-6">
-                {/* Chart Controls */}
-                <div className="flex gap-4 items-center">
-                  <Select
-                    label="Date Range"
-                    placeholder="Select date range"
-                    selectedKeys={[dateRange]}
-                    onSelectionChange={(keys) =>
-                      setDateRange(Array.from(keys)[0] as string)
-                    }
-                    className="max-w-xs"
-                  >
-                    <SelectItem key="7d">Last 7 days</SelectItem>
-                    <SelectItem key="30d">Last 30 days</SelectItem>
-                    <SelectItem key="90d">Last 90 days</SelectItem>
-                    <SelectItem key="1y">Last year</SelectItem>
-                  </Select>
-
-                  <Select
-                    label="Chart Type"
-                    placeholder="Select chart type"
-                    selectedKeys={[chartType]}
-                    onSelectionChange={(keys) =>
-                      setChartType(Array.from(keys)[0] as string)
-                    }
-                    className="max-w-xs"
-                  >
-                    <SelectItem key="bar">Bar Chart</SelectItem>
-                    <SelectItem key="line">Line Chart</SelectItem>
-                    <SelectItem key="area">Area Chart</SelectItem>
-                    <SelectItem key="pie">Pie Chart</SelectItem>
-                  </Select>
-                </div>
-
                 {/* Enhanced Chart Display */}
                 <div className="h-[500px] bg-gray-50 rounded-lg p-6 border border-gray-200">
                   {selectedChart === "office-performance" && (
                     <div className="h-full">
-                      <h4 className="text-lg font-semibold mb-4">
+                      <h4 className="text-lg font-semibold mb-4 text-gray-900">
                         Office Performance Scores - Full View
                       </h4>
                       <ResponsiveContainer width="100%" height={400}>
@@ -525,12 +545,12 @@ export default function PresidentDashboard() {
                           />
                           <XAxis
                             dataKey="office"
-                            tick={{ fontSize: 12 }}
+                            tick={{ fontSize: 12, fill: "#111827" }}
                             angle={-45}
                             textAnchor="end"
                             height={120}
                           />
-                          <YAxis tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
                           <Tooltip content={<CustomTooltip />} />
                           <Bar
                             dataKey="score"
@@ -542,17 +562,25 @@ export default function PresidentDashboard() {
 
                       {/* Detailed Data Table */}
                       <div className="mt-6">
-                        <h5 className="text-md font-semibold mb-3">
+                        <h5 className="text-md font-semibold mb-3 text-gray-900">
                           Detailed Performance Data
                         </h5>
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b border-gray-200">
-                                <th className="text-left py-2">Office</th>
-                                <th className="text-right py-2">Score</th>
-                                <th className="text-right py-2">Status</th>
-                                <th className="text-right py-2">Trend</th>
+                                <th className="text-left py-2 text-gray-900 font-semibold">
+                                  Office
+                                </th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
+                                  Score
+                                </th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
+                                  Status
+                                </th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
+                                  Trend
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -561,30 +589,28 @@ export default function PresidentDashboard() {
                                   key={index}
                                   className="border-b border-gray-100"
                                 >
-                                  <td className="py-2 font-medium">
+                                  <td className="py-2 font-medium text-gray-900">
                                     {office.office}
                                   </td>
-                                  <td className="text-right py-2 font-bold">
+                                  <td className="text-right py-2 font-bold text-gray-900">
                                     {office.score}%
                                   </td>
                                   <td className="text-right py-2">
-                                    <Chip
-                                      size="sm"
-                                      color={
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
                                         office.score >= 60
-                                          ? "success"
+                                          ? "bg-green-100 text-green-800"
                                           : office.score >= 40
-                                          ? "warning"
-                                          : "danger"
-                                      }
-                                      variant="flat"
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : "bg-red-100 text-red-800"
+                                      }`}
                                     >
                                       {office.score >= 60
                                         ? "Excellent"
                                         : office.score >= 40
                                         ? "Good"
                                         : "Needs Improvement"}
-                                    </Chip>
+                                    </span>
                                   </td>
                                   <td className="text-right py-2">
                                     {office.score >= 60 ? (
@@ -604,7 +630,7 @@ export default function PresidentDashboard() {
 
                   {selectedChart === "weekly-trends" && (
                     <div className="h-full">
-                      <h4 className="text-lg font-semibold mb-4">
+                      <h4 className="text-lg font-semibold mb-4 text-gray-900">
                         Weekly Commitment Trends - Full View
                       </h4>
                       <ResponsiveContainer width="100%" height={400}>
@@ -613,8 +639,11 @@ export default function PresidentDashboard() {
                             strokeDasharray="3 3"
                             stroke="#E5E7EB"
                           />
-                          <XAxis dataKey="week" tick={{ fontSize: 12 }} />
-                          <YAxis tick={{ fontSize: 12 }} />
+                          <XAxis
+                            dataKey="week"
+                            tick={{ fontSize: 12, fill: "#111827" }}
+                          />
+                          <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
                           <Tooltip content={<CustomTooltip />} />
                           <Line
                             type="monotone"
@@ -645,22 +674,28 @@ export default function PresidentDashboard() {
 
                       {/* Weekly Data Table */}
                       <div className="mt-6">
-                        <h5 className="text-md font-semibold mb-3">
+                        <h5 className="text-md font-semibold mb-3 text-gray-900">
                           Weekly Performance Data
                         </h5>
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b border-gray-200">
-                                <th className="text-left py-2">Week</th>
-                                <th className="text-right py-2">
+                                <th className="text-left py-2 text-gray-900 font-semibold">
+                                  Week
+                                </th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
                                   Total Commitments
                                 </th>
-                                <th className="text-right py-2">Completed</th>
-                                <th className="text-right py-2">
+                                <th className="text-right py-2 text-gray-900 font-semibold">
+                                  Completed
+                                </th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
                                   Completion Rate
                                 </th>
-                                <th className="text-right py-2">Performance</th>
+                                <th className="text-right py-2 text-gray-900 font-semibold">
+                                  Performance
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -674,36 +709,34 @@ export default function PresidentDashboard() {
                                     key={index}
                                     className="border-b border-gray-100"
                                   >
-                                    <td className="py-2 font-medium">
+                                    <td className="py-2 font-medium text-gray-900">
                                       {week.week}
                                     </td>
-                                    <td className="text-right py-2 font-bold">
+                                    <td className="text-right py-2 font-bold text-gray-900">
                                       {week.commitments}
                                     </td>
                                     <td className="text-right py-2 font-bold text-green-600">
                                       {week.completed}
                                     </td>
-                                    <td className="text-right py-2 font-bold">
+                                    <td className="text-right py-2 font-bold text-gray-900">
                                       {completionRate}%
                                     </td>
                                     <td className="text-right py-2">
-                                      <Chip
-                                        size="sm"
-                                        color={
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
                                           parseFloat(completionRate) >= 70
-                                            ? "success"
+                                            ? "bg-green-100 text-green-800"
                                             : parseFloat(completionRate) >= 50
-                                            ? "warning"
-                                            : "danger"
-                                        }
-                                        variant="flat"
+                                            ? "bg-yellow-100 text-yellow-800"
+                                            : "bg-red-100 text-red-800"
+                                        }`}
                                       >
                                         {parseFloat(completionRate) >= 70
                                           ? "Excellent"
                                           : parseFloat(completionRate) >= 50
                                           ? "Good"
                                           : "Needs Improvement"}
-                                      </Chip>
+                                      </span>
                                     </td>
                                   </tr>
                                 );
@@ -718,10 +751,20 @@ export default function PresidentDashboard() {
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onPress={() => setSelectedChart(null)}>
+              <Button
+                variant="light"
+                onPress={() => setSelectedChart(null)}
+                className="text-black"
+              >
                 Close
               </Button>
-              <Button color="primary">Export Data</Button>
+              <Button
+                color="primary"
+                className="text-black"
+                onPress={handleExportData}
+              >
+                Export Data
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

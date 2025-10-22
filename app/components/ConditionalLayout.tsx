@@ -17,11 +17,8 @@ export default function ConditionalLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  // Pages that should never show sidebar
-  const noSidebarPages = ["/splash", "/login"];
-
-  // Pages that require authentication
-  const protectedPages = [
+  // Quick check for immediate redirect on protected pages
+  const isProtectedPage = [
     "/sales",
     "/marketing",
     "/finance",
@@ -32,18 +29,22 @@ export default function ConditionalLayout({
     "/admin",
     "/profile",
     "/home",
-  ];
+  ].includes(pathname);
+
+  // Pages that should never show sidebar
+  const noSidebarPages = ["/splash", "/login"];
 
   // Check if current page requires authentication
-  const requiresAuth = protectedPages.includes(pathname);
+  const requiresAuth = isProtectedPage;
 
   // Check if current page should show sidebar
   const shouldShowSidebar = authenticated && !noSidebarPages.includes(pathname);
 
-  // Redirect to splash if not authenticated and trying to access protected page
+  // Redirect to login if not authenticated and trying to access protected page
   useEffect(() => {
     if (!isLoading && requiresAuth && !authenticated) {
-      router.push("/splash");
+      // Redirect directly to login instead of splash to avoid loops
+      router.replace("/login");
     }
   }, [authenticated, isLoading, requiresAuth, router, pathname]);
 
@@ -71,7 +72,7 @@ export default function ConditionalLayout({
       <div className="flex h-screen bg-gray-50">
         <Sidebar />
         <main
-          className="flex-1 md:ml-64 lg:ml-80 overflow-y-auto transition-all duration-300"
+          className="flex-1 md:ml-64 lg:ml-80 overflow-y-auto transition-all duration-300 pt-16 md:pt-0"
           id="main-content"
         >
           {children}

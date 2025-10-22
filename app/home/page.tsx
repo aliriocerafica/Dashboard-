@@ -108,37 +108,37 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Welcome Section */}
-        <div className="text-start mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center sm:text-start mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
             Welcome to Dashboard For All
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mb-6">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto sm:mx-0 mb-4 sm:mb-6">
             Access real-time analytics and insights across all departments.
             Choose a department below to view its dedicated dashboard.
           </p>
         </div>
 
         {/* Department Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {departments.map((dept, index) => (
             <Link
               key={dept.name}
               href={dept.href}
-              className="group flowing-hover bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden"
+              className="group flowing-hover bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 relative overflow-hidden"
               style={{
                 transitionDelay: `${index * 50}ms`,
               }}
             >
               {/* Animated background gradient on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out rounded-2xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out rounded-2xl" />
 
               {/* Content with relative positioning */}
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-6">
                   <div
-                    className={`icon-float w-16 h-16 bg-gradient-to-br ${dept.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-500 ease-in-out`}
+                    className={`icon-float w-16 h-16 bg-linear-to-br ${dept.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-500 ease-in-out`}
                     style={{
                       transitionDelay: `${index * 50 + 100}ms`,
                     }}
