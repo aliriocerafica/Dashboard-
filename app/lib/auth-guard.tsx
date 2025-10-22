@@ -11,10 +11,10 @@ interface AuthGuardProps {
   redirectTo?: string;
 }
 
-export default function AuthGuard({ 
-  children, 
+export default function AuthGuard({
+  children,
   fallback,
-  redirectTo = "/splash" 
+  redirectTo = "/splash",
 }: AuthGuardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
@@ -24,36 +24,40 @@ export default function AuthGuard({
     const checkAuth = () => {
       const authenticated = isAuthenticated();
       const username = getCurrentUsername();
-      
+
       if (!authenticated || !username) {
         // Not authenticated, redirect to login
         router.push(redirectTo);
         return;
       }
-      
+
       setIsAuth(true);
       setIsLoading(false);
     };
 
     // Small delay to prevent flash
-    const timer = setTimeout(checkAuth, 100);
-    
+    const timer = setTimeout(checkAuth, 10);
+
     return () => clearTimeout(timer);
   }, [router, redirectTo]);
 
   if (isLoading) {
-    return fallback || (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Verifying authentication..." />
-      </div>
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner size="lg" text="Verifying authentication..." />
+        </div>
+      )
     );
   }
 
   if (!isAuth) {
-    return fallback || (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Redirecting to login..." />
-      </div>
+    return (
+      fallback || (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner size="lg" text="Redirecting to login..." />
+        </div>
+      )
     );
   }
 
@@ -67,10 +71,7 @@ export function withAuthGuard<P extends object>(
 ) {
   return function AuthenticatedComponent(props: P) {
     return (
-      <AuthGuard 
-        redirectTo={options?.redirectTo} 
-        fallback={options?.fallback}
-      >
+      <AuthGuard redirectTo={options?.redirectTo} fallback={options?.fallback}>
         <Component {...props} />
       </AuthGuard>
     );

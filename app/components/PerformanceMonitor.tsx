@@ -4,8 +4,11 @@ import { useEffect } from "react";
 
 export default function PerformanceMonitor() {
   useEffect(() => {
-    // Only run in development
+    // Only run in development and only when needed
     if (process.env.NODE_ENV !== "development") return;
+
+    // Skip performance monitoring to reduce overhead
+    return;
 
     // Monitor sidebar loading time
     const startTime = performance.now();

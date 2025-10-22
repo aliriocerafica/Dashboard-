@@ -116,7 +116,8 @@ export function middleware(request: NextRequest) {
       { reason: "Unauthenticated access attempt" }
     );
 
-    return NextResponse.redirect(new URL("/splash", request.url));
+    // Redirect directly to login to avoid splash screen delay
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // If trying to access auth page while already authenticated

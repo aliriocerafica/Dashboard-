@@ -43,8 +43,8 @@ export default function ConditionalLayout({
   // Redirect to login if not authenticated and trying to access protected page
   useEffect(() => {
     if (!isLoading && requiresAuth && !authenticated) {
-      // Redirect directly to login instead of splash to avoid loops
-      router.replace("/login");
+      // Use push instead of replace to avoid navigation issues
+      router.push("/login");
     }
   }, [authenticated, isLoading, requiresAuth, router, pathname]);
 
