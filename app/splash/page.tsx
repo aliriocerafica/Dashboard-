@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -12,10 +12,10 @@ export default function SplashScreen() {
     // Show splash for 2.5 seconds, then redirect to login
     const timer = setTimeout(() => {
       setIsVisible(false);
-      
+
       // After fade-out animation (500ms), redirect to login
       setTimeout(() => {
-        router.push('/login');
+        router.push("/login");
       }, 500);
     }, 2500); // 2.5 seconds
 
@@ -25,7 +25,7 @@ export default function SplashScreen() {
   return (
     <div
       className={`fixed inset-0 flex items-center justify-center bg-white transition-opacity duration-500 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
+        isVisible ? "opacity-100" : "opacity-0"
       }`}
     >
       {/* Center content */}
@@ -33,7 +33,7 @@ export default function SplashScreen() {
         {/* Logo with pulse animation */}
         <div
           className={`transform transition-all duration-500 ${
-            isVisible ? 'scale-100 opacity-100' : 'scale-150 opacity-0'
+            isVisible ? "scale-100 opacity-100" : "scale-150 opacity-0"
           }`}
         >
           <div className="w-24 h-24 md:w-32 md:h-32 bg-[#ff6d74] rounded-2xl flex items-center justify-center shadow-2xl animate-pulse">
@@ -44,25 +44,36 @@ export default function SplashScreen() {
         {/* Text */}
         <div
           className={`text-center transform transition-all duration-500 ${
-            isVisible ? 'scale-100 opacity-100' : 'scale-150 opacity-0'
+            isVisible ? "scale-100 opacity-100" : "scale-150 opacity-0"
           }`}
         >
           <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
             Dashboard
           </h1>
-          <p className="text-[#ff6d74] text-sm md:text-base font-medium">Business Intelligence Platform</p>
+          <p className="text-[#ff6d74] text-sm md:text-base font-medium">
+            Business Intelligence Platform
+          </p>
         </div>
 
         {/* Loading indicator */}
         <div
           className={`transform transition-all duration-500 ${
-            isVisible ? 'scale-100 opacity-100' : 'scale-150 opacity-0'
+            isVisible ? "scale-100 opacity-100" : "scale-150 opacity-0"
           }`}
         >
           <div className="flex gap-2 mt-4">
-            <div className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-            <div className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div
+              className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce"
+              style={{ animationDelay: "0s" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-[#ff6d74] rounded-full animate-bounce"
+              style={{ animationDelay: "0.4s" }}
+            ></div>
           </div>
         </div>
       </div>

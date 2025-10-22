@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -31,6 +32,7 @@ import { useAuth } from "../lib/useAuth";
 
 export default function Sidebar() {
   const { username, isAdminUser, isLoading: authLoading } = useAuth();
+  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(true);
   const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(true);
@@ -39,6 +41,13 @@ export default function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+
+  // Function to check if a link is active
+  const isActiveLink = (href: string) => {
+    if (href === "/" && pathname === "/") return true;
+    if (href !== "/" && pathname.startsWith(href)) return true;
+    return false;
+  };
 
   useEffect(() => {
     // Initialize admin user data in the background
@@ -277,10 +286,14 @@ export default function Sidebar() {
             {/* Home Link */}
             <Link
               href="/home"
-              className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+              className={`nav-mouse-follow flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                 isSidebarCollapsed
                   ? "justify-center px-2 py-3"
                   : "gap-3 px-4 py-3"
+              } ${
+                isActiveLink("/home")
+                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  : "text-gray-700 bg-transparent hover:text-blue-600"
               }`}
               title={isSidebarCollapsed ? "Home" : ""}
             >
@@ -293,10 +306,14 @@ export default function Sidebar() {
             {/* Documentation Link */}
             <Link
               href="/documentation"
-              className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-emerald-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+              className={`nav-mouse-follow flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                 isSidebarCollapsed
                   ? "justify-center px-2 py-3"
                   : "gap-3 px-4 py-3"
+              } ${
+                isActiveLink("/documentation")
+                  ? "bg-emerald-50 text-emerald-600 border-l-4 border-emerald-600"
+                  : "text-gray-700 bg-transparent hover:text-emerald-600"
               }`}
               title={isSidebarCollapsed ? "Documentation" : ""}
             >
@@ -423,11 +440,16 @@ export default function Sidebar() {
                 <div className="space-y-1 mt-2">
                   {departments.map((dept) => {
                     const IconComponent = dept.icon;
+                    const isActive = isActiveLink(dept.href);
                     return (
                       <Link
                         key={dept.name}
                         href={dept.href}
-                        className="nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group"
+                        className={`nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
+                          isActive
+                            ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                            : "text-gray-700 bg-transparent hover:text-blue-600"
+                        }`}
                         title={isSidebarCollapsed ? dept.name : ""}
                       >
                         <IconComponent className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
@@ -444,11 +466,16 @@ export default function Sidebar() {
               <div className="space-y-1">
                 {departments.map((dept) => {
                   const IconComponent = dept.icon;
+                  const isActive = isActiveLink(dept.href);
                   return (
                     <Link
                       key={dept.name}
                       href={dept.href}
-                      className="nav-mouse-follow flex items-center justify-center px-2 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-blue-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group"
+                      className={`nav-mouse-follow flex items-center justify-center px-2 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
+                        isActive
+                          ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                          : "text-gray-700 bg-transparent hover:text-blue-600"
+                      }`}
                       title={dept.name}
                     >
                       <IconComponent className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
@@ -615,7 +642,11 @@ export default function Sidebar() {
                 {/* Home Link */}
                 <Link
                   href="/home"
-                  className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg transition-all"
+                  className={`nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    isActiveLink("/home")
+                      ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                      : "text-gray-700 hover:text-blue-600"
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <HomeIcon className="w-5 h-5" />
@@ -625,7 +656,11 @@ export default function Sidebar() {
                 {/* Documentation Link */}
                 <Link
                   href="/documentation"
-                  className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-emerald-600 rounded-lg transition-all"
+                  className={`nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    isActiveLink("/documentation")
+                      ? "bg-emerald-50 text-emerald-600 border-l-4 border-emerald-600"
+                      : "text-gray-700 hover:text-emerald-600"
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <DocumentTextIcon className="w-5 h-5" />
@@ -694,11 +729,16 @@ export default function Sidebar() {
                     <div className="space-y-1 mt-2">
                       {departments.map((dept) => {
                         const IconComponent = dept.icon;
+                        const isActive = isActiveLink(dept.href);
                         return (
                           <Link
                             key={dept.name}
                             href={dept.href}
-                            className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg transition-all"
+                            className={`nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                              isActive
+                                ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                                : "text-gray-700 hover:text-blue-600"
+                            }`}
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
                             <IconComponent className="w-5 h-5" />
