@@ -276,18 +276,10 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
                     setDateRange(Array.from(keys)[0] as string)
                   }
                 >
-                  <SelectItem key="7d">
-                    Last 7 days
-                  </SelectItem>
-                  <SelectItem key="30d">
-                    Last 30 days
-                  </SelectItem>
-                  <SelectItem key="90d">
-                    Last 90 days
-                  </SelectItem>
-                  <SelectItem key="1y">
-                    Last year
-                  </SelectItem>
+                  <SelectItem key="7d">Last 7 days</SelectItem>
+                  <SelectItem key="30d">Last 30 days</SelectItem>
+                  <SelectItem key="90d">Last 90 days</SelectItem>
+                  <SelectItem key="1y">Last year</SelectItem>
                 </Select>
 
                 <Select
@@ -298,18 +290,10 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
                     setExportFormat(Array.from(keys)[0] as string)
                   }
                 >
-                  <SelectItem key="png">
-                    PNG Image
-                  </SelectItem>
-                  <SelectItem key="pdf">
-                    PDF Document
-                  </SelectItem>
-                  <SelectItem key="svg">
-                    SVG Vector
-                  </SelectItem>
-                  <SelectItem key="csv">
-                    CSV Data
-                  </SelectItem>
+                  <SelectItem key="png">PNG Image</SelectItem>
+                  <SelectItem key="pdf">PDF Document</SelectItem>
+                  <SelectItem key="svg">SVG Vector</SelectItem>
+                  <SelectItem key="csv">CSV Data</SelectItem>
                 </Select>
               </div>
 
