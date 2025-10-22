@@ -56,8 +56,16 @@ interface WIGDashboardData {
     dueDate: string;
   }>;
   trends: {
-    weeklyCommitments: Array<{ week: string; commitments: number; completed: number }>;
-    departmentPerformance: Array<{ department: string; trend: string; change: number }>;
+    weeklyCommitments: Array<{
+      week: string;
+      commitments: number;
+      completed: number;
+    }>;
+    departmentPerformance: Array<{
+      department: string;
+      trend: string;
+      change: number;
+    }>;
   };
 }
 
@@ -69,14 +77,14 @@ export default function PresidentDashboard() {
   useEffect(() => {
     const fetchWIGData = async () => {
       try {
-        const response = await fetch('/api/get-wig-dashboard');
+        const response = await fetch("/api/get-wig-dashboard");
         if (!response.ok) {
-          throw new Error('Failed to fetch WIG dashboard data');
+          throw new Error("Failed to fetch WIG dashboard data");
         }
         const result = await response.json();
         setData(result.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -149,12 +157,16 @@ export default function PresidentDashboard() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Commitments</p>
-                  <p className="text-2xl font-bold text-gray-900">{summary.totalCommitments}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Commitments
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {summary.totalCommitments}
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <ChartBarIcon className="w-6 h-6 text-blue-600" />
@@ -163,12 +175,14 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">{summary.completedCommitments}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {summary.completedCommitments}
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <CheckCircleIcon className="w-6 h-6 text-green-600" />
@@ -177,12 +191,16 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">In Progress</p>
-                  <p className="text-2xl font-bold text-orange-600">{summary.incompleteCommitments}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    In Progress
+                  </p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {summary.incompleteCommitments}
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <ClockIcon className="w-6 h-6 text-orange-600" />
@@ -191,12 +209,16 @@ export default function PresidentDashboard() {
             </CardBody>
           </Card>
 
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardBody className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Commitment Rate</p>
-                  <p className="text-2xl font-bold text-purple-600">{summary.commitmentRate}%</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Commitment Rate
+                  </p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {summary.commitmentRate}%
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                   <ArrowTrendingUpIcon className="w-6 h-6 text-purple-600" />
@@ -209,16 +231,18 @@ export default function PresidentDashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Office Performance Chart */}
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Office Performance Scores</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Office Performance Scores
+              </h3>
             </CardHeader>
             <CardBody>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={officeScores}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis 
-                    dataKey="office" 
+                  <XAxis
+                    dataKey="office"
                     tick={{ fontSize: 10 }}
                     angle={-45}
                     textAnchor="end"
@@ -233,9 +257,11 @@ export default function PresidentDashboard() {
           </Card>
 
           {/* Weekly Trends Chart */}
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Weekly Commitment Trends</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Weekly Commitment Trends
+              </h3>
             </CardHeader>
             <CardBody>
               <ResponsiveContainer width="100%" height={300}>
@@ -268,14 +294,19 @@ export default function PresidentDashboard() {
 
         {/* Unit Performance Table */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Unit Performance Scores</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Unit Performance Scores
+              </h3>
             </CardHeader>
             <CardBody>
               <div className="space-y-4">
                 {unitScores.slice(0, 8).map((unit, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {unit.unit}
@@ -283,13 +314,25 @@ export default function PresidentDashboard() {
                       <Progress
                         value={unit.score}
                         className="mt-1"
-                        color={unit.score >= 60 ? "success" : unit.score >= 40 ? "warning" : "danger"}
+                        color={
+                          unit.score >= 60
+                            ? "success"
+                            : unit.score >= 40
+                            ? "warning"
+                            : "danger"
+                        }
                       />
                     </div>
                     <div className="ml-4">
-                      <span className={`text-sm font-bold ${
-                        unit.score >= 60 ? "text-green-700" : unit.score >= 40 ? "text-orange-700" : "text-red-700"
-                      }`}>
+                      <span
+                        className={`text-sm font-bold ${
+                          unit.score >= 60
+                            ? "text-green-700"
+                            : unit.score >= 40
+                            ? "text-orange-700"
+                            : "text-red-700"
+                        }`}
+                      >
                         {unit.score}%
                       </span>
                     </div>
@@ -300,23 +343,29 @@ export default function PresidentDashboard() {
           </Card>
 
           {/* Recent Commitments */}
-          <Card className="bg-white shadow-lg border border-gray-100">
+          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">Recent Commitments</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Commitments
+              </h3>
             </CardHeader>
             <CardBody>
               <div className="space-y-4">
                 {recentCommitments.map((commitment, index) => (
                   <div key={index} className="border-l-4 border-blue-500 pl-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                        commitment.status === "Completed" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-orange-100 text-orange-800"
-                      }`}>
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          commitment.status === "Completed"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-orange-100 text-orange-800"
+                        }`}
+                      >
                         {commitment.status}
                       </span>
-                      <span className="text-xs text-gray-800 font-semibold">{commitment.dueDate}</span>
+                      <span className="text-xs text-gray-800 font-semibold">
+                        {commitment.dueDate}
+                      </span>
                     </div>
                     <p className="text-sm font-medium text-gray-900 mb-1">
                       {commitment.department}
@@ -332,9 +381,11 @@ export default function PresidentDashboard() {
         </div>
 
         {/* Department Performance Trends */}
-        <Card className="bg-white shadow-lg border border-gray-100">
+        <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
           <CardHeader>
-            <h3 className="text-lg font-semibold text-gray-900">Department Performance Trends</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Department Performance Trends
+            </h3>
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -349,11 +400,20 @@ export default function PresidentDashboard() {
                       <div className="w-5 h-5 bg-gray-400 rounded-full" />
                     )}
                   </div>
-                  <p className="text-sm font-medium text-gray-900">{dept.department}</p>
-                  <p className={`text-lg font-bold ${
-                    dept.change > 0 ? "text-green-600" : dept.change < 0 ? "text-red-600" : "text-gray-600"
-                  }`}>
-                    {dept.change > 0 ? "+" : ""}{dept.change}%
+                  <p className="text-sm font-medium text-gray-900">
+                    {dept.department}
+                  </p>
+                  <p
+                    className={`text-lg font-bold ${
+                      dept.change > 0
+                        ? "text-green-600"
+                        : dept.change < 0
+                        ? "text-red-600"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    {dept.change > 0 ? "+" : ""}
+                    {dept.change}%
                   </p>
                 </div>
               ))}
