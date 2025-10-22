@@ -18,17 +18,25 @@ export default function ConditionalLayout({
   const router = useRouter();
 
   // Pages that should never show sidebar
-  const noSidebarPages = ["/splash"];
-  
+  const noSidebarPages = ["/splash", "/login"];
+
   // Pages that require authentication
   const protectedPages = [
-    "/sales", "/marketing", "/finance", "/hr", "/operations", 
-    "/it", "/president", "/admin", "/profile", "/home"
+    "/sales",
+    "/marketing",
+    "/finance",
+    "/hr",
+    "/operations",
+    "/it",
+    "/president",
+    "/admin",
+    "/profile",
+    "/home",
   ];
 
   // Check if current page requires authentication
   const requiresAuth = protectedPages.includes(pathname);
-  
+
   // Check if current page should show sidebar
   const shouldShowSidebar = authenticated && !noSidebarPages.includes(pathname);
 
