@@ -27,10 +27,10 @@ export function useAuth() {
     // Check immediately
     checkAuth();
 
-    // Set a shorter timeout to prevent infinite loading (fallback)
+    // Set a timeout to prevent infinite loading (fallback)
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
-    }, 10); // 10ms timeout for immediate response
+    }, 1000); // 1 second timeout to prevent infinite loading
 
     // Listen for both storage changes (other tabs) and custom events (same tab)
     const handleAuthChange = () => {

@@ -30,9 +30,6 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import {
   ChartBarIcon,
@@ -79,6 +76,10 @@ export default function PresidentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("weekly-tracker");
+  const [wigTrackerData, setWigTrackerData] = useState<any[]>([]);
+  const [wigTrackerLoading, setWigTrackerLoading] = useState(false);
+  const [wigTrackerError, setWigTrackerError] = useState<string | null>(null);
 
   // Export functions
   const exportToCSV = (data: any[], filename: string) => {
@@ -149,6 +150,38 @@ export default function PresidentDashboard() {
     fetchWIGData();
   }, []);
 
+  // Fetch Weekly WIG Tracker data when tab is active
+  useEffect(() => {
+    const fetchWigTrackerData = async () => {
+      if (activeTab === "data-table" && wigTrackerData.length === 0) {
+        setWigTrackerLoading(true);
+        setWigTrackerError(null);
+
+        try {
+          const response = await fetch("/api/get-weekly-wig-tracker");
+          if (!response.ok) {
+            throw new Error("Failed to fetch Weekly WIG Tracker data");
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            setWigTrackerData(result.data);
+          } else {
+            throw new Error(result.error || "Failed to fetch data");
+          }
+        } catch (err) {
+          setWigTrackerError(
+            err instanceof Error ? err.message : "An error occurred"
+          );
+        } finally {
+          setWigTrackerLoading(false);
+        }
+      }
+    };
+
+    fetchWigTrackerData();
+  }, [activeTab, wigTrackerData.length]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -215,559 +248,826 @@ export default function PresidentDashboard() {
           </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    Total Commitments
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {summary.totalCommitments}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <ChartBarIcon className="w-6 h-6 text-blue-600" />
-                </div>
+        {/* Weekly WIG Tracker Navigation */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit">
+            <Button
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
+                activeTab === "weekly-tracker"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+              onPress={() => setActiveTab("weekly-tracker")}
+            >
+              <div className="flex items-center space-x-2">
+                <ChartBarIcon className="w-4 h-4" />
+                <span>Weekly WIG Tracker</span>
               </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {summary.completedCommitments}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
-                </div>
+            </Button>
+            <Button
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
+                activeTab === "data-table"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+              onPress={() => setActiveTab("data-table")}
+            >
+              <div className="flex items-center space-x-2">
+                <ClockIcon className="w-4 h-4" />
+                <span>Data Table</span>
               </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    In Progress
-                  </p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {summary.incompleteCommitments}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <ClockIcon className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    Commitment Rate
-                  </p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {summary.commitmentRate}%
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <ArrowTrendingUpIcon className="w-6 h-6 text-purple-600" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+            </Button>
+          </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Office Performance Chart */}
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Office Performance Scores
-              </h3>
-              <Button
-                size="sm"
-                color="primary"
-                variant="solid"
-                onPress={() => setSelectedChart("office-performance")}
-                className="text-xs bg-blue-600 text-white hover:bg-blue-700"
-              >
-                View More
-              </Button>
-            </CardHeader>
-            <CardBody>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={officeScores}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="office"
-                    tick={{ fontSize: 10 }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={100}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="score" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardBody>
-          </Card>
-
-          {/* Weekly Trends Chart */}
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Weekly Commitment Trends
-              </h3>
-              <Button
-                size="sm"
-                color="primary"
-                variant="solid"
-                onPress={() => setSelectedChart("weekly-trends")}
-                className="text-xs bg-blue-600 text-white hover:bg-blue-700"
-              >
-                View More
-              </Button>
-            </CardHeader>
-            <CardBody>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={trends.weeklyCommitments}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="week" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="commitments"
-                    stroke="#3B82F6"
-                    strokeWidth={3}
-                    dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "#3B82F6", strokeWidth: 2 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="completed"
-                    stroke="#10B981"
-                    strokeWidth={3}
-                    dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Unit Performance Table */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Unit Performance Scores
-              </h3>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                {unitScores.slice(0, 8).map((unit, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {unit.unit}
+        {/* Tab Content */}
+        {activeTab === "weekly-tracker" && (
+          <>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardBody className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        Total Commitments
                       </p>
-                      <Progress
-                        value={unit.score}
-                        className="mt-1"
-                        color={
-                          unit.score >= 60
-                            ? "success"
-                            : unit.score >= 40
-                            ? "warning"
-                            : "danger"
-                        }
+                      <p className="text-2xl font-bold text-gray-900">
+                        {summary.totalCommitments}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <ChartBarIcon className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardBody className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        Completed
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {summary.completedCommitments}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardBody className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        In Progress
+                      </p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {summary.incompleteCommitments}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <ClockIcon className="w-6 h-6 text-orange-600" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardBody className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        Commitment Rate
+                      </p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {summary.commitmentRate}%
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <ArrowTrendingUpIcon className="w-6 h-6 text-purple-600" />
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Office Performance Chart */}
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Office Performance Scores
+                  </h3>
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="solid"
+                    onPress={() => setSelectedChart("office-performance")}
+                    className="text-xs bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    View More
+                  </Button>
+                </CardHeader>
+                <CardBody>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={officeScores}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                      <XAxis
+                        dataKey="office"
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar
+                        dataKey="score"
+                        fill="#3B82F6"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardBody>
+              </Card>
+
+              {/* Weekly Trends Chart */}
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Weekly Commitment Trends
+                  </h3>
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="solid"
+                    onPress={() => setSelectedChart("weekly-trends")}
+                    className="text-xs bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    View More
+                  </Button>
+                </CardHeader>
+                <CardBody>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trends.weeklyCommitments}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                      <XAxis dataKey="week" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line
+                        type="monotone"
+                        dataKey="commitments"
+                        stroke="#3B82F6"
+                        strokeWidth={3}
+                        dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "#3B82F6", strokeWidth: 2 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="completed"
+                        stroke="#10B981"
+                        strokeWidth={3}
+                        dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Unit Performance Table */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Unit Performance Scores
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {unitScores.slice(0, 8).map((unit, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {unit.unit}
+                          </p>
+                          <Progress
+                            value={unit.score}
+                            className="mt-1"
+                            color={
+                              unit.score >= 60
+                                ? "success"
+                                : unit.score >= 40
+                                ? "warning"
+                                : "danger"
+                            }
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <span
+                            className={`text-sm font-bold ${
+                              unit.score >= 60
+                                ? "text-green-700"
+                                : unit.score >= 40
+                                ? "text-orange-700"
+                                : "text-red-700"
+                            }`}
+                          >
+                            {unit.score}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Recent Commitments */}
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Recent Commitments
+                  </h3>
+                </CardHeader>
+                <CardBody>
+                  <div className="space-y-4">
+                    {recentCommitments.map((commitment, index) => (
+                      <div
+                        key={index}
+                        className="border-l-4 border-blue-500 pl-4"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${
+                              commitment.status === "Completed"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
+                            {commitment.status}
+                          </span>
+                          <span className="text-xs text-gray-800 font-semibold">
+                            {commitment.dueDate}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          {commitment.department}
+                        </p>
+                        <p className="text-xs text-gray-900 line-clamp-2">
+                          {commitment.leadStatement}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Department Performance Trends */}
+            <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Department Performance Trends
+                </h3>
+              </CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {trends.departmentPerformance.map((dept, index) => (
+                    <div key={index} className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        {dept.trend === "up" ? (
+                          <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
+                        ) : dept.trend === "down" ? (
+                          <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />
+                        ) : (
+                          <div className="w-5 h-5 bg-gray-400 rounded-full" />
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {dept.department}
+                      </p>
+                      <p
+                        className={`text-lg font-bold ${
+                          dept.change > 0
+                            ? "text-green-600"
+                            : dept.change < 0
+                            ? "text-red-600"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {dept.change > 0 ? "+" : ""}
+                        {dept.change}%
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Full View Modal */}
+            <Modal
+              isOpen={selectedChart !== null}
+              onClose={() => setSelectedChart(null)}
+              size="5xl"
+              scrollBehavior="inside"
+              backdrop="blur"
+              placement="center"
+              className="max-w-7xl"
+              classNames={{
+                base: "bg-white",
+                backdrop: "bg-black/50 backdrop-blur-md",
+                header: "bg-white",
+                body: "bg-white",
+                footer: "bg-white",
+              }}
+            >
+              <ModalContent className="bg-white">
+                <ModalHeader className="flex flex-col gap-1">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {selectedChart === "office-performance" &&
+                      "Office Performance Analysis"}
+                    {selectedChart === "weekly-trends" &&
+                      "Weekly Commitment Trends Analysis"}
+                  </h3>
+                  <p className="text-sm text-gray-700 font-medium">
+                    Detailed chart analysis with interactive controls
+                  </p>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="flex flex-col gap-6">
+                    {/* Enhanced Chart Display */}
+                    <div className="h-[500px] bg-gray-50 rounded-lg p-6 border border-gray-200">
+                      {selectedChart === "office-performance" && (
+                        <div className="h-full">
+                          <h4 className="text-lg font-semibold mb-4 text-gray-900">
+                            Office Performance Scores - Full View
+                          </h4>
+                          <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={officeScores}>
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#E5E7EB"
+                              />
+                              <XAxis
+                                dataKey="office"
+                                tick={{ fontSize: 12, fill: "#111827" }}
+                                angle={-45}
+                                textAnchor="end"
+                                height={120}
+                              />
+                              <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Bar
+                                dataKey="score"
+                                fill="#3B82F6"
+                                radius={[4, 4, 0, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+
+                          {/* Detailed Data Table */}
+                          <div className="mt-6">
+                            <h5 className="text-md font-semibold mb-3 text-gray-900">
+                              Detailed Performance Data
+                            </h5>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left py-2 text-gray-900 font-semibold">
+                                      Office
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Score
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Status
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Trend
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {officeScores.map((office, index) => (
+                                    <tr
+                                      key={index}
+                                      className="border-b border-gray-100"
+                                    >
+                                      <td className="py-2 font-medium text-gray-900">
+                                        {office.office}
+                                      </td>
+                                      <td className="text-right py-2 font-bold text-gray-900">
+                                        {office.score}%
+                                      </td>
+                                      <td className="text-right py-2">
+                                        <span
+                                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            office.score >= 60
+                                              ? "bg-green-100 text-green-800"
+                                              : office.score >= 40
+                                              ? "bg-yellow-100 text-yellow-800"
+                                              : "bg-red-100 text-red-800"
+                                          }`}
+                                        >
+                                          {office.score >= 60
+                                            ? "Excellent"
+                                            : office.score >= 40
+                                            ? "Good"
+                                            : "Needs Improvement"}
+                                        </span>
+                                      </td>
+                                      <td className="text-right py-2">
+                                        {office.score >= 60 ? (
+                                          <ArrowTrendingUpIcon className="w-4 h-4 text-green-600 inline" />
+                                        ) : (
+                                          <ArrowTrendingDownIcon className="w-4 h-4 text-red-600 inline" />
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedChart === "weekly-trends" && (
+                        <div className="h-full">
+                          <h4 className="text-lg font-semibold mb-4 text-gray-900">
+                            Weekly Commitment Trends - Full View
+                          </h4>
+                          <ResponsiveContainer width="100%" height={400}>
+                            <LineChart data={trends.weeklyCommitments}>
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#E5E7EB"
+                              />
+                              <XAxis
+                                dataKey="week"
+                                tick={{ fontSize: 12, fill: "#111827" }}
+                              />
+                              <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Line
+                                type="monotone"
+                                dataKey="commitments"
+                                stroke="#3B82F6"
+                                strokeWidth={4}
+                                dot={{ fill: "#3B82F6", strokeWidth: 2, r: 6 }}
+                                activeDot={{
+                                  r: 8,
+                                  stroke: "#3B82F6",
+                                  strokeWidth: 2,
+                                }}
+                              />
+                              <Line
+                                type="monotone"
+                                dataKey="completed"
+                                stroke="#10B981"
+                                strokeWidth={4}
+                                dot={{ fill: "#10B981", strokeWidth: 2, r: 6 }}
+                                activeDot={{
+                                  r: 8,
+                                  stroke: "#10B981",
+                                  strokeWidth: 2,
+                                }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+
+                          {/* Weekly Data Table */}
+                          <div className="mt-6">
+                            <h5 className="text-md font-semibold mb-3 text-gray-900">
+                              Weekly Performance Data
+                            </h5>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left py-2 text-gray-900 font-semibold">
+                                      Week
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Total Commitments
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Completed
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Completion Rate
+                                    </th>
+                                    <th className="text-right py-2 text-gray-900 font-semibold">
+                                      Performance
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {trends.weeklyCommitments.map(
+                                    (week, index) => {
+                                      const completionRate = (
+                                        (week.completed / week.commitments) *
+                                        100
+                                      ).toFixed(1);
+                                      return (
+                                        <tr
+                                          key={index}
+                                          className="border-b border-gray-100"
+                                        >
+                                          <td className="py-2 font-medium text-gray-900">
+                                            {week.week}
+                                          </td>
+                                          <td className="text-right py-2 font-bold text-gray-900">
+                                            {week.commitments}
+                                          </td>
+                                          <td className="text-right py-2 font-bold text-green-600">
+                                            {week.completed}
+                                          </td>
+                                          <td className="text-right py-2 font-bold text-gray-900">
+                                            {completionRate}%
+                                          </td>
+                                          <td className="text-right py-2">
+                                            <span
+                                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                parseFloat(completionRate) >= 70
+                                                  ? "bg-green-100 text-green-800"
+                                                  : parseFloat(
+                                                      completionRate
+                                                    ) >= 50
+                                                  ? "bg-yellow-100 text-yellow-800"
+                                                  : "bg-red-100 text-red-800"
+                                              }`}
+                                            >
+                                              {parseFloat(completionRate) >= 70
+                                                ? "Excellent"
+                                                : parseFloat(completionRate) >=
+                                                  50
+                                                ? "Good"
+                                                : "Needs Improvement"}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      );
+                                    }
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    variant="light"
+                    onPress={() => setSelectedChart(null)}
+                    className="text-black"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    color="primary"
+                    className="text-black"
+                    onPress={handleExportData}
+                  >
+                    Export Data
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          </>
+        )}
+
+        {/* Data Table Tab Content */}
+        {activeTab === "data-table" && (
+          <div className="space-y-6 -mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="mb-6 px-4 sm:px-6 lg:px-8">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Weekly WIG Tracker Data
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Live data from Google Sheets
+                </p>
+              </div>
+            </div>
+
+            {(() => {
+              // Filter out empty rows
+              const filteredData = wigTrackerData.filter((row) => {
+                return (
+                  row.sessionDate?.trim() ||
+                  row.department?.trim() ||
+                  row.subDepartment?.trim() ||
+                  row.leadStatement?.trim() ||
+                  row.commitment?.trim() ||
+                  row.dueDate?.trim() ||
+                  row.status?.trim()
+                );
+              });
+
+              // Check which columns have data
+              const hasSessionDate = filteredData.some((row) =>
+                row.sessionDate?.trim()
+              );
+              const hasDepartment = filteredData.some((row) =>
+                row.department?.trim()
+              );
+              const hasSubDepartment = filteredData.some((row) =>
+                row.subDepartment?.trim()
+              );
+              const hasLeadStatement = filteredData.some((row) =>
+                row.leadStatement?.trim()
+              );
+              const hasCommitment = filteredData.some((row) =>
+                row.commitment?.trim()
+              );
+              const hasDueDate = filteredData.some((row) =>
+                row.dueDate?.trim()
+              );
+              const hasStatus = filteredData.some((row) => row.status?.trim());
+
+              return (
+                <>
+                  {wigTrackerLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner
+                        size="md"
+                        text="Loading Weekly WIG Tracker data..."
                       />
                     </div>
-                    <div className="ml-4">
-                      <span
-                        className={`text-sm font-bold ${
-                          unit.score >= 60
-                            ? "text-green-700"
-                            : unit.score >= 40
-                            ? "text-orange-700"
-                            : "text-red-700"
-                        }`}
-                      >
-                        {unit.score}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Recent Commitments */}
-          <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Recent Commitments
-              </h3>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-4">
-                {recentCommitments.map((commitment, index) => (
-                  <div key={index} className="border-l-4 border-blue-500 pl-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-full ${
-                          commitment.status === "Completed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-orange-100 text-orange-800"
-                        }`}
-                      >
-                        {commitment.status}
-                      </span>
-                      <span className="text-xs text-gray-800 font-semibold">
-                        {commitment.dueDate}
-                      </span>
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      {commitment.department}
-                    </p>
-                    <p className="text-xs text-gray-900 line-clamp-2">
-                      {commitment.leadStatement}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Department Performance Trends */}
-        <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Department Performance Trends
-            </h3>
-          </CardHeader>
-          <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {trends.departmentPerformance.map((dept, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    {dept.trend === "up" ? (
-                      <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
-                    ) : dept.trend === "down" ? (
-                      <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />
-                    ) : (
-                      <div className="w-5 h-5 bg-gray-400 rounded-full" />
-                    )}
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {dept.department}
-                  </p>
-                  <p
-                    className={`text-lg font-bold ${
-                      dept.change > 0
-                        ? "text-green-600"
-                        : dept.change < 0
-                        ? "text-red-600"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {dept.change > 0 ? "+" : ""}
-                    {dept.change}%
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Full View Modal */}
-        <Modal
-          isOpen={selectedChart !== null}
-          onClose={() => setSelectedChart(null)}
-          size="5xl"
-          scrollBehavior="inside"
-          backdrop="blur"
-          placement="center"
-          className="max-w-7xl"
-          classNames={{
-            base: "bg-white",
-            backdrop: "bg-black/50 backdrop-blur-md",
-            header: "bg-white",
-            body: "bg-white",
-            footer: "bg-white",
-          }}
-        >
-          <ModalContent className="bg-white">
-            <ModalHeader className="flex flex-col gap-1">
-              <h3 className="text-2xl font-bold text-gray-900">
-                {selectedChart === "office-performance" &&
-                  "Office Performance Analysis"}
-                {selectedChart === "weekly-trends" &&
-                  "Weekly Commitment Trends Analysis"}
-              </h3>
-              <p className="text-sm text-gray-700 font-medium">
-                Detailed chart analysis with interactive controls
-              </p>
-            </ModalHeader>
-            <ModalBody>
-              <div className="flex flex-col gap-6">
-                {/* Enhanced Chart Display */}
-                <div className="h-[500px] bg-gray-50 rounded-lg p-6 border border-gray-200">
-                  {selectedChart === "office-performance" && (
-                    <div className="h-full">
-                      <h4 className="text-lg font-semibold mb-4 text-gray-900">
-                        Office Performance Scores - Full View
+                  ) : wigTrackerError ? (
+                    <div className="text-center py-8">
+                      <div className="text-red-600 text-4xl mb-4">⚠️</div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        Error Loading WIG Tracker Data
                       </h4>
-                      <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={officeScores}>
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#E5E7EB"
-                          />
-                          <XAxis
-                            dataKey="office"
-                            tick={{ fontSize: 12, fill: "#111827" }}
-                            angle={-45}
-                            textAnchor="end"
-                            height={120}
-                          />
-                          <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar
-                            dataKey="score"
-                            fill="#3B82F6"
-                            radius={[4, 4, 0, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-
-                      {/* Detailed Data Table */}
-                      <div className="mt-6">
-                        <h5 className="text-md font-semibold mb-3 text-gray-900">
-                          Detailed Performance Data
-                        </h5>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b border-gray-200">
-                                <th className="text-left py-2 text-gray-900 font-semibold">
-                                  Office
+                      <p className="text-gray-600 mb-4">{wigTrackerError}</p>
+                      <Button
+                        onClick={() => {
+                          setWigTrackerData([]);
+                          setWigTrackerError(null);
+                        }}
+                        className="bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  ) : wigTrackerData.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 text-4xl mb-4">📊</div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        No Data Available
+                      </h4>
+                      <p className="text-gray-600">
+                        No Weekly WIG Tracker data found in the Google Sheet.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                      <div className="overflow-x-auto max-h-[75vh] overflow-y-auto">
+                        <table className="w-full">
+                          <thead className="sticky top-0 z-10">
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                              {hasSessionDate && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Session Date
                                 </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Score
+                              )}
+                              {hasDepartment && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Department
                                 </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
+                              )}
+                              {hasSubDepartment && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Sub-Department
+                                </th>
+                              )}
+                              {hasLeadStatement && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Lead Statement
+                                </th>
+                              )}
+                              {hasCommitment && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Commitment
+                                </th>
+                              )}
+                              {hasDueDate && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
+                                  Due Date
+                                </th>
+                              )}
+                              {hasStatus && (
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
                                   Status
                                 </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Trend
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {officeScores.map((office, index) => (
-                                <tr
-                                  key={index}
-                                  className="border-b border-gray-100"
-                                >
-                                  <td className="py-2 font-medium text-gray-900">
-                                    {office.office}
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredData.map((row, index) => (
+                              <tr
+                                key={index}
+                                className="hover:bg-gray-50 transition-colors duration-150"
+                              >
+                                {hasSessionDate && (
+                                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                    {row.sessionDate?.trim() || "-"}
                                   </td>
-                                  <td className="text-right py-2 font-bold text-gray-900">
-                                    {office.score}%
+                                )}
+                                {hasDepartment && (
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {row.department?.trim() || "-"}
                                   </td>
-                                  <td className="text-right py-2">
-                                    <span
-                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        office.score >= 60
-                                          ? "bg-green-100 text-green-800"
-                                          : office.score >= 40
-                                          ? "bg-yellow-100 text-yellow-800"
-                                          : "bg-red-100 text-red-800"
-                                      }`}
-                                    >
-                                      {office.score >= 60
-                                        ? "Excellent"
-                                        : office.score >= 40
-                                        ? "Good"
-                                        : "Needs Improvement"}
-                                    </span>
+                                )}
+                                {hasSubDepartment && (
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {row.subDepartment?.trim() || "-"}
                                   </td>
-                                  <td className="text-right py-2">
-                                    {office.score >= 60 ? (
-                                      <ArrowTrendingUpIcon className="w-4 h-4 text-green-600 inline" />
-                                    ) : (
-                                      <ArrowTrendingDownIcon className="w-4 h-4 text-red-600 inline" />
-                                    )}
+                                )}
+                                {hasLeadStatement && (
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {row.leadStatement?.trim() || "-"}
                                   </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedChart === "weekly-trends" && (
-                    <div className="h-full">
-                      <h4 className="text-lg font-semibold mb-4 text-gray-900">
-                        Weekly Commitment Trends - Full View
-                      </h4>
-                      <ResponsiveContainer width="100%" height={400}>
-                        <LineChart data={trends.weeklyCommitments}>
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#E5E7EB"
-                          />
-                          <XAxis
-                            dataKey="week"
-                            tick={{ fontSize: 12, fill: "#111827" }}
-                          />
-                          <YAxis tick={{ fontSize: 12, fill: "#111827" }} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Line
-                            type="monotone"
-                            dataKey="commitments"
-                            stroke="#3B82F6"
-                            strokeWidth={4}
-                            dot={{ fill: "#3B82F6", strokeWidth: 2, r: 6 }}
-                            activeDot={{
-                              r: 8,
-                              stroke: "#3B82F6",
-                              strokeWidth: 2,
-                            }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="completed"
-                            stroke="#10B981"
-                            strokeWidth={4}
-                            dot={{ fill: "#10B981", strokeWidth: 2, r: 6 }}
-                            activeDot={{
-                              r: 8,
-                              stroke: "#10B981",
-                              strokeWidth: 2,
-                            }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-
-                      {/* Weekly Data Table */}
-                      <div className="mt-6">
-                        <h5 className="text-md font-semibold mb-3 text-gray-900">
-                          Weekly Performance Data
-                        </h5>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b border-gray-200">
-                                <th className="text-left py-2 text-gray-900 font-semibold">
-                                  Week
-                                </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Total Commitments
-                                </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Completed
-                                </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Completion Rate
-                                </th>
-                                <th className="text-right py-2 text-gray-900 font-semibold">
-                                  Performance
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {trends.weeklyCommitments.map((week, index) => {
-                                const completionRate = (
-                                  (week.completed / week.commitments) *
-                                  100
-                                ).toFixed(1);
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="border-b border-gray-100"
-                                  >
-                                    <td className="py-2 font-medium text-gray-900">
-                                      {week.week}
-                                    </td>
-                                    <td className="text-right py-2 font-bold text-gray-900">
-                                      {week.commitments}
-                                    </td>
-                                    <td className="text-right py-2 font-bold text-green-600">
-                                      {week.completed}
-                                    </td>
-                                    <td className="text-right py-2 font-bold text-gray-900">
-                                      {completionRate}%
-                                    </td>
-                                    <td className="text-right py-2">
+                                )}
+                                {hasCommitment && (
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {row.commitment?.trim() || "-"}
+                                  </td>
+                                )}
+                                {hasDueDate && (
+                                  <td className="px-4 py-3 text-sm text-gray-900">
+                                    {row.dueDate?.trim() || "-"}
+                                  </td>
+                                )}
+                                {hasStatus && (
+                                  <td className="px-4 py-3">
+                                    {row.status?.trim() ? (
                                       <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                          parseFloat(completionRate) >= 70
+                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                          row.status
+                                            .toLowerCase()
+                                            .includes("completed")
                                             ? "bg-green-100 text-green-800"
-                                            : parseFloat(completionRate) >= 50
+                                            : row.status
+                                                .toLowerCase()
+                                                .includes("in progress")
+                                            ? "bg-blue-100 text-blue-800"
+                                            : row.status
+                                                .toLowerCase()
+                                                .includes("pending")
                                             ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-red-100 text-red-800"
+                                            : row.status
+                                                .toLowerCase()
+                                                .includes("incomplete")
+                                            ? "bg-red-100 text-red-800"
+                                            : "bg-gray-100 text-gray-800"
                                         }`}
                                       >
-                                        {parseFloat(completionRate) >= 70
-                                          ? "Excellent"
-                                          : parseFloat(completionRate) >= 50
-                                          ? "Good"
-                                          : "Needs Improvement"}
+                                        {row.status}
                                       </span>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">
+                                        -
+                                      </span>
+                                    )}
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                        <p className="text-sm text-gray-600 text-center">
+                          Showing {filteredData.length} of{" "}
+                          {wigTrackerData.length} results
+                        </p>
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                variant="light"
-                onPress={() => setSelectedChart(null)}
-                className="text-black"
-              >
-                Close
-              </Button>
-              <Button
-                color="primary"
-                className="text-black"
-                onPress={handleExportData}
-              >
-                Export Data
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+                </>
+              );
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );

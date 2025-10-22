@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import LoadingSpinner from "./LoadingSpinner";
 import { useAuth } from "../lib/useAuth";
+import { clearAllAuthData } from "../lib/auth";
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export default function ConditionalLayout({
   const { authenticated, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [redirectAttempts, setRedirectAttempts] = useState(0);
 
   // Quick check for immediate redirect on protected pages
   const isProtectedPage = [
@@ -43,10 +45,23 @@ export default function ConditionalLayout({
   // Redirect to login if not authenticated and trying to access protected page
   useEffect(() => {
     if (!isLoading && requiresAuth && !authenticated) {
-      // Use push instead of replace to avoid navigation issues
-      router.push("/login");
+      // Add a small delay to prevent rapid redirects
+      const redirectTimer = setTimeout(() => {
+        router.push("/login");
+        setRedirectAttempts((prev) => prev + 1);
+      }, 50);
+      return () => clearTimeout(redirectTimer);
     }
   }, [authenticated, isLoading, requiresAuth, router, pathname]);
+
+  // Recovery mechanism for stuck authentication
+  useEffect(() => {
+    if (redirectAttempts > 3) {
+      // Clear all auth data and force refresh
+      clearAllAuthData();
+      window.location.reload();
+    }
+  }, [redirectAttempts]);
 
   // Show loading state briefly to prevent flash
   if (isLoading) {
@@ -61,7 +76,24 @@ export default function ConditionalLayout({
   if (requiresAuth && !authenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Redirecting to login..." />
+        <div className="text-center">
+          <LoadingSpinner size="lg" text="Redirecting to login..." />
+          <p className="mt-4 text-sm text-gray-600">
+            If this takes too long, please clear your browser data and try
+            again.
+          </p>
+          {redirectAttempts > 1 && (
+            <button
+              onClick={() => {
+                clearAllAuthData();
+                window.location.reload();
+              }}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Clear Auth Data & Reload
+            </button>
+          )}
+        </div>
       </div>
     );
   }

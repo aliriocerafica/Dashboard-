@@ -41,20 +41,25 @@ export default function SalesPage() {
   }, []);
   const [error, setError] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Check cache first
       const cacheKey = `sales-data-${GOOGLE_SHEET_URL}`;
-      const cachedData = cache.get<SalesData[]>(cacheKey);
 
-      if (cachedData) {
-        setData(cachedData);
-        setStats(calculateStats(cachedData));
-        setLoading(false);
-        return;
+      // Only check cache if not forcing refresh
+      if (!forceRefresh) {
+        const cachedData = cache.get<SalesData[]>(cacheKey);
+        if (cachedData) {
+          setData(cachedData);
+          setStats(calculateStats(cachedData));
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Clear cache when forcing refresh
+        cache.delete(cacheKey);
       }
 
       const sheetData = await fetchSheetData(GOOGLE_SHEET_URL);
@@ -106,7 +111,7 @@ export default function SalesPage() {
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              onClick={loadData}
+              onClick={() => loadData(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
             >
               Try Again
@@ -140,7 +145,7 @@ export default function SalesPage() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <button
-              onClick={loadData}
+              onClick={() => loadData(true)}
               disabled={loading}
               className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                 loading

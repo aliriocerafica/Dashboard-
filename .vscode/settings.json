@@ -13,5 +13,6 @@
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "typescript.tsserver.maxTsServerMemory": 4000
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import {
   ChevronDownIcon,
-  ChevronRightIcon,
   ChartBarIcon,
   MegaphoneIcon,
   CurrencyDollarIcon,
@@ -21,13 +20,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  logout,
-  getCurrentUsername,
-  setCurrentUsername,
-  isAdmin,
-  initializeAdminUser,
-} from "../lib/auth";
+import { logout, initializeAdminUser } from "../lib/auth";
 import { useAuth } from "../lib/useAuth";
 
 export default function Sidebar() {
@@ -40,7 +33,6 @@ export default function Sidebar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const navRef = useRef<HTMLDivElement>(null);
 
   // Function to check if a link is active
   const isActiveLink = (href: string) => {
@@ -58,35 +50,7 @@ export default function Sidebar() {
     initAdmin();
   }, []);
 
-  // Mouse tracking effect - optimized with throttling
-  useEffect(() => {
-    let throttleTimeout: NodeJS.Timeout;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (throttleTimeout) return;
-
-      throttleTimeout = setTimeout(() => {
-        if (navRef.current) {
-          const navLinks = navRef.current.querySelectorAll(".nav-mouse-follow");
-          navLinks.forEach((link) => {
-            const rect = link.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-            (link as HTMLElement).style.setProperty("--mouse-x", `${x}%`);
-            (link as HTMLElement).style.setProperty("--mouse-y", `${y}%`);
-          });
-        }
-        throttleTimeout = null as any;
-      }, 16); // ~60fps throttling
-    };
-
-    document.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      if (throttleTimeout) clearTimeout(throttleTimeout);
-    };
-  }, []);
+  // Removed complex mouse tracking for better performance
 
   const handleLogout = () => {
     setIsLogoutConfirmOpen(true);
@@ -278,7 +242,6 @@ export default function Sidebar() {
 
           {/* Navigation Section */}
           <div
-            ref={navRef}
             className={`flex-1 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 max-h-[calc(100vh-200px)] ${
               isSidebarCollapsed ? "px-2" : "px-4"
             }`}
@@ -286,7 +249,7 @@ export default function Sidebar() {
             {/* Home Link */}
             <Link
               href="/home"
-              className={`nav-mouse-follow flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+              className={`flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                 isSidebarCollapsed
                   ? "justify-center px-2 py-3"
                   : "gap-3 px-4 py-3"
@@ -306,7 +269,7 @@ export default function Sidebar() {
             {/* Documentation Link */}
             <Link
               href="/documentation"
-              className={`nav-mouse-follow flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+              className={`flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                 isSidebarCollapsed
                   ? "justify-center px-2 py-3"
                   : "gap-3 px-4 py-3"
@@ -339,38 +302,10 @@ export default function Sidebar() {
                 </button>
               ) : (
                 <div className="space-y-1">
-                  <Link
-                    href="/forms"
-                    className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
-                      isSidebarCollapsed
-                        ? "justify-center px-2 py-3"
-                        : "gap-3 px-4 py-3"
-                    }`}
-                    title={isSidebarCollapsed ? "Forms" : ""}
-                  >
-                    <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-                    {!isSidebarCollapsed && (
-                      <span className="relative z-10">Forms</span>
-                    )}
-                  </Link>
-                  <Link
-                    href="/admin/it-requests"
-                    className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-purple-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
-                      isSidebarCollapsed
-                        ? "justify-center px-2 py-3"
-                        : "gap-3 px-4 py-3"
-                    }`}
-                    title={isSidebarCollapsed ? "Manage Request" : ""}
-                  >
-                    <CogIcon className="w-5 h-5 transition-transform duration-300" />
-                    {!isSidebarCollapsed && (
-                      <span className="relative z-10">Manage Request</span>
-                    )}
-                  </Link>
                   {isAdminUser && (
                     <Link
                       href="/admin/user-management"
-                      className={`nav-mouse-follow flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+                      className={`flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                         isSidebarCollapsed
                           ? "justify-center px-2 py-3"
                           : "gap-3 px-4 py-3"
@@ -387,24 +322,10 @@ export default function Sidebar() {
               )}
               {isProcessesOpen && !isSidebarCollapsed && (
                 <div className="space-y-1 mt-2">
-                  <Link
-                    href="/forms"
-                    className="nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-orange-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
-                  >
-                    <DocumentTextIcon className="w-5 h-5 transition-transform duration-300" />
-                    <span className="relative z-10">Forms</span>
-                  </Link>
-                  <Link
-                    href="/admin/it-requests"
-                    className="nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-purple-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
-                  >
-                    <CogIcon className="w-5 h-5 transition-transform duration-300" />
-                    <span className="relative z-10">Manage Request</span>
-                  </Link>
                   {isAdminUser && (
                     <Link
                       href="/admin/user-management"
-                      className="nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                     >
                       <UserGroupIcon className="w-5 h-5 transition-transform duration-300" />
                       <span className="relative z-10">User Management</span>
@@ -445,7 +366,7 @@ export default function Sidebar() {
                       <Link
                         key={dept.name}
                         href={dept.href}
-                        className={`nav-mouse-follow flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
                           isActive
                             ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                             : "text-gray-700 bg-transparent hover:text-blue-600"
@@ -471,7 +392,7 @@ export default function Sidebar() {
                     <Link
                       key={dept.name}
                       href={dept.href}
-                      className={`nav-mouse-follow flex items-center justify-center px-2 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
+                      className={`flex items-center justify-center px-2 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 group ${
                         isActive
                           ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                           : "text-gray-700 bg-transparent hover:text-blue-600"
@@ -680,22 +601,6 @@ export default function Sidebar() {
                   </button>
                   {isProcessesOpen && (
                     <div className="space-y-1 mt-2">
-                      <Link
-                        href="/forms"
-                        className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-orange-600 rounded-lg transition-all"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <DocumentTextIcon className="w-5 h-5" />
-                        <span className="relative z-10">Forms</span>
-                      </Link>
-                      <Link
-                        href="/admin/it-requests"
-                        className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-purple-600 rounded-lg transition-all"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <CogIcon className="w-5 h-5" />
-                        <span className="relative z-10">Manage Request</span>
-                      </Link>
                       {isAdminUser && (
                         <Link
                           href="/admin/user-management"

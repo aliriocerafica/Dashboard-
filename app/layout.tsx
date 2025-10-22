@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import InactivityMonitor from "./components/InactivityMonitor";
 import ConditionalLayout from "./components/ConditionalLayout";
-import PerformanceMonitor from "./components/PerformanceMonitor";
 import HeroUIProvider from "./components/HeroUIProvider";
 
 const geistSans = Geist({
@@ -34,7 +33,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <HeroUIProvider>
-          <PerformanceMonitor />
           <InactivityMonitor />
           <ConditionalLayout>{children}</ConditionalLayout>
         </HeroUIProvider>

@@ -164,12 +164,21 @@ export function setAuthenticated(value: boolean): void {
   if (typeof window === "undefined") return;
   if (value) {
     sessionStorage.setItem("authenticated", "true");
-    // Also set cookie for server-side authentication
-    document.cookie = "authenticated=true; path=/; max-age=86400"; // 24 hours
+    // Set cookie with proper attributes for server-side authentication
+    // Remove Secure flag for localhost development
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    const secureFlag = isLocalhost ? "" : "; Secure";
+    document.cookie = `authenticated=true; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
   } else {
     sessionStorage.removeItem("authenticated");
     // Remove cookie
-    document.cookie = "authenticated=; path=/; max-age=0";
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    const secureFlag = isLocalhost ? "" : "; Secure";
+    document.cookie = `authenticated=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
   }
   // Clear cache when auth status changes
   authCache = null;
@@ -180,8 +189,14 @@ export function setAuthenticated(value: boolean): void {
 export function logout(): void {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("authenticated");
-  // Remove cookie
-  document.cookie = "authenticated=; path=/; max-age=0";
+  sessionStorage.removeItem("username");
+  // Remove cookie with proper attributes
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const secureFlag = isLocalhost ? "" : "; Secure";
+  document.cookie = `authenticated=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
+  document.cookie = `username=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
   // Clear cache on logout
   authCache = null;
   authCacheTime = 0;
@@ -202,10 +217,43 @@ export function getCurrentUsername(): string | null {
 export function setCurrentUsername(username: string): void {
   if (typeof window === "undefined") return;
   sessionStorage.setItem("username", username);
+  // Also set cookie for server-side authentication
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const secureFlag = isLocalhost ? "" : "; Secure";
+  document.cookie = `username=${username}; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
 }
 
 // Store new password temporarily (for verification - in production use secure cookies)
 export function updateStoredPassword(password: string): void {
   if (typeof window === "undefined") return;
   sessionStorage.setItem("currentPassword", password);
+}
+
+// Clear all authentication data (for debugging and recovery)
+export function clearAllAuthData(): void {
+  if (typeof window === "undefined") return;
+
+  // Clear session storage
+  sessionStorage.removeItem("authenticated");
+  sessionStorage.removeItem("username");
+  sessionStorage.removeItem("currentPassword");
+
+  // Clear cookies
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const secureFlag = isLocalhost ? "" : "; Secure";
+  document.cookie = `authenticated=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
+  document.cookie = `username=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
+
+  // Clear cache
+  authCache = null;
+  authCacheTime = 0;
+
+  // Trigger auth change event
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth-change"));
+  }
 }

@@ -273,9 +273,7 @@ export async function fetchWIGCommitmentData(
       throw new Error("Invalid Google Sheets URL - cannot extract sheet ID");
     }
 
-    console.log(
-      `Fetching WIG commitment data from sheet ID: ${sheetId}, gid: ${gid}`
-    );
+    // Fetching WIG commitment data
 
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&timestamp=${Date.now()}`;
 
@@ -336,7 +334,7 @@ export async function fetchWIGCommitmentData(
       commitments.push(commitment);
     }
 
-    console.log(`✓ Successfully parsed ${commitments.length} commitments`);
+    // Successfully parsed commitments
     return commitments;
   } catch (error) {
     console.error("Error fetching WIG commitment data:", error);
@@ -1010,7 +1008,7 @@ export async function fetchPresidentDataFromAllSheets(
     for (const gid of commonSheetGids) {
       try {
         const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&timestamp=${Date.now()}`;
-        console.log(`Attempting to fetch from gid: ${gid}`);
+        // Attempting to fetch from sheet
 
         const response = await fetch(csvUrl, {
           cache: "no-store",
@@ -1020,7 +1018,7 @@ export async function fetchPresidentDataFromAllSheets(
         });
 
         if (!response.ok) {
-          console.warn(`Failed to fetch sheet gid ${gid}: ${response.status}`);
+          // Failed to fetch sheet
           continue;
         }
 
@@ -1031,22 +1029,20 @@ export async function fetchPresidentDataFromAllSheets(
           csvText.includes("<!DOCTYPE") ||
           csvText.includes("<html")
         ) {
-          console.warn(`Received HTML instead of CSV for gid ${gid}`);
+          // Received HTML instead of CSV
           continue;
         }
 
         const lines = csvText.split("\n").filter((line) => line.trim());
 
         if (lines.length < 2) {
-          console.warn(`Sheet gid ${gid} has no data rows`);
+          // Sheet has no data rows
           continue;
         }
 
         // Parse initiatives from this sheet
         const dataLines = lines.slice(1);
-        console.log(
-          `Processing ${dataLines.length} rows from sheet gid ${gid}`
-        );
+        // Processing data rows
 
         for (const line of dataLines) {
           const columns = parseCSVLine(line);
@@ -1089,7 +1085,7 @@ export async function fetchPresidentDataFromAllSheets(
             // Validate initiative has at least a name
             if (initiative.initiativeName.trim()) {
               allInitiatives.push(initiative);
-              console.log(`✓ Parsed initiative: ${initiative.initiativeName}`);
+              // Parsed initiative
             }
           }
         }
@@ -1101,7 +1097,7 @@ export async function fetchPresidentDataFromAllSheets(
 
     // If no data found, try fetching all sheets using export endpoint
     if (allInitiatives.length === 0) {
-      console.log("No data found in common sheets, attempting all sheets...");
+      // No data found in common sheets, attempting all sheets
 
       // Try exporting as XLSX and parsing (if available)
       const allSheetsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&timestamp=${Date.now()}`;
@@ -1130,7 +1126,7 @@ export async function fetchPresidentDataFromAllSheets(
 
           if (lines.length >= 2) {
             const dataLines = lines.slice(1);
-            console.log(`Processing ${dataLines.length} rows from all sheets`);
+            // Processing data from all sheets
 
             for (const line of dataLines) {
               const columns = parseCSVLine(line);
@@ -1179,9 +1175,7 @@ export async function fetchPresidentDataFromAllSheets(
       }
     }
 
-    console.log(
-      `✓ Successfully parsed ${allInitiatives.length} total initiatives from all sheets`
-    );
+    // Successfully parsed initiatives from all sheets
     return { initiatives: allInitiatives, metrics: [] };
   } catch (error) {
     console.error("Error fetching President data from all sheets:", error);
@@ -1273,7 +1267,7 @@ export async function fetchCommitmentScoreData(
       throw new Error("Invalid Google Sheets URL - cannot extract sheet ID");
     }
 
-    console.log(`Fetching commitment score data from sheet ID: ${sheetId}`);
+    // Fetching commitment score data
 
     // Use gid=0 for the score card sheet
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0&timestamp=${Date.now()}`;
@@ -1310,7 +1304,7 @@ export async function fetchCommitmentScoreData(
     const lines = csvText.split("\n").filter((line) => line.trim());
 
     if (lines.length < 2) {
-      console.warn("CSV has no data rows");
+      // CSV has no data rows
       return {
         scores: [],
         totalCount: 0,
@@ -1364,7 +1358,7 @@ export async function fetchCommitmentScoreData(
       }
     }
 
-    console.log(`✓ Successfully parsed ${scores.length} commitment scores`);
+    // Successfully parsed commitment scores
 
     return {
       scores,
