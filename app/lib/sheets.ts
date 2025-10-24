@@ -456,10 +456,10 @@ export async function fetchWIGDataFromMultipleSheets(
 // Convert Google Sheets URL to CSV export URL
 export function getCSVUrl(sheetUrl: string): string {
   // If it's already a direct CSV export URL, return it as-is
-  if (sheetUrl.includes('/pub?output=csv')) {
+  if (sheetUrl.includes("/pub?output=csv")) {
     return sheetUrl;
   }
-  
+
   const sheetId = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];
   if (!sheetId) {
     throw new Error("Invalid Google Sheets URL");
