@@ -455,6 +455,11 @@ export async function fetchWIGDataFromMultipleSheets(
 
 // Convert Google Sheets URL to CSV export URL
 export function getCSVUrl(sheetUrl: string): string {
+  // If it's already a direct CSV export URL, return it as-is
+  if (sheetUrl.includes('/pub?output=csv')) {
+    return sheetUrl;
+  }
+  
   const sheetId = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];
   if (!sheetId) {
     throw new Error("Invalid Google Sheets URL");
@@ -468,16 +473,47 @@ export async function fetchSheetData(sheetUrl: string): Promise<SalesData[]> {
     const csvUrl = getCSVUrl(sheetUrl);
     // Add timestamp to prevent caching and ensure fresh data
     const csvUrlWithTimestamp = `${csvUrl}&timestamp=${Date.now()}`;
-    const response = await fetch(csvUrlWithTimestamp, { cache: "no-store" });
+
+    console.log("Fetching from CSV URL:", csvUrlWithTimestamp);
+
+    const response = await fetch(csvUrlWithTimestamp, {
+      cache: "no-store",
+      headers: {
+        Accept: "text/csv",
+        "User-Agent": "Mozilla/5.0 (compatible; Dashboard/1.0)",
+      },
+    });
+
+    console.log("Response status:", response.status);
+    console.log(
+      "Response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error("Response error:", errorText.substring(0, 200));
+      throw new Error(
+        `Failed to fetch data: ${response.status} ${response.statusText}`
+      );
     }
 
     const csvText = await response.text();
+    console.log("CSV text length:", csvText.length);
+    console.log("First 200 chars:", csvText.substring(0, 200));
+
+    // Check if we got HTML instead of CSV (common issue with Google Sheets)
+    if (csvText.includes("<!DOCTYPE") || csvText.includes("<html")) {
+      throw new Error(
+        "Received HTML instead of CSV. The Google Sheet may not be published to the web. Please go to File > Share > Publish to web and publish the sheet as a web page."
+      );
+    }
+
     const lines = csvText.split("\n").filter((line) => line.trim());
+    console.log("Number of lines:", lines.length);
 
     if (lines.length < 2) {
+      console.warn("No data rows found in CSV");
       return [];
     }
 
