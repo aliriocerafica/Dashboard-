@@ -882,9 +882,7 @@ export default function PresidentDashboard() {
           <div className="space-y-6 -mx-4 sm:-mx-6 lg:-mx-8">
             <div className="mb-6 px-4 sm:px-6 lg:px-8">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Weekly WIG Tracker Data
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900">Data</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   Live data from Google Sheets
                 </p>
@@ -930,10 +928,7 @@ export default function PresidentDashboard() {
                 <>
                   {wigTrackerLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner
-                        size="md"
-                        text="Loading Weekly WIG Tracker data..."
-                      />
+                      <LoadingSpinner size="md" text="Loading data..." />
                     </div>
                   ) : wigTrackerError ? (
                     <div className="text-center py-8">
@@ -959,7 +954,7 @@ export default function PresidentDashboard() {
                         No Data Available
                       </h4>
                       <p className="text-gray-600">
-                        No Weekly WIG Tracker data found in the Google Sheet.
+                        No data found in the Google Sheet.
                       </p>
                     </div>
                   ) : (

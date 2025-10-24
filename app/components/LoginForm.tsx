@@ -106,13 +106,11 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
           />
         </div>
         {/* Gradient Overlay - Red Theme */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6d74]/85 via-[#ff6d74]/80 to-red-500/80 z-10"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-[#ff6d74]/85 via-[#ff6d74]/80 to-red-500/80 z-10"></div>
 
         {/* Content */}
         <div className="relative z-20 max-w-md w-full text-white text-center">
-          <h2 className="text-4xl font-bold mb-4">
-            Welcome to Dashboard For All
-          </h2>
+          <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
           <p className="text-lg text-white/90 leading-relaxed">
             Access powerful business intelligence and real-time analytics across
             all your departments. Manage, monitor, and drive better decisions

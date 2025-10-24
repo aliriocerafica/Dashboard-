@@ -42,15 +42,15 @@ export default function MobileHeader() {
 
 function getPageTitle(pathname: string): string {
   const titles: Record<string, string> = {
-    "/sales": "Sales Dashboard",
-    "/marketing": "Marketing Dashboard",
-    "/finance": "Finance Dashboard",
-    "/hr": "HR Dashboard",
-    "/operations": "Operations Dashboard",
-    "/it": "IT Dashboard",
-    "/president": "President Dashboard",
+    "/sales": "Sales",
+    "/marketing": "Marketing",
+    "/finance": "Finance",
+    "/hr": "HR",
+    "/operations": "Operations",
+    "/it": "IT",
+    "/president": "President",
     "/profile": "Profile",
-    "/admin": "Admin Panel",
+    "/admin": "Admin",
   };
 
   return titles[pathname] || "Dashboard";
