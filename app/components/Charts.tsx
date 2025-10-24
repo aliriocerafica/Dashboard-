@@ -1,10 +1,10 @@
-import { SalesData, DashboardStats } from '../lib/sheets';
-import { 
-  TagIcon, 
-  DevicePhoneMobileIcon, 
-  HandRaisedIcon, 
-  ChatBubbleLeftRightIcon 
-} from '@heroicons/react/24/outline';
+import { SalesData, DashboardStats } from "../lib/sheets";
+import {
+  TagIcon,
+  DevicePhoneMobileIcon,
+  HandRaisedIcon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/outline";
 
 interface ChartsProps {
   data: SalesData[];
@@ -61,28 +61,34 @@ export default function Charts({ data, stats }: ChartsProps) {
           <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg border border-emerald-100">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-              <span className="text-sm font-medium text-gray-700">Ready to Engage</span>
+              <span className="text-sm font-medium text-gray-700">
+                Ready to Engage
+              </span>
             </div>
             <span className="bg-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs">
-              {fitLevelDistribution['Ready to Engage'] || 0}
+              {fitLevelDistribution["Ready to Engage"] || 0}
             </span>
           </div>
           <div className="flex justify-between items-center p-2 bg-blue-50 rounded-lg border border-blue-100">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium text-gray-700">In Development</span>
+              <span className="text-sm font-medium text-gray-700">
+                In Development
+              </span>
             </div>
             <span className="bg-blue-500 text-white px-2 py-1 rounded-full font-bold text-xs">
-              {fitLevelDistribution['Develop & Qualify'] || 0}
+              {fitLevelDistribution["Develop & Qualify"] || 0}
             </span>
           </div>
           <div className="flex justify-between items-center p-2 bg-amber-50 rounded-lg border border-amber-100">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-              <span className="text-sm font-medium text-gray-700">Needs Review</span>
+              <span className="text-sm font-medium text-gray-700">
+                Needs Review
+              </span>
             </div>
             <span className="bg-amber-500 text-white px-2 py-1 rounded-full font-bold text-xs">
-              {fitLevelDistribution['Unqualified'] || 0}
+              {fitLevelDistribution["Unqualified"] || 0}
             </span>
           </div>
         </div>
@@ -99,10 +105,15 @@ export default function Charts({ data, stats }: ChartsProps) {
             <p className="text-xs text-gray-600">Where leads come from</p>
           </div>
         </div>
-        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+        <div className="space-y-2">
           {Object.entries(sourceDistribution).map(([source, count]) => (
-            <div key={source} className="flex justify-between items-center p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-              <span className="text-sm font-medium text-gray-700 truncate">{source}</span>
+            <div
+              key={source}
+              className="flex justify-between items-center p-2 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100"
+            >
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {source}
+              </span>
               <span className="bg-blue-500 text-white px-2 py-1 rounded-full font-bold text-xs">
                 {count}
               </span>
@@ -129,8 +140,13 @@ export default function Charts({ data, stats }: ChartsProps) {
         </div>
         <div className="space-y-2">
           {Object.entries(touchPointDistribution).map(([touchPoint, count]) => (
-            <div key={touchPoint} className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-              <span className="text-sm font-medium text-gray-700">{touchPoint}</span>
+            <div
+              key={touchPoint}
+              className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg border border-emerald-100"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                {touchPoint}
+              </span>
               <span className="bg-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs">
                 {count}
               </span>
@@ -157,8 +173,13 @@ export default function Charts({ data, stats }: ChartsProps) {
         </div>
         <div className="space-y-2">
           {Object.entries(leadResponseDistribution).map(([response, count]) => (
-            <div key={response} className="flex justify-between items-center p-2 bg-amber-50 rounded-lg border border-amber-100">
-              <span className="text-sm font-medium text-gray-700">{response}</span>
+            <div
+              key={response}
+              className="flex justify-between items-center p-2 bg-amber-50 rounded-lg border border-amber-100"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                {response}
+              </span>
               <span className="bg-amber-500 text-white px-2 py-1 rounded-full font-bold text-xs">
                 {count}
               </span>

@@ -1,6 +1,6 @@
-import { SalesData } from '../lib/sheets';
-import { useState } from 'react';
-import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { SalesData } from "../lib/sheets";
+import { useState } from "react";
+import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface DataTableProps {
   data: SalesData[];
@@ -8,16 +8,16 @@ interface DataTableProps {
 
 export default function DataTable({ data }: DataTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
   const getScoreBadge = (score: number) => {
-    if (score >= 20) return 'bg-green-500 text-white';
-    if (score >= 15) return 'bg-yellow-500 text-white';
-    return 'bg-red-500 text-white';
+    if (score >= 20) return "bg-green-500 text-white";
+    if (score >= 15) return "bg-yellow-500 text-white";
+    return "bg-red-500 text-white";
   };
 
   const getDaysInPipeline = (date: string) => {
-    if (!date || date.trim() === '') return 0;
+    if (!date || date.trim() === "") return 0;
     const itemDate = new Date(date);
     if (isNaN(itemDate.getTime())) return 0;
     const today = new Date();
@@ -27,17 +27,18 @@ export default function DataTable({ data }: DataTableProps) {
   };
 
   const getDaysBadge = (days: number) => {
-    if (days > 14) return 'bg-red-500 text-white';
-    if (days > 7) return 'bg-yellow-500 text-white';
-    return 'bg-green-500 text-white';
+    if (days > 14) return "bg-red-500 text-white";
+    if (days > 7) return "bg-yellow-500 text-white";
+    return "bg-green-500 text-white";
   };
 
   // Filter data based on search term
-  const filteredData = data.filter(item => 
-    item.firmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.fitLevel.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter(
+    (item) =>
+      item.firmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.fitLevel.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Show only first 3 rows in the main table
@@ -49,10 +50,14 @@ export default function DataTable({ data }: DataTableProps) {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Sales Pipeline</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{data.length} Total</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Sales Pipeline
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {data.length} Total
+              </p>
             </div>
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
             >
@@ -60,7 +65,7 @@ export default function DataTable({ data }: DataTableProps) {
             </button>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -89,35 +94,54 @@ export default function DataTable({ data }: DataTableProps) {
               {displayData.map((item, index) => {
                 const daysInPipeline = getDaysInPipeline(item.date);
                 return (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                  <tr
+                    key={index}
+                    className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+                        <div className="w-10 h-10 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
                           {item.firmName.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">{item.firmName}</div>
-                          <div className="text-xs text-gray-500">{item.date}</div>
+                          <div className="font-medium text-gray-900 text-sm">
+                            {item.firmName}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {item.date}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{item.contactPerson}</div>
+                      <div className="text-sm text-gray-900">
+                        {item.contactPerson}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getScoreBadge(item.score)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getScoreBadge(
+                          item.score
+                        )}`}
+                      >
                         {item.score}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-gray-600">{daysInPipeline} days</span>
+                      <span className="text-sm text-gray-600">
+                        {daysInPipeline} days
+                      </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-                        item.fitLevel === 'Ready to Engage' ? 'bg-emerald-50 text-emerald-700' :
-                        item.fitLevel === 'Develop & Qualify' ? 'bg-amber-50 text-amber-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                          item.fitLevel === "Ready to Engage"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : item.fitLevel === "Develop & Qualify"
+                            ? "bg-amber-50 text-amber-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
                         {item.fitLevel}
                       </span>
                     </td>
@@ -132,7 +156,7 @@ export default function DataTable({ data }: DataTableProps) {
             </tbody>
           </table>
         </div>
-        
+
         {data.length > 3 && (
           <div className="px-6 py-3 bg-gray-50/50 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
@@ -146,14 +170,21 @@ export default function DataTable({ data }: DataTableProps) {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="fixed inset-0 bg-white/20 backdrop-blur-md transition-opacity" onClick={() => setIsModalOpen(false)}></div>
-            
+            <div
+              className="fixed inset-0 bg-white/20 backdrop-blur-md transition-opacity"
+              onClick={() => setIsModalOpen(false)}
+            ></div>
+
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-slate-50 to-gray-50 rounded-t-2xl">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Complete Sales Pipeline</h2>
-                  <p className="text-sm text-gray-600 mt-1">All leads with search and filter capabilities</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Complete Sales Pipeline
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    All leads with search and filter capabilities
+                  </p>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -209,35 +240,54 @@ export default function DataTable({ data }: DataTableProps) {
                     {filteredData.map((item, index) => {
                       const daysInPipeline = getDaysInPipeline(item.date);
                       return (
-                        <tr key={index} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                        <tr
+                          key={index}
+                          className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                        >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+                              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
                                 {item.firmName.substring(0, 2).toUpperCase()}
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900 text-sm">{item.firmName}</div>
-                                <div className="text-xs text-gray-500">{item.date}</div>
+                                <div className="font-medium text-gray-900 text-sm">
+                                  {item.firmName}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {item.date}
+                                </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">{item.contactPerson}</div>
+                            <div className="text-sm text-gray-900">
+                              {item.contactPerson}
+                            </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getScoreBadge(item.score)}`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getScoreBadge(
+                                item.score
+                              )}`}
+                            >
                               {item.score}
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-sm text-gray-600">{daysInPipeline} days</span>
+                            <span className="text-sm text-gray-600">
+                              {daysInPipeline} days
+                            </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-                              item.fitLevel === 'Ready to Engage' ? 'bg-emerald-50 text-emerald-700' :
-                              item.fitLevel === 'Develop & Qualify' ? 'bg-amber-50 text-amber-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                                item.fitLevel === "Ready to Engage"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : item.fitLevel === "Develop & Qualify"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
                               {item.fitLevel}
                             </span>
                           </td>
@@ -257,11 +307,12 @@ export default function DataTable({ data }: DataTableProps) {
               <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    Total: {data.length} leads | Filtered: {filteredData.length} leads
+                    Total: {data.length} leads | Filtered: {filteredData.length}{" "}
+                    leads
                   </p>
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Close
                   </button>
@@ -274,4 +325,3 @@ export default function DataTable({ data }: DataTableProps) {
     </>
   );
 }
-

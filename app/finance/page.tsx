@@ -143,324 +143,273 @@ export default function FinancePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Page Header */}
         <div className="mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-              <CurrencyDollarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 Finance Dashboard
               </h1>
-              <p className="text-sm sm:text-base text-gray-600">
-                Financial management and payment tracking
+              <p className="text-sm sm:text-base text-gray-900">
+                Financial management and reporting
               </p>
             </div>
+            <a
+              href="https://docs.google.com/spreadsheets/d/placeholder-finance-sheet/edit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+              View Original Sheet
+            </a>
           </div>
+        </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-lg w-full sm:w-fit">
-            <Button
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
-                activeTab === "payroll"
-                  ? "bg-white text-emerald-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-              onPress={() => setActiveTab("payroll")}
-            >
-              Payroll Concerns
-            </Button>
-            <Button
-              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
-                activeTab === "invoices"
-                  ? "bg-white text-emerald-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-              onPress={() => setActiveTab("invoices")}
-            >
-              Client Invoice Commitment
-            </Button>
+        {/* Navigation Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab("payroll")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "payroll"
+                    ? "border-emerald-500 text-emerald-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Payroll Concerns
+              </button>
+              <button
+                onClick={() => setActiveTab("invoices")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "invoices"
+                    ? "border-emerald-500 text-emerald-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Invoices
+              </button>
+            </nav>
           </div>
         </div>
 
         {/* Payroll Concerns Tab */}
         {activeTab === "payroll" && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
+              <div className="bg-white rounded-2xl p-6 shadow-sm">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">Loading payroll concerns...</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="text-center py-12">
+              <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
                 <div className="text-red-600 text-6xl mb-4">⚠️</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
                   Error Loading Data
                 </h2>
                 <p className="text-gray-600 mb-6">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
                 >
                   Try Again
                 </button>
               </div>
             ) : payrollData ? (
               <>
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                  <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                    <CardBody className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
-                            Total Concerns
-                          </p>
-                          <p className="text-2xl font-bold text-gray-900">
-                            {payrollData.summary.totalConcerns}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <BanknotesIcon className="w-6 h-6 text-blue-600" />
-                        </div>
+                {/* Mobile App Summary Cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <BanknotesIcon className="w-5 h-5" />
                       </div>
-                    </CardBody>
-                  </Card>
-
-                  <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                    <CardBody className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
-                            Pending Concerns
-                          </p>
-                          <p className="text-2xl font-bold text-orange-600">
-                            {payrollData.summary.pendingConcerns}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <ClockIcon className="w-6 h-6 text-orange-600" />
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-
-                  <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                    <CardBody className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
-                            Resolved
-                          </p>
-                          <p className="text-2xl font-bold text-green-600">
-                            {payrollData.summary.resolvedConcerns}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                          <CheckCircleIcon className="w-6 h-6 text-green-600" />
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-
-                  <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                    <CardBody className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">
-                            In Review
-                          </p>
-                          <p className="text-2xl font-bold text-purple-600">
-                            {payrollData.summary.inReviewConcerns}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <ExclamationTriangleIcon className="w-6 h-6 text-purple-600" />
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                </div>
-
-                {/* Weekly Concerns Chart */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Weekly Raise Concerns
-                        </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Number of concerns raised per week
-                        </p>
-                      </div>
+                      <span className="text-xs opacity-80">Total</span>
                     </div>
+                    <div className="text-2xl font-bold">
+                      {payrollData.summary.totalConcerns}
+                    </div>
+                    <div className="text-xs opacity-80">Concerns</div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={payrollData.concerns
-                            .reduce((acc: any[], concern: any) => {
-                              const date = new Date(concern.payrollDate);
-                              const weekStart = new Date(date);
-                              weekStart.setDate(date.getDate() - date.getDay());
-                              const weekKey = weekStart
-                                .toISOString()
-                                .split("T")[0];
-
-                              const existingWeek = acc.find(
-                                (w) => w.week === weekKey
-                              );
-                              if (existingWeek) {
-                                existingWeek.concerns += 1;
-                              } else {
-                                acc.push({
-                                  week: weekKey,
-                                  concerns: 1,
-                                  weekLabel: `Week ${acc.length + 1}`,
-                                });
-                              }
-                              return acc;
-                            }, [])
-                            .map((week: any, index: number) => ({
-                              week: week.weekLabel || `Week ${index + 1}`,
-                              concerns: week.concerns,
-                              date: week.week,
-                            }))}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                        >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#f0f0f0"
-                          />
-                          <XAxis
-                            dataKey="week"
-                            stroke="#6b7280"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                          />
-                          <YAxis
-                            stroke="#6b7280"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "white",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                            }}
-                            labelStyle={{ color: "#374151", fontWeight: "600" }}
-                          />
-                          <Bar
-                            dataKey="concerns"
-                            fill="#3b82f6"
-                            radius={[4, 4, 0, 0]}
-                            stroke="#2563eb"
-                            strokeWidth={1}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <ClockIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs opacity-80">Pending</span>
                     </div>
+                    <div className="text-2xl font-bold">
+                      {payrollData.summary.pendingConcerns}
+                    </div>
+                    <div className="text-xs opacity-80">Awaiting</div>
                   </div>
 
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                    <p className="text-sm text-gray-500 text-center">
-                      Weekly trend of payroll concerns raised
-                    </p>
+                  <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <CheckCircleIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs opacity-80">Resolved</span>
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {payrollData.summary.resolvedConcerns}
+                    </div>
+                    <div className="text-xs opacity-80">Completed</div>
+                  </div>
+
+                  <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <ExclamationTriangleIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs opacity-80">In Review</span>
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {payrollData.summary.inReviewConcerns}
+                    </div>
+                    <div className="text-xs opacity-80">Processing</div>
                   </div>
                 </div>
 
-                {/* Payroll Concerns Table */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Payroll Concerns
-                        </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {payrollData.summary.totalConcerns} Total
-                        </p>
+                {/* Mobile App Weekly Chart */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Weekly Trends
+                    </h3>
+                    <span className="text-sm text-gray-500">
+                      Concerns raised
+                    </span>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={payrollData.concerns
+                          .reduce((acc: any[], concern: any) => {
+                            const date = new Date(concern.payrollDate);
+                            const weekStart = new Date(date);
+                            weekStart.setDate(date.getDate() - date.getDay());
+                            const weekKey = weekStart
+                              .toISOString()
+                              .split("T")[0];
+
+                            const existingWeek = acc.find(
+                              (w) => w.week === weekKey
+                            );
+                            if (existingWeek) {
+                              existingWeek.concerns += 1;
+                            } else {
+                              acc.push({
+                                week: weekKey,
+                                concerns: 1,
+                                weekLabel: `Week ${acc.length + 1}`,
+                              });
+                            }
+                            return acc;
+                          }, [])
+                          .map((week: any, index: number) => ({
+                            week: week.weekLabel || `Week ${index + 1}`,
+                            concerns: week.concerns,
+                            date: week.week,
+                          }))}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis
+                          dataKey="week"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                          }}
+                          labelStyle={{ color: "#374151", fontWeight: "600" }}
+                        />
+                        <Bar
+                          dataKey="concerns"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                          stroke="#2563eb"
+                          strokeWidth={1}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Mobile App Concerns List */}
+                <div className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Recent Concerns
+                    </h3>
+                    <span className="text-sm text-gray-500">
+                      {payrollData.summary.totalConcerns} total
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {payrollData.concerns.slice(0, 5).map((concern: any) => (
+                      <div
+                        key={concern.id}
+                        className="p-3 bg-gray-50 rounded-xl"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-900">
+                            {concern.concernType}
+                          </span>
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              concern.status === "Resolved"
+                                ? "bg-green-100 text-green-800"
+                                : concern.status === "In Review"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {concern.status}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {concern.payrollDate}
+                        </div>
+                        {concern.dateResolved && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            Resolved: {concern.dateResolved}
+                          </div>
+                        )}
                       </div>
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors w-full sm:w-auto">
-                        + View All
+                    ))}
+                    {payrollData.concerns.length > 5 && (
+                      <button className="w-full py-2 text-blue-500 text-sm font-medium">
+                        View All {payrollData.concerns.length} Concerns
                       </button>
-                    </div>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[640px]">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Employee
-                          </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Type
-                          </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Resolved
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {payrollData.concerns.map((concern: any) => (
-                          <tr key={concern.id} className="hover:bg-gray-50">
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {concern.payrollDate}
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              Confidential Data
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              Confidential Data
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {concern.concernType}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  concern.status === "Resolved"
-                                    ? "bg-green-100 text-green-800"
-                                    : concern.status === "In Review"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {concern.status}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {concern.dateResolved || "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200">
-                    <p className="text-sm text-gray-500 text-center">
-                      Showing {payrollData.concerns.length} of{" "}
-                      {payrollData.summary.totalConcerns} results
-                    </p>
+                    )}
                   </div>
                 </div>
               </>

@@ -5,11 +5,10 @@ import { UserGroupIcon } from "@heroicons/react/24/outline";
 
 export default function HRPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         <div className="text-center">
-          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg mx-auto mb-4 sm:mb-6">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg mx-auto mb-4 sm:mb-6">
             <UserGroupIcon className="w-8 h-8 sm:w-12 sm:h-12" />
           </div>
           <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
@@ -19,7 +18,7 @@ export default function HRPage() {
             Employee management and performance
           </p>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-lg border border-gray-700 p-6 sm:p-12 max-w-2xl mx-auto">
+          <div className="bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl shadow-lg border border-gray-700 p-6 sm:p-12 max-w-2xl mx-auto">
             <div className="text-center mb-4 sm:mb-6">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gray-700 rounded-full mb-3 sm:mb-4">
                 <svg
@@ -52,14 +51,37 @@ export default function HRPage() {
               <li>• Employee satisfaction scores</li>
             </ul>
             <div className="text-center pt-3 sm:pt-4 border-t border-gray-700">
-              <button
-                onClick={() => {
-                  window.location.href = "/home";
-                }}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors font-medium text-sm sm:text-base"
-              >
-                Back to Home
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    window.location.href = "/home";
+                  }}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors font-medium text-sm sm:text-base"
+                >
+                  Back to Home
+                </button>
+                <a
+                  href="https://docs.google.com/spreadsheets/d/placeholder-hr-sheet/edit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg transition-colors font-medium text-sm sm:text-base flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                  View Original Sheet
+                </a>
+              </div>
             </div>
           </div>
         </div>

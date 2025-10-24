@@ -4,6 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import LoadingSpinner from "./LoadingSpinner";
+import MobileNavbar from "./MobileNavbar";
+import MobileHeader from "./MobileHeader";
 import { useAuth } from "../lib/useAuth";
 import { clearAllAuthData } from "../lib/auth";
 
@@ -103,15 +105,27 @@ export default function ConditionalLayout({
       <div className="flex h-screen bg-gray-50">
         <Sidebar />
         <main
-          className="flex-1 md:ml-64 lg:ml-80 overflow-y-auto transition-all duration-300 pt-16 md:pt-0"
+          className="flex-1 md:ml-64 lg:ml-80 overflow-y-auto transition-all duration-300 pt-20 md:pt-0 pb-20 md:pb-0"
           id="main-content"
         >
           {children}
         </main>
+        {/* Mobile header - only shows on mobile when authenticated */}
+        <MobileHeader />
+        {/* Mobile navbar - only shows on mobile when authenticated */}
+        <MobileNavbar />
       </div>
     );
   }
 
   // Otherwise, show content without sidebar
-  return <div className="min-h-screen bg-gray-50">{children}</div>;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {children}
+      {/* Mobile header - only shows on mobile when authenticated */}
+      {authenticated && <MobileHeader />}
+      {/* Mobile navbar - only shows on mobile when authenticated */}
+      {authenticated && <MobileNavbar />}
+    </div>
+  );
 }

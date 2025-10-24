@@ -506,20 +506,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex items-center gap-2 px-3 py-2 text-gray-700 bg-white/95 backdrop-blur-sm hover:bg-gray-100 rounded-lg transition-all shadow-lg border border-gray-200"
-        >
-          {isMobileMenuOpen ? (
-            <XMarkIcon className="w-6 h-6" />
-          ) : (
-            <Bars3Icon className="w-6 h-6" />
-          )}
-        </button>
-      </div>
-
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40">
