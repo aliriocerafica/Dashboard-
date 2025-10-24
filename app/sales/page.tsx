@@ -22,6 +22,9 @@ import AuthGuard from "../lib/auth-guard";
 const GOOGLE_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTTDistJH55uEgQ6wKWhK48fHEg8_F9UwMjd4yp9FUgFuUvJwSBsdKrW9xOlDTiKW3B0LR-4vk-PiBp/pub?output=csv";
 
+const VIEW_SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/1_sQb1x5vGjUtxTegjCLyDFi3MgfaG_hxu0x7rxXyArI/edit?gid=0#gid=0";
+
 export default function SalesPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [data, setData] = useState<SalesData[]>([]);
@@ -224,7 +227,7 @@ export default function SalesPage() {
                 {loading ? "Loading..." : "Refresh"}
               </button>
               <a
-                href={GOOGLE_SHEET_URL}
+                href={VIEW_SHEET_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"

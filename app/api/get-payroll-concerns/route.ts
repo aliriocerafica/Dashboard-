@@ -58,18 +58,24 @@ export async function GET(request: NextRequest) {
       // Simple CSV parsing (handles quoted fields)
       const values = parseCSVLine(line);
 
-      if (values.length >= 9 && values[0] && values[1] && values[2]) {
-        concerns.push({
-          timestamp: values[0] || "",
-          email: values[1] || "",
-          name: values[2] || "",
-          payrollDate: values[3] || "",
-          concernType: values[4] || "",
-          details: values[5] || "",
-          attachments: values[6] || "",
-          status: values[7] || "",
-          dateResolved: values[8] || "",
-        });
+      // More lenient validation - check if we have enough columns and at least some data
+      if (values.length >= 8) {
+        // Check if this row has meaningful data (not just empty cells)
+        const hasData = values.some((val) => val && val.trim() !== "");
+
+        if (hasData) {
+          concerns.push({
+            timestamp: values[0] || "",
+            email: values[1] || "",
+            name: values[2] || "",
+            payrollDate: values[3] || "",
+            concernType: values[4] || "",
+            details: values[5] || "",
+            attachments: values[6] || "",
+            status: values[7] || "",
+            dateResolved: values[8] || "",
+          });
+        }
       }
     }
 

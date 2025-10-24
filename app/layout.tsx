@@ -20,6 +20,12 @@ export const metadata: Metadata = {
   title: "Dashboard for All",
   description:
     "Unified business intelligence platform with real-time analytics, multi-department dashboards, and actionable insights across your organization",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({

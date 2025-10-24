@@ -250,10 +250,7 @@ export default function PresidentDashboard() {
               </p>
             </div>
             <a
-              href={
-                process.env.NEXT_PUBLIC_SHEET_URL ||
-                "https://docs.google.com/spreadsheets/d/placeholder-president-sheet/edit"
-              }
+              href="https://docs.google.com/spreadsheets/d/1qp_5G8qnw_T1AUYMW4zQhgTzSo5kfX8AczOEM6jO-xw/edit?gid=1673922593#gid=1673922593"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"

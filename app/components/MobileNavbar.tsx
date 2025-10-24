@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -16,7 +16,6 @@ import {
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
-  TagIcon,
   ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "../lib/auth";
@@ -93,25 +92,33 @@ export default function MobileNavbar() {
     router.push("/login");
   };
 
+  // Close modal when pathname changes (navigation)
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [pathname]);
+
   return (
     <>
       {/* Mobile-only bottom navigation bar with new design */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="bg-blue-900 rounded-t-3xl mx-2 mb-2 shadow-2xl">
+        <div
+          className="rounded-t-3xl mx-2 shadow-2xl"
+          style={{
+            backgroundColor: "#ff6d74",
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
+        >
           <div className="flex items-center justify-around px-4 py-3">
             {/* Home */}
             <Link
               href="/"
               className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
                 isActive("/")
-                  ? "bg-white text-blue-900 shadow-lg"
-                  : "text-white hover:text-blue-200"
+                  ? "bg-white text-gray-800 shadow-lg"
+                  : "text-white hover:text-gray-200"
               }`}
             >
               <HomeIcon className="w-5 h-5" />
-              {isActive("/") && (
-                <span className="text-xs font-medium mt-1">Home</span>
-              )}
             </Link>
 
             {/* Search */}
@@ -119,14 +126,11 @@ export default function MobileNavbar() {
               href="/search"
               className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
                 isActive("/search")
-                  ? "bg-white text-blue-900 shadow-lg"
-                  : "text-white hover:text-blue-200"
+                  ? "bg-white text-gray-800 shadow-lg"
+                  : "text-white hover:text-gray-200"
               }`}
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
-              {isActive("/search") && (
-                <span className="text-xs font-medium mt-1">Search</span>
-              )}
             </Link>
 
             {/* Departments Dropup */}
@@ -135,20 +139,23 @@ export default function MobileNavbar() {
                 onClick={toggleExpanded}
                 className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
                   isExpanded
-                    ? "bg-white text-blue-900 shadow-lg"
-                    : "text-white hover:text-blue-200"
+                    ? "bg-white text-gray-800 shadow-lg"
+                    : "text-white hover:text-gray-200"
                 }`}
               >
                 <BuildingOfficeIcon className="w-5 h-5" />
-                {isExpanded && (
-                  <span className="text-xs font-medium mt-1">Departments</span>
-                )}
               </button>
 
               {/* Dropup Menu */}
               {isExpanded && (
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)]">
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4">
+                <div
+                  className="fixed inset-0 flex items-center justify-center z-50"
+                  onClick={() => setIsExpanded(false)}
+                >
+                  <div
+                    className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4 w-80 max-w-[calc(100vw-2rem)] mx-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="text-sm font-semibold text-gray-700 mb-3 text-center">
                       Departments
                     </div>
@@ -176,34 +183,16 @@ export default function MobileNavbar() {
               )}
             </div>
 
-            {/* Offers */}
-            <Link
-              href="/offers"
-              className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
-                isActive("/offers")
-                  ? "bg-white text-blue-900 shadow-lg"
-                  : "text-white hover:text-blue-200"
-              }`}
-            >
-              <TagIcon className="w-5 h-5" />
-              {isActive("/offers") && (
-                <span className="text-xs font-medium mt-1">Offers</span>
-              )}
-            </Link>
-
             {/* Profile */}
             <Link
               href="/profile"
               className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
                 isActive("/profile")
-                  ? "bg-white text-blue-900 shadow-lg"
-                  : "text-white hover:text-blue-200"
+                  ? "bg-white text-gray-800 shadow-lg"
+                  : "text-white hover:text-gray-200"
               }`}
             >
               <UserIcon className="w-5 h-5" />
-              {isActive("/profile") && (
-                <span className="text-xs font-medium mt-1">Profile</span>
-              )}
             </Link>
           </div>
         </div>

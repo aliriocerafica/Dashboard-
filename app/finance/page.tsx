@@ -153,7 +153,7 @@ export default function FinancePage() {
               </p>
             </div>
             <a
-              href="https://docs.google.com/spreadsheets/d/placeholder-finance-sheet/edit"
+              href="https://docs.google.com/spreadsheets/d/1D2Du8AeSWHVMSsHfe6Yxu6WxbLXrLvuMWU-h83YOgQQ/edit?gid=222330370#gid=222330370"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
@@ -298,34 +298,65 @@ export default function FinancePage() {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={payrollData.concerns
-                          .reduce((acc: any[], concern: any) => {
-                            const date = new Date(concern.payrollDate);
-                            const weekStart = new Date(date);
-                            weekStart.setDate(date.getDate() - date.getDay());
-                            const weekKey = weekStart
-                              .toISOString()
-                              .split("T")[0];
+                        data={(() => {
+                          const weeklyData = payrollData.concerns
+                            .reduce((acc: any[], concern: any) => {
+                              // Validate and parse the date safely
+                              const dateStr = concern.payrollDate;
+                              if (!dateStr || dateStr.trim() === "") {
+                                return acc; // Skip if no date
+                              }
 
-                            const existingWeek = acc.find(
-                              (w) => w.week === weekKey
-                            );
-                            if (existingWeek) {
-                              existingWeek.concerns += 1;
-                            } else {
-                              acc.push({
-                                week: weekKey,
-                                concerns: 1,
-                                weekLabel: `Week ${acc.length + 1}`,
-                              });
-                            }
-                            return acc;
-                          }, [])
-                          .map((week: any, index: number) => ({
-                            week: week.weekLabel || `Week ${index + 1}`,
-                            concerns: week.concerns,
-                            date: week.week,
-                          }))}
+                              const date = new Date(dateStr);
+
+                              // Check if date is valid
+                              if (isNaN(date.getTime())) {
+                                console.warn("Invalid date:", dateStr);
+                                return acc; // Skip invalid dates
+                              }
+
+                              const weekStart = new Date(date);
+                              weekStart.setDate(date.getDate() - date.getDay());
+
+                              // Double-check the weekStart date is valid
+                              if (isNaN(weekStart.getTime())) {
+                                console.warn(
+                                  "Invalid weekStart date for:",
+                                  dateStr
+                                );
+                                return acc;
+                              }
+
+                              const weekKey = weekStart
+                                .toISOString()
+                                .split("T")[0];
+
+                              const existingWeek = acc.find(
+                                (w) => w.week === weekKey
+                              );
+                              if (existingWeek) {
+                                existingWeek.concerns += 1;
+                              } else {
+                                acc.push({
+                                  week: weekKey,
+                                  concerns: 1,
+                                  weekLabel: `Week ${acc.length + 1}`,
+                                });
+                              }
+                              return acc;
+                            }, [])
+                            .map((week: any, index: number) => ({
+                              week: week.weekLabel || `Week ${index + 1}`,
+                              concerns: week.concerns,
+                              date: week.week,
+                            }))
+                            .filter((week: any) => week.concerns > 0);
+
+                          // Return data or fallback
+                          return weeklyData.length > 0
+                            ? weeklyData
+                            : [{ week: "No Data", concerns: 0, date: "" }];
+                        })()}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
