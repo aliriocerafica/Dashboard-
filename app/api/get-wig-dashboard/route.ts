@@ -1,29 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const GOOGLE_SHEET_URL = 
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu6xGRE5ah-2airOT9EXJePKOMAseMIkyKunz0c7VDpxFCT3He0qSxURfdXXsGFJo-2VQE0cUtm_Sv/pub?output=csv";
+
 export async function GET(request: NextRequest) {
   try {
-    const sheetUrl = process.env.NEXT_PUBLIC_SHEET_URL;
+    console.log("Fetching WIG dashboard data from:", GOOGLE_SHEET_URL);
     
-    if (!sheetUrl) {
-      return NextResponse.json(
-        { error: 'Google Sheets URL not configured' },
-        { status: 500 }
-      );
+    // Fetch data from Google Sheets CSV
+    const response = await fetch(GOOGLE_SHEET_URL, {
+      cache: "no-store",
+      headers: {
+        Accept: "text/csv",
+        "User-Agent": "Mozilla/5.0 (compatible; Dashboard/1.0)",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
     }
 
-    // Extract sheet ID from the URL
-    const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-    if (!sheetIdMatch) {
-      return NextResponse.json(
-        { error: 'Invalid Google Sheets URL format' },
-        { status: 400 }
-      );
+    const csvText = await response.text();
+    console.log("CSV text length:", csvText.length);
+    console.log("First 200 chars:", csvText.substring(0, 200));
+
+    // Check if we got HTML instead of CSV
+    if (csvText.includes("<!DOCTYPE") || csvText.includes("<html")) {
+      throw new Error("Received HTML instead of CSV. The Google Sheet may not be published to the web.");
     }
 
-    const sheetId = sheetIdMatch[1];
-    
-    // For now, return mock data based on the WIG dashboard structure
-    // In production, you would use Google Sheets API with proper authentication
+    // Parse CSV data
+    const lines = csvText.split("\n").filter((line) => line.trim());
+    console.log("Parsed lines:", lines.length);
+
+    // For now, return the existing mock data structure
+    // TODO: Parse real CSV data from the WIG tracker sheet
     const wigDashboardData = {
       summary: {
         totalCommitments: 164,
@@ -101,7 +112,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: wigDashboardData,
       lastUpdated: new Date().toISOString(),
-      source: `Google Sheets: ${sheetId}`
+      source: "WIG Tracker Google Sheet",
+      csvLines: lines.length
     });
 
   } catch (error) {
