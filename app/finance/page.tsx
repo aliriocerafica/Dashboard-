@@ -299,58 +299,49 @@ export default function FinancePage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={(() => {
-                          const weeklyData = payrollData.concerns
-                            .reduce((acc: any[], concern: any) => {
-                              // Validate and parse the date safely
-                              const dateStr = concern.payrollDate;
-                              if (!dateStr || dateStr.trim() === "") {
-                                return acc; // Skip if no date
-                              }
+                          // Group concerns by week
+                          const weeklyGroups: { [key: string]: number } = {};
 
-                              const date = new Date(dateStr);
+                          payrollData.concerns.forEach((concern: any) => {
+                            const dateStr = concern.payrollDate;
+                            if (!dateStr || dateStr.trim() === "") {
+                              return; // Skip if no date
+                            }
 
-                              // Check if date is valid
-                              if (isNaN(date.getTime())) {
-                                console.warn("Invalid date:", dateStr);
-                                return acc; // Skip invalid dates
-                              }
+                            const date = new Date(dateStr);
 
-                              const weekStart = new Date(date);
-                              weekStart.setDate(date.getDate() - date.getDay());
+                            // Check if date is valid
+                            if (isNaN(date.getTime())) {
+                              console.warn("Invalid date:", dateStr);
+                              return; // Skip invalid dates
+                            }
 
-                              // Double-check the weekStart date is valid
-                              if (isNaN(weekStart.getTime())) {
-                                console.warn(
-                                  "Invalid weekStart date for:",
-                                  dateStr
-                                );
-                                return acc;
-                              }
+                            // Get the start of the week (Sunday)
+                            const weekStart = new Date(date);
+                            weekStart.setDate(date.getDate() - date.getDay());
+                            weekStart.setHours(0, 0, 0, 0);
 
-                              const weekKey = weekStart
-                                .toISOString()
-                                .split("T")[0];
+                            const weekKey = weekStart
+                              .toISOString()
+                              .split("T")[0];
 
-                              const existingWeek = acc.find(
-                                (w) => w.week === weekKey
-                              );
-                              if (existingWeek) {
-                                existingWeek.concerns += 1;
-                              } else {
-                                acc.push({
-                                  week: weekKey,
-                                  concerns: 1,
-                                  weekLabel: `Week ${acc.length + 1}`,
-                                });
-                              }
-                              return acc;
-                            }, [])
-                            .map((week: any, index: number) => ({
-                              week: week.weekLabel || `Week ${index + 1}`,
-                              concerns: week.concerns,
-                              date: week.week,
+                            // Count concerns for this week
+                            weeklyGroups[weekKey] =
+                              (weeklyGroups[weekKey] || 0) + 1;
+                          });
+
+                          // Convert to array and sort by date
+                          const weeklyData = Object.entries(weeklyGroups)
+                            .map(([weekKey, concerns], index) => ({
+                              week: `Week ${index + 1}`,
+                              concerns: concerns,
+                              date: weekKey,
                             }))
-                            .filter((week: any) => week.concerns > 0);
+                            .sort(
+                              (a, b) =>
+                                new Date(a.date).getTime() -
+                                new Date(b.date).getTime()
+                            );
 
                           // Return data or fallback
                           return weeklyData.length > 0
