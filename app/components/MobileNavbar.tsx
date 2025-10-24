@@ -15,6 +15,9 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ArrowRightOnRectangleIcon,
+  MagnifyingGlassIcon,
+  TagIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "../lib/auth";
 
@@ -92,78 +95,105 @@ export default function MobileNavbar() {
 
   return (
     <>
-      {/* Mobile-only bottom navigation bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg md:hidden">
-        <div className="flex items-center justify-around px-2 py-2">
-          {/* Home */}
-          <Link
-            href="/"
-            className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
-              isActive("/")
-                ? "bg-purple-100 text-purple-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <HomeIcon className="w-6 h-6" />
-            <span className="text-xs font-medium mt-1">Home</span>
-          </Link>
-
-          {/* Departments Dropup */}
-          <div className="relative">
-            <button
-              onClick={toggleExpanded}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
-                isExpanded
-                  ? "bg-purple-100 text-purple-600"
-                  : "text-gray-500 hover:text-gray-700"
+      {/* Mobile-only bottom navigation bar with new design */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+        <div className="bg-blue-900 rounded-t-3xl mx-2 mb-2 shadow-2xl">
+          <div className="flex items-center justify-around px-4 py-3">
+            {/* Home */}
+            <Link
+              href="/"
+              className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
+                isActive("/")
+                  ? "bg-white text-blue-900 shadow-lg"
+                  : "text-white hover:text-blue-200"
               }`}
             >
-              <BuildingOfficeIcon className="w-6 h-6" />
-              <span className="text-xs font-medium mt-1">Departments</span>
-              {isExpanded ? (
-                <ChevronUpIcon className="w-4 h-4 mt-1" />
-              ) : (
-                <ChevronDownIcon className="w-4 h-4 mt-1" />
-              )}
-            </button>
+              <HomeIcon className="w-5 h-5" />
+              {isActive("/") && <span className="text-xs font-medium mt-1">Home</span>}
+            </Link>
 
-            {/* Dropup Menu */}
-            {isExpanded && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 max-w-[calc(100vw-2rem)]">
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-3 text-center">
-                    Departments
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {departments.map((dept) => (
-                      <Link
-                        key={dept.name}
-                        href={dept.href}
-                        className={`flex items-center p-3 rounded-xl transition-colors ${
-                          isActive(dept.href)
-                            ? "bg-purple-100 text-purple-600"
-                            : "hover:bg-gray-50 text-gray-700"
-                        }`}
-                        onClick={() => setIsExpanded(false)}
-                      >
-                        <dept.icon className={`w-5 h-5 mr-3 ${dept.color}`} />
-                        <span className="text-sm font-medium">{dept.name}</span>
-                      </Link>
-                    ))}
+            {/* Search */}
+            <Link
+              href="/search"
+              className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
+                isActive("/search")
+                  ? "bg-white text-blue-900 shadow-lg"
+                  : "text-white hover:text-blue-200"
+              }`}
+            >
+              <MagnifyingGlassIcon className="w-5 h-5" />
+              {isActive("/search") && <span className="text-xs font-medium mt-1">Search</span>}
+            </Link>
+
+            {/* Departments Dropup */}
+            <div className="relative">
+              <button
+                onClick={toggleExpanded}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
+                  isExpanded
+                    ? "bg-white text-blue-900 shadow-lg"
+                    : "text-white hover:text-blue-200"
+                }`}
+              >
+                <BuildingOfficeIcon className="w-5 h-5" />
+                {isExpanded && <span className="text-xs font-medium mt-1">Departments</span>}
+              </button>
+
+              {/* Dropup Menu */}
+              {isExpanded && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 max-w-[calc(100vw-2rem)]">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-4">
+                    <div className="text-sm font-semibold text-gray-700 mb-3 text-center">
+                      Departments
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {departments.map((dept) => (
+                        <Link
+                          key={dept.name}
+                          href={dept.href}
+                          className={`flex items-center p-3 rounded-xl transition-colors ${
+                            isActive(dept.href)
+                              ? "bg-blue-100 text-blue-600"
+                              : "hover:bg-gray-50 text-gray-700"
+                          }`}
+                          onClick={() => setIsExpanded(false)}
+                        >
+                          <dept.icon className={`w-5 h-5 mr-3 ${dept.color}`} />
+                          <span className="text-sm font-medium">{dept.name}</span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            className="flex flex-col items-center justify-center p-2 rounded-lg transition-colors text-gray-500 hover:text-red-600 hover:bg-red-50"
-          >
-            <ArrowRightOnRectangleIcon className="w-6 h-6" />
-            <span className="text-xs font-medium mt-1">Logout</span>
-          </button>
+            {/* Offers */}
+            <Link
+              href="/offers"
+              className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
+                isActive("/offers")
+                  ? "bg-white text-blue-900 shadow-lg"
+                  : "text-white hover:text-blue-200"
+              }`}
+            >
+              <TagIcon className="w-5 h-5" />
+              {isActive("/offers") && <span className="text-xs font-medium mt-1">Offers</span>}
+            </Link>
+
+            {/* Profile */}
+            <Link
+              href="/profile"
+              className={`flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 ${
+                isActive("/profile")
+                  ? "bg-white text-blue-900 shadow-lg"
+                  : "text-white hover:text-blue-200"
+              }`}
+            >
+              <UserIcon className="w-5 h-5" />
+              {isActive("/profile") && <span className="text-xs font-medium mt-1">Profile</span>}
+            </Link>
+          </div>
         </div>
       </div>
 
