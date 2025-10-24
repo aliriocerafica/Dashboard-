@@ -302,46 +302,93 @@ export default function FinancePage() {
                           // Group concerns by week
                           const weeklyGroups: { [key: string]: number } = {};
 
-                          payrollData.concerns.forEach((concern: any) => {
-                            const dateStr = concern.payrollDate;
-                            if (!dateStr || dateStr.trim() === "") {
-                              return; // Skip if no date
+                          console.log(
+                            "Total concerns from API:",
+                            payrollData.concerns.length
+                          );
+                          console.log("All concerns:", payrollData.concerns);
+
+                          payrollData.concerns.forEach(
+                            (concern: any, index: number) => {
+                              const dateStr = concern.payrollDate;
+                              console.log(`Concern ${index + 1}:`, {
+                                payrollDate: dateStr,
+                                concernType: concern.concernType,
+                                status: concern.status,
+                              });
+
+                              if (!dateStr || dateStr.trim() === "") {
+                                console.log(
+                                  `Concern ${
+                                    index + 1
+                                  } has no date - grouping into 'No Date' category`
+                                );
+                                // Group concerns with no date into a special category
+                                weeklyGroups["no-date"] =
+                                  (weeklyGroups["no-date"] || 0) + 1;
+                                return;
+                              }
+
+                              const date = new Date(dateStr);
+                              console.log(
+                                `Parsing date "${dateStr}" -> ${date.toISOString()}`
+                              );
+
+                              // Check if date is valid
+                              if (isNaN(date.getTime())) {
+                                console.warn("Invalid date:", dateStr);
+                                return; // Skip invalid dates
+                              }
+
+                              // Get the start of the week (Sunday)
+                              const weekStart = new Date(date);
+                              weekStart.setDate(date.getDate() - date.getDay());
+                              weekStart.setHours(0, 0, 0, 0);
+
+                              const weekKey = weekStart
+                                .toISOString()
+                                .split("T")[0];
+
+                              console.log(
+                                `Concern ${index + 1} grouped into week:`,
+                                weekKey
+                              );
+
+                              // Count concerns for this week
+                              weeklyGroups[weekKey] =
+                                (weeklyGroups[weekKey] || 0) + 1;
                             }
-
-                            const date = new Date(dateStr);
-
-                            // Check if date is valid
-                            if (isNaN(date.getTime())) {
-                              console.warn("Invalid date:", dateStr);
-                              return; // Skip invalid dates
-                            }
-
-                            // Get the start of the week (Sunday)
-                            const weekStart = new Date(date);
-                            weekStart.setDate(date.getDate() - date.getDay());
-                            weekStart.setHours(0, 0, 0, 0);
-
-                            const weekKey = weekStart
-                              .toISOString()
-                              .split("T")[0];
-
-                            // Count concerns for this week
-                            weeklyGroups[weekKey] =
-                              (weeklyGroups[weekKey] || 0) + 1;
-                          });
+                          );
 
                           // Convert to array and sort by date
                           const weeklyData = Object.entries(weeklyGroups)
-                            .map(([weekKey, concerns], index) => ({
-                              week: `Week ${index + 1}`,
-                              concerns: concerns,
-                              date: weekKey,
-                            }))
-                            .sort(
-                              (a, b) =>
+                            .map(([weekKey, concerns], index) => {
+                              // Handle the special "no-date" category
+                              if (weekKey === "no-date") {
+                                return {
+                                  week: "No Date",
+                                  concerns: concerns,
+                                  date: "no-date",
+                                };
+                              }
+                              return {
+                                week: `Week ${index + 1}`,
+                                concerns: concerns,
+                                date: weekKey,
+                              };
+                            })
+                            .sort((a, b) => {
+                              // Put "no-date" at the end
+                              if (a.date === "no-date") return 1;
+                              if (b.date === "no-date") return -1;
+                              return (
                                 new Date(a.date).getTime() -
                                 new Date(b.date).getTime()
-                            );
+                              );
+                            });
+
+                          console.log("Weekly groups:", weeklyGroups);
+                          console.log("Final weekly data:", weeklyData);
 
                           // Return data or fallback
                           return weeklyData.length > 0

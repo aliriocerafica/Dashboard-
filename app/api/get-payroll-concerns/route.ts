@@ -80,6 +80,16 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("Parsed concerns:", concerns.length);
+    console.log("All parsed concerns:", concerns);
+
+    // Debug each concern's payrollDate
+    concerns.forEach((concern, index) => {
+      console.log(`Concern ${index + 1}:`, {
+        payrollDate: concern.payrollDate,
+        concernType: concern.concernType,
+        status: concern.status,
+      });
+    });
 
     // Calculate summary statistics
     const totalConcerns = concerns.length;
