@@ -18,7 +18,7 @@ interface PayrollConcern {
 export async function GET(request: NextRequest) {
   try {
     console.log("Fetching payroll concerns from:", GOOGLE_SHEET_URL);
-    
+
     // Fetch data from Google Sheets CSV
     const response = await fetch(GOOGLE_SHEET_URL, {
       cache: "no-store",
@@ -29,7 +29,9 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch data: ${response.status} ${response.statusText}`
+      );
     }
 
     const csvText = await response.text();
@@ -38,33 +40,35 @@ export async function GET(request: NextRequest) {
 
     // Check if we got HTML instead of CSV
     if (csvText.includes("<!DOCTYPE") || csvText.includes("<html")) {
-      throw new Error("Received HTML instead of CSV. The Google Sheet may not be published to the web.");
+      throw new Error(
+        "Received HTML instead of CSV. The Google Sheet may not be published to the web."
+      );
     }
 
     // Parse CSV data
-    const lines = csvText.split('\n').filter(line => line.trim());
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    
+    const lines = csvText.split("\n").filter((line) => line.trim());
+    const headers = lines[0].split(",").map((h) => h.trim().replace(/"/g, ""));
+
     const concerns: PayrollConcern[] = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim()) continue;
-      
+
       // Simple CSV parsing (handles quoted fields)
       const values = parseCSVLine(line);
-      
+
       if (values.length >= 9 && values[0] && values[1] && values[2]) {
         concerns.push({
-          timestamp: values[0] || '',
-          email: values[1] || '',
-          name: values[2] || '',
-          payrollDate: values[3] || '',
-          concernType: values[4] || '',
-          details: values[5] || '',
-          attachments: values[6] || '',
-          status: values[7] || '',
-          dateResolved: values[8] || '',
+          timestamp: values[0] || "",
+          email: values[1] || "",
+          name: values[2] || "",
+          payrollDate: values[3] || "",
+          concernType: values[4] || "",
+          details: values[5] || "",
+          attachments: values[6] || "",
+          status: values[7] || "",
+          dateResolved: values[8] || "",
         });
       }
     }
@@ -73,9 +77,15 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary statistics
     const totalConcerns = concerns.length;
-    const resolvedConcerns = concerns.filter(c => c.status === 'Resolved').length;
-    const pendingConcerns = concerns.filter(c => c.status === 'Pending').length;
-    const inReviewConcerns = concerns.filter(c => c.status === 'In Review').length;
+    const resolvedConcerns = concerns.filter(
+      (c) => c.status === "Resolved"
+    ).length;
+    const pendingConcerns = concerns.filter(
+      (c) => c.status === "Pending"
+    ).length;
+    const inReviewConcerns = concerns.filter(
+      (c) => c.status === "In Review"
+    ).length;
 
     const payrollData = {
       summary: {
@@ -117,22 +127,22 @@ export async function GET(request: NextRequest) {
 // Helper function to parse CSV line with proper handling of quoted fields
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];
-  let current = '';
+  let current = "";
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === "," && !inQuotes) {
       result.push(current.trim());
-      current = '';
+      current = "";
     } else {
       current += char;
     }
   }
-  
+
   result.push(current.trim());
   return result;
 }

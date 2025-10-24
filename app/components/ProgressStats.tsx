@@ -113,7 +113,7 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
   ).length;
 
   // Weekly Goals (you can customize these)
-  const weeklyGoal = 5;
+  const weeklyGoal = 3;
   const conversionGoal = 8;
   const qualityGoal = 10;
 
