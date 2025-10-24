@@ -109,7 +109,9 @@ export default function MobileNavbar() {
               }`}
             >
               <HomeIcon className="w-5 h-5" />
-              {isActive("/") && <span className="text-xs font-medium mt-1">Home</span>}
+              {isActive("/") && (
+                <span className="text-xs font-medium mt-1">Home</span>
+              )}
             </Link>
 
             {/* Search */}
@@ -122,7 +124,9 @@ export default function MobileNavbar() {
               }`}
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
-              {isActive("/search") && <span className="text-xs font-medium mt-1">Search</span>}
+              {isActive("/search") && (
+                <span className="text-xs font-medium mt-1">Search</span>
+              )}
             </Link>
 
             {/* Departments Dropup */}
@@ -136,7 +140,9 @@ export default function MobileNavbar() {
                 }`}
               >
                 <BuildingOfficeIcon className="w-5 h-5" />
-                {isExpanded && <span className="text-xs font-medium mt-1">Departments</span>}
+                {isExpanded && (
+                  <span className="text-xs font-medium mt-1">Departments</span>
+                )}
               </button>
 
               {/* Dropup Menu */}
@@ -159,7 +165,9 @@ export default function MobileNavbar() {
                           onClick={() => setIsExpanded(false)}
                         >
                           <dept.icon className={`w-5 h-5 mr-3 ${dept.color}`} />
-                          <span className="text-sm font-medium">{dept.name}</span>
+                          <span className="text-sm font-medium">
+                            {dept.name}
+                          </span>
                         </Link>
                       ))}
                     </div>
@@ -178,7 +186,9 @@ export default function MobileNavbar() {
               }`}
             >
               <TagIcon className="w-5 h-5" />
-              {isActive("/offers") && <span className="text-xs font-medium mt-1">Offers</span>}
+              {isActive("/offers") && (
+                <span className="text-xs font-medium mt-1">Offers</span>
+              )}
             </Link>
 
             {/* Profile */}
@@ -191,7 +201,9 @@ export default function MobileNavbar() {
               }`}
             >
               <UserIcon className="w-5 h-5" />
-              {isActive("/profile") && <span className="text-xs font-medium mt-1">Profile</span>}
+              {isActive("/profile") && (
+                <span className="text-xs font-medium mt-1">Profile</span>
+              )}
             </Link>
           </div>
         </div>
