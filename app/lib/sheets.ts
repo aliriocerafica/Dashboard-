@@ -74,7 +74,253 @@ export interface ITSummaryStats {
   totalResponses: number;
 }
 
-// ============= PRESIDENT DEPARTMENT DATA TYPES =============
+// ============= DPO DEPARTMENT DATA TYPES =============
+
+export interface DPOTask {
+  taskName: string;
+  startDate: string;
+  status: string;
+  submittedTo: string;
+  targetDateOfCompletion: string;
+  dateCompleted: string;
+}
+
+export interface DPODashboardStats {
+  totalTasks: number;
+  pendingTasks: number;
+  completedTasks: number;
+  overdueTasks: number;
+  completionRate: number;
+  averageCompletionTime: number;
+  tasksByStatus: Record<string, number>;
+  tasksByAssignee: Record<string, number>;
+}
+
+// ============= DPO DEPARTMENT FUNCTIONS =============
+
+// Fetch and parse DPO WIG data from Google Sheets directly
+export async function fetchDPOData(sheetUrl: string): Promise<DPOTask[]> {
+  try {
+    console.log("🔄 Fetching DPO data directly from Google Sheets...");
+
+    // Extract sheet ID from the URL
+    const sheetId = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+
+    if (!sheetId) {
+      throw new Error("Invalid Google Sheets URL");
+    }
+
+    // Use the provided URL directly since it's already the correct CSV export URL
+    const csvUrl = sheetUrl;
+
+    console.log("📊 Fetching from CSV URL:", csvUrl);
+
+    // Try server-side API first (most reliable)
+    try {
+      console.log("📊 Trying server-side API...");
+      const apiUrl = `/api/dpo-data?url=${encodeURIComponent(csvUrl)}`;
+      const response = await fetch(apiUrl, {
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ Server-side API successful:", data);
+        return data;
+      } else {
+        throw new Error(`Server API failed: ${response.statusText}`);
+      }
+    } catch (apiError) {
+      console.log("📊 Server API failed, trying client-side methods...");
+
+      // Fallback to client-side methods
+      let csvText = "";
+
+      // Method 1: Try direct fetch first
+      try {
+        console.log("📊 Trying direct fetch...");
+        const response = await fetch(csvUrl, {
+          cache: "no-store",
+          mode: "cors",
+          headers: {
+            Accept: "text/csv",
+          },
+        });
+
+        if (response.ok) {
+          csvText = await response.text();
+          console.log("✅ Direct fetch successful");
+        } else {
+          throw new Error(`Direct fetch failed: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.log("📊 Direct fetch failed, trying proxy...");
+
+        // Method 2: Try api.allorigins.win proxy
+        try {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+            csvUrl
+          )}`;
+          const response = await fetch(proxyUrl, {
+            cache: "no-store",
+            headers: {
+              Accept: "text/csv",
+            },
+          });
+
+          if (response.ok) {
+            csvText = await response.text();
+            console.log("✅ Proxy fetch successful");
+          } else {
+            throw new Error(`Proxy fetch failed: ${response.statusText}`);
+          }
+        } catch (proxyError) {
+          console.log("📊 Proxy failed, trying cors-anywhere...");
+
+          // Method 3: Try cors-anywhere proxy
+          const corsUrl = `https://cors-anywhere.herokuapp.com/${csvUrl}`;
+          const response = await fetch(corsUrl, {
+            cache: "no-store",
+            headers: {
+              Accept: "text/csv",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          });
+
+          if (response.ok) {
+            csvText = await response.text();
+            console.log("✅ CORS proxy fetch successful");
+          } else {
+            throw new Error(`CORS proxy fetch failed: ${response.statusText}`);
+          }
+        }
+      }
+
+      console.log("📊 CSV text received:", csvText.substring(0, 200) + "...");
+
+      const lines = csvText.split("\n").filter((line) => line.trim());
+
+      if (lines.length < 2) {
+        return [];
+      }
+
+      const dpoTasks: DPOTask[] = [];
+
+      // Skip header row and parse data
+      for (let i = 1; i < lines.length; i++) {
+        const columns = parseCSVLine(lines[i]);
+
+        // Skip empty rows
+        if (columns.length === 0 || !columns.some((col) => col?.trim())) {
+          continue;
+        }
+
+        // Skip if first column contains header text or if task name is empty
+        const firstCol = columns[0]?.trim().toLowerCase() || "";
+        const taskName = columns[0]?.trim() || "";
+        if (firstCol === "task name" || taskName === "") {
+          continue;
+        }
+
+        dpoTasks.push({
+          taskName: columns[0]?.trim() || "", // Column A (index 0) - Task Name
+          startDate: columns[1]?.trim() || "", // Column B (index 1) - Start Date
+          status: columns[2]?.trim() || "", // Column C (index 2) - Status
+          submittedTo: columns[3]?.trim() || "", // Column D (index 3) - Submitted To
+          targetDateOfCompletion: columns[4]?.trim() || "", // Column E (index 4) - Target Date
+          dateCompleted: columns[5]?.trim() || "", // Column F (index 5) - Date Completed
+        });
+      }
+
+      console.log("📊 DPO Data parsed successfully:", dpoTasks);
+      return dpoTasks;
+    }
+  } catch (error) {
+    console.error("❌ Error fetching DPO data:", error);
+    throw error;
+  }
+}
+
+// Calculate DPO dashboard statistics
+export function calculateDPOStats(data: DPOTask[]): DPODashboardStats {
+  const totalTasks = data.length;
+
+  // Count tasks by status
+  const tasksByStatus: Record<string, number> = {};
+  const tasksByAssignee: Record<string, number> = {};
+
+  let completedTasks = 0;
+  let pendingTasks = 0;
+  let overdueTasks = 0;
+  let totalCompletionDays = 0;
+  let completedTasksWithDates = 0;
+
+  data.forEach((task) => {
+    // Count by status
+    const status = task.status.toLowerCase();
+    tasksByStatus[status] = (tasksByStatus[status] || 0) + 1;
+
+    // Count by assignee
+    const assignee = task.submittedTo || "Unassigned";
+    tasksByAssignee[assignee] = (tasksByAssignee[assignee] || 0) + 1;
+
+    // Count completed tasks - only if status is actually "completed"
+    if (status === "completed") {
+      completedTasks++;
+
+      // Calculate completion time
+      if (task.startDate && task.dateCompleted) {
+        try {
+          const startDate = new Date(task.startDate);
+          const completedDate = new Date(task.dateCompleted);
+          if (!isNaN(startDate.getTime()) && !isNaN(completedDate.getTime())) {
+            const diffTime = Math.abs(
+              completedDate.getTime() - startDate.getTime()
+            );
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            totalCompletionDays += diffDays;
+            completedTasksWithDates++;
+          }
+        } catch (error) {
+          console.warn("Error parsing dates for task:", task.taskName);
+        }
+      }
+    } else if (status === "pending") {
+      pendingTasks++;
+
+      // Check if overdue
+      if (task.targetDateOfCompletion) {
+        try {
+          const targetDate = new Date(task.targetDateOfCompletion);
+          const today = new Date();
+          if (!isNaN(targetDate.getTime()) && targetDate < today) {
+            overdueTasks++;
+          }
+        } catch (error) {
+          console.warn("Error parsing target date for task:", task.taskName);
+        }
+      }
+    }
+  });
+
+  const completionRate =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const averageCompletionTime =
+    completedTasksWithDates > 0
+      ? Math.round(totalCompletionDays / completedTasksWithDates)
+      : 0;
+
+  return {
+    totalTasks,
+    pendingTasks,
+    completedTasks,
+    overdueTasks,
+    completionRate,
+    averageCompletionTime,
+    tasksByStatus,
+    tasksByAssignee,
+  };
+}
 
 export interface PresidentInitiative {
   date: string;

@@ -30,6 +30,7 @@ export default function ConditionalLayout({
     "/operations",
     "/it",
     "/president",
+    "/dpo",
     "/admin",
     "/profile",
     "/home",

@@ -17,6 +17,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   BuildingOffice2Icon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
@@ -132,6 +133,13 @@ export default function Sidebar() {
         icon: BuildingOffice2Icon,
         description: "WIG Dashboard & Executive",
         color: "bg-purple-50 text-purple-600",
+      },
+      {
+        name: "DPO",
+        href: "/dpo",
+        icon: ShieldCheckIcon,
+        description: "Data Privacy Officer",
+        color: "bg-blue-50 text-blue-600",
       },
     ],
     []
