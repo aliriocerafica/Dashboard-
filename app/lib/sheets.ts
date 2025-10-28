@@ -917,12 +917,27 @@ export function calculateITStats(data: ITData[]): ITDashboardStats {
 
   const totalTickets = actualTickets.length;
 
-  // Count resolved/unresolved tickets
+  // Count resolved/unresolved tickets - only use Status column (Column G)
   const resolvedTickets = actualTickets.filter(
+    (item) => item.status?.toLowerCase() === "resolved"
+  ).length;
+
+  // Debug: Show difference between old and new logic
+  const oldLogicResolved = actualTickets.filter(
     (item) =>
       item.status?.toLowerCase() === "resolved" ||
       item.isProblemSolved?.toLowerCase() === "yes"
   ).length;
+
+  console.log("=== RESOLVED TICKET COUNTING ===");
+  console.log(`Total tickets: ${totalTickets}`);
+  console.log(`Resolved (Status only): ${resolvedTickets}`);
+  console.log(
+    `Resolved (Old logic - Status OR Problem Solved): ${oldLogicResolved}`
+  );
+  console.log(`Difference: ${oldLogicResolved - resolvedTickets} tickets`);
+  console.log("=== END RESOLVED COUNTING ===");
+
   const unresolvedTickets = totalTickets - resolvedTickets;
 
   // Try to get pre-calculated summary stats first

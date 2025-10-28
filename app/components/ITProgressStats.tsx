@@ -168,10 +168,27 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
   // Calculate metrics for selected week
   const weeklyTickets = selectedWeekData.length;
   const weeklyResolvedTickets = selectedWeekData.filter(
+    (item) => item.status?.toLowerCase() === "resolved"
+  ).length;
+
+  // Debug: Show difference between old and new logic for weekly data
+  const oldLogicWeeklyResolved = selectedWeekData.filter(
     (item) =>
       item.status?.toLowerCase() === "resolved" ||
       item.isProblemSolved?.toLowerCase() === "yes"
   ).length;
+
+  console.log("=== WEEKLY RESOLVED TICKET COUNTING ===");
+  console.log(`Week ${selectedWeek.week}, ${selectedWeek.year}:`);
+  console.log(`Total weekly tickets: ${weeklyTickets}`);
+  console.log(`Resolved (Status only): ${weeklyResolvedTickets}`);
+  console.log(
+    `Resolved (Old logic - Status OR Problem Solved): ${oldLogicWeeklyResolved}`
+  );
+  console.log(
+    `Difference: ${oldLogicWeeklyResolved - weeklyResolvedTickets} tickets`
+  );
+  console.log("=== END WEEKLY RESOLVED COUNTING ===");
 
   // Calculate Laptop Release and Peripheral Release counts
   const weeklyLaptopReleases = selectedWeekData.filter((item) =>
@@ -208,9 +225,7 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
       troubleshootingType: ticket.troubleshootingType,
       timeResolved: ticket.timeResolved,
       calculatedResolutionTime: ticket.calculatedResolutionTime,
-      isResolved:
-        ticket.status?.toLowerCase() === "resolved" ||
-        ticket.isProblemSolved?.toLowerCase() === "yes",
+      isResolved: ticket.status?.toLowerCase() === "resolved",
       isLaptopRelease: ticket.troubleshootingType
         ?.toLowerCase()
         .includes("laptop release"),
@@ -241,9 +256,7 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
   // Total Time / Number of Resolved Tickets = Avg Resolution Time
   // Use calculatedResolutionTime (Column M) which has the Apps Script calculated time
   const resolvedTicketsWithTime = selectedWeekData.filter((item) => {
-    const isResolved =
-      item.status?.toLowerCase() === "resolved" ||
-      item.isProblemSolved?.toLowerCase() === "yes";
+    const isResolved = item.status?.toLowerCase() === "resolved";
 
     // Check if either time field has data
     const hasCalculatedTime =
