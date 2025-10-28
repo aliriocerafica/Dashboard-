@@ -35,6 +35,8 @@ export default function ITPage() {
     topAccount: "",
     topTroubleshootingType: "",
     satisfactionRate: 0,
+    laptopReleases: 0,
+    peripheralReleases: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,25 +55,49 @@ export default function ITPage() {
       const itData = await fetchITData(GOOGLE_SHEET_URL);
       setData(itData);
 
-      // Debug: Show what's in Row 2, Column O (index 1, col 14)
-      if (itData.length > 1) {
-        console.log("Row 2 Data:", {
-          timestamp: itData[1].timestamp,
-          columnO: itData[1].calculatedColumnO,
-          columnM: itData[1].calculatedResolutionTime,
+      // Debug: Show sample data structure
+      console.log("=== IT DATA DEBUG ===");
+      console.log(`Total rows fetched: ${itData.length}`);
+
+      if (itData.length > 0) {
+        console.log("First row (header):", {
+          timestamp: itData[0].timestamp,
+          timeResolved: itData[0].timeResolved,
+          calculatedResolutionTime: itData[0].calculatedResolutionTime,
+          status: itData[0].status,
         });
       }
 
-      // Debug: Show what's in Row 7, Column Q (index 6, col 16)
-      if (itData.length > 6) {
-        console.log("Row 7 Data:", {
-          timestamp: itData[6].timestamp,
-          columnN: itData[6].calculatedColumnN,
-          columnO: itData[6].calculatedColumnO,
-          columnP: itData[6].calculatedColumnP,
-          columnQ: itData[6].calculatedColumnQ,
+      if (itData.length > 1) {
+        console.log("Second row:", {
+          timestamp: itData[1].timestamp,
+          timeResolved: itData[1].timeResolved,
+          calculatedResolutionTime: itData[1].calculatedResolutionTime,
+          status: itData[1].status,
         });
       }
+
+      // Show a few sample tickets with time data
+      const ticketsWithTime = itData
+        .filter(
+          (item) =>
+            item.timeResolved &&
+            item.timeResolved.trim() !== "" &&
+            item.timestamp &&
+            item.timestamp !== "timestamp"
+        )
+        .slice(0, 3);
+
+      console.log(
+        "Sample tickets with time data:",
+        ticketsWithTime.map((ticket) => ({
+          timestamp: ticket.timestamp,
+          timeResolved: ticket.timeResolved,
+          status: ticket.status,
+        }))
+      );
+
+      console.log("=== END IT DATA DEBUG ===");
 
       const calculatedStats = calculateITStats(itData);
       setStats(calculatedStats);
@@ -82,6 +108,8 @@ export default function ITPage() {
       console.log("Satisfaction Rate:", calculatedStats.satisfactionRate + "%");
       console.log("Total Tickets:", calculatedStats.totalTickets);
       console.log("Resolved:", calculatedStats.resolvedTickets);
+      console.log("Laptop Releases:", calculatedStats.laptopReleases);
+      console.log("Peripheral Releases:", calculatedStats.peripheralReleases);
       console.log("==========================");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
@@ -222,8 +250,8 @@ export default function ITPage() {
           </div>
         </div>
 
-        {/* Row 1: KPI tiles (4 cols) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+        {/* Row 1: KPI tiles (6 cols) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
           {/* Total Tickets */}
           <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
             <div className="flex items-center justify-between mb-2">
@@ -272,6 +300,34 @@ export default function ITPage() {
               {stats.satisfactionRate}%
             </div>
             <div className="text-sm text-gray-500">Satisfaction</div>
+          </div>
+
+          {/* Laptop Release */}
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <ComputerDesktopIcon className="w-8 h-8 text-indigo-600" />
+              <div className="text-sm font-medium text-gray-600">
+                Laptop Release
+              </div>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">
+              {stats.laptopReleases}
+            </div>
+            <div className="text-sm text-gray-500">Total releases</div>
+          </div>
+
+          {/* Peripheral Release */}
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <TicketIcon className="w-8 h-8 text-cyan-600" />
+              <div className="text-sm font-medium text-gray-600">
+                Peripheral Release
+              </div>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">
+              {stats.peripheralReleases}
+            </div>
+            <div className="text-sm text-gray-500">Total releases</div>
           </div>
         </div>
 

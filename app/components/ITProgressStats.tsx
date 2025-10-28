@@ -1,9 +1,17 @@
 // @ts-nocheck
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { ITData } from '../lib/sheets';
-import { TicketIcon, CheckCircleIcon, ClockIcon, CalendarIcon, ChevronDownIcon, StarIcon } from '@heroicons/react/24/outline';
+import { useState, useMemo } from "react";
+import { ITData } from "../lib/sheets";
+import {
+  TicketIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  CalendarIcon,
+  ChevronDownIcon,
+  StarIcon,
+  ComputerDesktopIcon,
+} from "@heroicons/react/24/outline";
 
 interface ITProgressStatsProps {
   data: ITData[];
@@ -19,11 +27,15 @@ interface WeekOption {
 export default function ITProgressStats({ data }: ITProgressStatsProps) {
   // Get week number from date
   const getWeekNumber = (date: Date) => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const d = new Date(
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    );
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    const weekNo = Math.ceil(
+      ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+    );
     return weekNo;
   };
 
@@ -35,12 +47,12 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
   // Get all available weeks from data
   const availableWeeks = useMemo(() => {
     const weeksSet = new Set<string>();
-    
+
     // Always add the current week, even if no tickets exist
     weeksSet.add(`${currentYear}-${currentWeek}`);
-    
+
     // Add weeks from existing data
-    data.forEach(item => {
+    data.forEach((item) => {
       try {
         const itemDate = new Date(item.timestamp);
         if (isNaN(itemDate.getTime())) return;
@@ -53,13 +65,15 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
     });
 
     const weeks: WeekOption[] = Array.from(weeksSet)
-      .map(weekStr => {
-        const [year, week] = weekStr.split('-').map(Number);
+      .map((weekStr) => {
+        const [year, week] = weekStr.split("-").map(Number);
         const isCurrent = week === currentWeek && year === currentYear;
         return {
           week,
           year,
-          label: isCurrent ? `Week ${week}, ${year} (Current)` : `Week ${week}, ${year}`,
+          label: isCurrent
+            ? `Week ${week}, ${year} (Current)`
+            : `Week ${week}, ${year}`,
           isCurrent,
         };
       })
@@ -73,17 +87,26 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
 
   // State for selected week
   const [selectedWeek, setSelectedWeek] = useState<WeekOption>(
-    availableWeeks.find(w => w.isCurrent) || availableWeeks[0] || { week: currentWeek, year: currentYear, label: `Week ${currentWeek}, ${currentYear} (Current)`, isCurrent: true }
+    availableWeeks.find((w) => w.isCurrent) ||
+      availableWeeks[0] || {
+        week: currentWeek,
+        year: currentYear,
+        label: `Week ${currentWeek}, ${currentYear} (Current)`,
+        isCurrent: true,
+      }
   );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Filter data for selected week
   const selectedWeekData = useMemo(() => {
-    return data.filter(item => {
+    return data.filter((item) => {
       try {
         const itemDate = new Date(item.timestamp);
         if (isNaN(itemDate.getTime())) return false;
-        return getWeekNumber(itemDate) === selectedWeek.week && itemDate.getFullYear() === selectedWeek.year;
+        return (
+          getWeekNumber(itemDate) === selectedWeek.week &&
+          itemDate.getFullYear() === selectedWeek.year
+        );
       } catch {
         return false;
       }
@@ -92,162 +115,321 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
 
   // Parse time string to seconds
   const parseTimeToSeconds = (timeStr: string): number => {
-    if (!timeStr) return 0;
-    
+    if (!timeStr || timeStr.trim() === "") return 0;
+
     let totalSeconds = 0;
-    const minutesMatch = timeStr.match(/(\d+)m/);
-    const secondsMatch = timeStr.match(/(\d+)s/);
-    const hoursMatch = timeStr.match(/(\d+)h/);
-    
+    const cleanTimeStr = timeStr.trim();
+
+    // Handle various time formats: "1h 17m 15s", "7m 6s", "5m 2s", "15m 40s", etc.
+    const hoursMatch = cleanTimeStr.match(/(\d+)h/);
+    const minutesMatch = cleanTimeStr.match(/(\d+)m/);
+    const secondsMatch = cleanTimeStr.match(/(\d+)s/);
+
     if (hoursMatch) totalSeconds += parseInt(hoursMatch[1]) * 3600;
     if (minutesMatch) totalSeconds += parseInt(minutesMatch[1]) * 60;
     if (secondsMatch) totalSeconds += parseInt(secondsMatch[1]);
-    
+
+    // If no time components found, try to parse as pure numbers (fallback)
+    if (totalSeconds === 0 && /^\d+$/.test(cleanTimeStr)) {
+      const numValue = parseInt(cleanTimeStr);
+      if (numValue > 0) {
+        // Assume it's minutes if it's a reasonable number
+        totalSeconds = numValue * 60;
+      }
+    }
+
+    // Try to parse decimal minutes (e.g., "15.5" minutes)
+    if (totalSeconds === 0 && /^\d+\.?\d*$/.test(cleanTimeStr)) {
+      const numValue = parseFloat(cleanTimeStr);
+      if (numValue > 0) {
+        totalSeconds = Math.round(numValue * 60);
+      }
+    }
+
     return totalSeconds;
   };
 
   // Format seconds to readable time
   const formatTime = (seconds: number): string => {
-    if (seconds === 0) return '0s';
-    
+    if (seconds === 0) return "0s";
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
-    let result = '';
+
+    let result = "";
     if (hours > 0) result += `${hours}h `;
     if (minutes > 0) result += `${minutes}m `;
-    if (secs > 0 || result === '') result += `${secs}s`;
-    
+    if (secs > 0 || result === "") result += `${secs}s`;
+
     return result.trim();
   };
 
   // Calculate metrics for selected week
   const weeklyTickets = selectedWeekData.length;
-  const weeklyResolvedTickets = selectedWeekData.filter(item => 
-    item.status?.toLowerCase() === 'resolved' || 
-    item.isProblemSolved?.toLowerCase() === 'yes'
+  const weeklyResolvedTickets = selectedWeekData.filter(
+    (item) =>
+      item.status?.toLowerCase() === "resolved" ||
+      item.isProblemSolved?.toLowerCase() === "yes"
+  ).length;
+
+  // Calculate Laptop Release and Peripheral Release counts
+  const weeklyLaptopReleases = selectedWeekData.filter((item) =>
+    item.troubleshootingType?.toLowerCase().includes("laptop release")
+  ).length;
+
+  const weeklyPeripheralReleases = selectedWeekData.filter((item) =>
+    item.troubleshootingType?.toLowerCase().includes("peripheral release")
   ).length;
 
   console.log(`Week ${selectedWeek.week}, ${selectedWeek.year}:`, {
     totalWeeklyTickets: weeklyTickets,
     resolvedTickets: weeklyResolvedTickets,
-    sampleTicket: selectedWeekData[0] ? {
-      timestamp: selectedWeekData[0].timestamp,
-      status: selectedWeekData[0].status,
-      timeResolved: selectedWeekData[0].timeResolved,
-      calculatedResolutionTime: selectedWeekData[0].calculatedResolutionTime,
-    } : 'No tickets'
+    laptopReleases: weeklyLaptopReleases,
+    peripheralReleases: weeklyPeripheralReleases,
+    sampleTicket: selectedWeekData[0]
+      ? {
+          timestamp: selectedWeekData[0].timestamp,
+          status: selectedWeekData[0].status,
+          troubleshootingType: selectedWeekData[0].troubleshootingType,
+          timeResolved: selectedWeekData[0].timeResolved,
+          calculatedResolutionTime:
+            selectedWeekData[0].calculatedResolutionTime,
+        }
+      : "No tickets",
   });
+
+  // Debug: Log all tickets with their time data
+  console.log("=== DEBUG: All tickets in selected week ===");
+  selectedWeekData.forEach((ticket, index) => {
+    console.log(`Ticket ${index + 1}:`, {
+      timestamp: ticket.timestamp,
+      status: ticket.status,
+      troubleshootingType: ticket.troubleshootingType,
+      timeResolved: ticket.timeResolved,
+      calculatedResolutionTime: ticket.calculatedResolutionTime,
+      isResolved:
+        ticket.status?.toLowerCase() === "resolved" ||
+        ticket.isProblemSolved?.toLowerCase() === "yes",
+      isLaptopRelease: ticket.troubleshootingType
+        ?.toLowerCase()
+        .includes("laptop release"),
+      isPeripheralRelease: ticket.troubleshootingType
+        ?.toLowerCase()
+        .includes("peripheral release"),
+    });
+  });
+  console.log("=== END DEBUG ===");
+
+  // Test time parsing with sample data
+  console.log("=== TIME PARSING TESTS ===");
+  const testTimes = [
+    "1h 17m 15s",
+    "7m 6s",
+    "5m 2s",
+    "15m 40s",
+    "30m 44s",
+    "9m 39s",
+  ];
+  testTimes.forEach((timeStr) => {
+    const seconds = parseTimeToSeconds(timeStr);
+    console.log(`Test: "${timeStr}" -> ${seconds}s (${formatTime(seconds)})`);
+  });
+  console.log("=== END TIME PARSING TESTS ===");
 
   // Calculate average resolution time for the week
   // Total Time / Number of Resolved Tickets = Avg Resolution Time
   // Use calculatedResolutionTime (Column M) which has the Apps Script calculated time
-  const resolvedTicketsWithTime = selectedWeekData.filter(item => {
-    const isResolved = item.status?.toLowerCase() === 'resolved' || item.isProblemSolved?.toLowerCase() === 'yes';
-    const hasTime = (item.calculatedResolutionTime && item.calculatedResolutionTime.trim() !== '') || 
-                    (item.timeResolved && item.timeResolved.trim() !== '');
-    return isResolved && hasTime;
+  const resolvedTicketsWithTime = selectedWeekData.filter((item) => {
+    const isResolved =
+      item.status?.toLowerCase() === "resolved" ||
+      item.isProblemSolved?.toLowerCase() === "yes";
+
+    // Check if either time field has data
+    const hasCalculatedTime =
+      item.calculatedResolutionTime &&
+      item.calculatedResolutionTime.trim() !== "";
+    const hasTimeResolved =
+      item.timeResolved && item.timeResolved.trim() !== "";
+
+    return isResolved && (hasCalculatedTime || hasTimeResolved);
   });
-  
-  console.log(`Week ${selectedWeek.week}: ${resolvedTicketsWithTime.length} tickets with time out of ${weeklyResolvedTickets} resolved`);
-  
-  const resolutionTimesInSeconds = resolvedTicketsWithTime.map(item => {
-    // Prefer calculatedResolutionTime (Column M) over timeResolved (Column J)
-    const timeStr = item.calculatedResolutionTime && item.calculatedResolutionTime.trim() !== ''
-      ? item.calculatedResolutionTime
-      : item.timeResolved;
-    
-    const seconds = parseTimeToSeconds(timeStr);
-    if (seconds === 0) {
-      console.log(`⚠️ Could not parse time: "${timeStr}" for ticket at ${item.timestamp}`);
-    } else {
-      console.log(`✓ Parsed: "${timeStr}" = ${seconds}s (${formatTime(seconds)})`);
-    }
-    return seconds;
-  }).filter(time => time > 0); // Only count valid times
-  
-  const totalResolutionSeconds = resolutionTimesInSeconds.reduce((sum, time) => sum + time, 0);
-  
-  const avgResolutionSeconds = resolutionTimesInSeconds.length > 0
-    ? Math.round(totalResolutionSeconds / resolutionTimesInSeconds.length)
-    : 0;
-  const weeklyAvgResolutionTime = avgResolutionSeconds > 0 ? formatTime(avgResolutionSeconds) : '0s';
-  
-  console.log(`✓ Week ${selectedWeek.week} Avg Resolution Time: ${resolutionTimesInSeconds.length} tickets, Total: ${formatTime(totalResolutionSeconds)}, Avg: ${weeklyAvgResolutionTime}`);
+
+  console.log(
+    `Week ${selectedWeek.week}: ${resolvedTicketsWithTime.length} tickets with time out of ${weeklyResolvedTickets} resolved`
+  );
+
+  const resolutionTimesInSeconds = resolvedTicketsWithTime
+    .map((item) => {
+      // Prefer calculatedResolutionTime, but fallback to timeResolved
+      let timeStr = "";
+      if (
+        item.calculatedResolutionTime &&
+        item.calculatedResolutionTime.trim() !== ""
+      ) {
+        timeStr = item.calculatedResolutionTime;
+      } else if (item.timeResolved && item.timeResolved.trim() !== "") {
+        timeStr = item.timeResolved;
+      }
+
+      const seconds = parseTimeToSeconds(timeStr);
+      console.log(`🔍 Parsing time: "${timeStr}" -> ${seconds}s`);
+      if (seconds === 0) {
+        console.log(
+          `⚠️ Could not parse time: "${timeStr}" for ticket at ${item.timestamp}`
+        );
+      } else {
+        console.log(
+          `✓ Parsed: "${timeStr}" = ${seconds}s (${formatTime(seconds)})`
+        );
+      }
+      return seconds;
+    })
+    .filter((time) => time > 0); // Only count valid times
+
+  const totalResolutionSeconds = resolutionTimesInSeconds.reduce(
+    (sum, time) => sum + time,
+    0
+  );
+
+  const avgResolutionSeconds =
+    resolutionTimesInSeconds.length > 0
+      ? Math.round(totalResolutionSeconds / resolutionTimesInSeconds.length)
+      : 0;
+  const weeklyAvgResolutionTime =
+    avgResolutionSeconds > 0 ? formatTime(avgResolutionSeconds) : "0s";
+
+  console.log(
+    `✓ Week ${selectedWeek.week} Avg Resolution Time: ${
+      resolutionTimesInSeconds.length
+    } tickets, Total: ${formatTime(
+      totalResolutionSeconds
+    )}, Avg: ${weeklyAvgResolutionTime}`
+  );
 
   // Calculate satisfaction rate for the week
-  const weeklyResponses = selectedWeekData.filter(item => item.response).length;
-  const weeklySatisfied = selectedWeekData.filter(item => 
-    item.response?.toLowerCase().includes('satisfied')
+  const weeklyResponses = selectedWeekData.filter(
+    (item) => item.response
   ).length;
-  const weeklySatisfactionRate = weeklyResponses > 0 
-    ? Math.round((weeklySatisfied / weeklyResponses) * 1000) / 10 
-    : 0;
+  const weeklySatisfied = selectedWeekData.filter((item) =>
+    item.response?.toLowerCase().includes("satisfied")
+  ).length;
+  const weeklySatisfactionRate =
+    weeklyResponses > 0
+      ? Math.round((weeklySatisfied / weeklyResponses) * 1000) / 10
+      : 0;
 
   // Weekly goal: 10 tickets resolved per week
   const weeklyGoal = 10;
-  const weeklyProgress = Math.min((weeklyResolvedTickets / weeklyGoal) * 100, 100);
+  const weeklyProgress = Math.min(
+    (weeklyResolvedTickets / weeklyGoal) * 100,
+    100
+  );
 
   const progressBars = [
     {
-      label: 'Weekly Resolved Tickets',
+      label: "Weekly Resolved Tickets",
       current: weeklyResolvedTickets,
       goal: weeklyGoal,
       percentage: weeklyProgress,
-      color: 'purple',
+      color: "purple",
       icon: CheckCircleIcon,
-      description: selectedWeek.isCurrent ? 'This week' : `Week ${selectedWeek.week}, ${selectedWeek.year}`,
+      description: selectedWeek.isCurrent
+        ? "This week"
+        : `Week ${selectedWeek.week}, ${selectedWeek.year}`,
       showGoal: false,
       showOver: false,
       showProgressBar: false,
     },
     {
-      label: 'Weekly Avg Resolution Time',
-      current: weeklyAvgResolutionTime,
+      label: "Weekly Avg Resolution Time",
+      current:
+        resolutionTimesInSeconds.length > 0 ? weeklyAvgResolutionTime : "0s",
       goal: 0,
       percentage: 0,
-      color: 'blue',
+      color: "blue",
       icon: ClockIcon,
-      description: resolutionTimesInSeconds.length > 0 
-        ? `Total time / ${resolutionTimesInSeconds.length} tickets` 
-        : weeklyResolvedTickets > 0 
-          ? 'No time data available'
-          : 'No tickets this week',
+      description:
+        resolutionTimesInSeconds.length > 0
+          ? `Average of ${resolutionTimesInSeconds.length} resolved tickets`
+          : weeklyResolvedTickets > 0
+          ? "No time data available for resolved tickets"
+          : "No tickets this week",
       showGoal: false,
       showOver: false,
       showProgressBar: false,
     },
     {
-      label: 'Weekly Satisfaction Rate',
+      label: "Weekly Satisfaction Rate",
       current: `${weeklySatisfactionRate}%`,
       goal: 100,
       percentage: weeklySatisfactionRate,
-      color: 'emerald',
+      color: "emerald",
       icon: StarIcon,
-      description: weeklyResponses > 0 ? 'Customer satisfaction' : 'No responses this week',
+      description:
+        weeklyResponses > 0
+          ? "Customer satisfaction"
+          : "No responses this week",
       showGoal: false,
       showOver: false,
       showProgressBar: true,
     },
+    {
+      label: "Laptop Release",
+      current: weeklyLaptopReleases,
+      goal: 0,
+      percentage: 0,
+      color: "indigo",
+      icon: ComputerDesktopIcon,
+      description: selectedWeek.isCurrent
+        ? "Laptops released this week"
+        : `Week ${selectedWeek.week}, ${selectedWeek.year}`,
+      showGoal: false,
+      showOver: false,
+      showProgressBar: false,
+    },
+    {
+      label: "Peripheral Release",
+      current: weeklyPeripheralReleases,
+      goal: 0,
+      percentage: 0,
+      color: "cyan",
+      icon: TicketIcon,
+      description: selectedWeek.isCurrent
+        ? "Peripherals released this week"
+        : `Week ${selectedWeek.week}, ${selectedWeek.year}`,
+      showGoal: false,
+      showOver: false,
+      showProgressBar: false,
+    },
   ];
 
-  const getColorClasses = (color: string, type: 'bg' | 'text' | 'border') => {
+  const getColorClasses = (color: string, type: "bg" | "text" | "border") => {
     const colors: Record<string, Record<string, string>> = {
       purple: {
-        bg: 'bg-purple-500',
-        text: 'text-purple-600',
-        border: 'border-purple-200',
+        bg: "bg-purple-500",
+        text: "text-purple-600",
+        border: "border-purple-200",
       },
       blue: {
-        bg: 'bg-blue-500',
-        text: 'text-blue-600',
-        border: 'border-blue-200',
+        bg: "bg-blue-500",
+        text: "text-blue-600",
+        border: "border-blue-200",
       },
       emerald: {
-        bg: 'bg-emerald-500',
-        text: 'text-emerald-600',
-        border: 'border-emerald-200',
+        bg: "bg-emerald-500",
+        text: "text-emerald-600",
+        border: "border-emerald-200",
+      },
+      indigo: {
+        bg: "bg-indigo-500",
+        text: "text-indigo-600",
+        border: "border-indigo-200",
+      },
+      cyan: {
+        bg: "bg-cyan-500",
+        text: "text-cyan-600",
+        border: "border-cyan-200",
       },
     };
     return colors[color]?.[type] || colors.purple[type];
@@ -261,11 +443,15 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
             <TicketIcon className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Weekly Report</h3>
-            <p className="text-xs text-gray-500">Track weekly performance metrics</p>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Weekly Report
+            </h3>
+            <p className="text-xs text-gray-500">
+              Track weekly performance metrics
+            </p>
           </div>
         </div>
-        
+
         {/* Week Selector Dropdown */}
         <div className="relative">
           <button
@@ -274,18 +460,22 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
           >
             <CalendarIcon className="w-4 h-4" />
             <span>{selectedWeek.label}</span>
-            <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDownIcon
+              className={`w-4 h-4 transition-transform ${
+                isDropdownOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
-          
+
           {/* Dropdown Menu */}
           {isDropdownOpen && (
             <>
               {/* Backdrop */}
-              <div 
-                className="fixed inset-0 z-10" 
+              <div
+                className="fixed inset-0 z-10"
                 onClick={() => setIsDropdownOpen(false)}
               ></div>
-              
+
               {/* Dropdown Content */}
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-20 max-h-80 overflow-y-auto">
                 {availableWeeks.length > 0 ? (
@@ -297,9 +487,10 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
                         setIsDropdownOpen(false);
                       }}
                       className={`w-full text-left px-4 py-3 hover:bg-purple-50 transition-colors flex items-center justify-between ${
-                        selectedWeek.week === week.week && selectedWeek.year === week.year
-                          ? 'bg-purple-50 text-purple-700 font-semibold'
-                          : 'text-gray-700'
+                        selectedWeek.week === week.week &&
+                        selectedWeek.year === week.year
+                          ? "bg-purple-50 text-purple-700 font-semibold"
+                          : "text-gray-700"
                       }`}
                     >
                       <span>{week.label}</span>
@@ -311,7 +502,9 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
                     </button>
                   ))
                 ) : (
-                  <div className="px-4 py-3 text-sm text-gray-500">No weeks available</div>
+                  <div className="px-4 py-3 text-sm text-gray-500">
+                    No weeks available
+                  </div>
                 )}
               </div>
             </>
@@ -323,26 +516,49 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
         {progressBars.map((item, index) => {
           const Icon = item.icon;
           const isComplete = item.percentage >= 100;
-          
+
           return (
             <div key={index} className="relative">
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Icon className={`w-5 h-5 ${getColorClasses(item.color, 'text')}`} />
+                  <Icon
+                    className={`w-5 h-5 ${getColorClasses(item.color, "text")}`}
+                  />
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{item.label}</div>
-                    <div className="text-xs text-gray-500">{item.description}</div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      {item.label}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {item.description}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-gray-900">
-                    {typeof item.current === 'string' ? item.current : item.current}
-                    {item.showGoal && item.showOver && <span className="text-sm text-gray-400"> over /{item.goal}</span>}
-                    {item.showGoal && !item.showOver && <span className="text-sm text-gray-400">/{item.goal}</span>}
+                    {typeof item.current === "string"
+                      ? item.current
+                      : item.current}
+                    {item.showGoal && item.showOver && (
+                      <span className="text-sm text-gray-400">
+                        {" "}
+                        over /{item.goal}
+                      </span>
+                    )}
+                    {item.showGoal && !item.showOver && (
+                      <span className="text-sm text-gray-400">
+                        /{item.goal}
+                      </span>
+                    )}
                   </div>
                   {item.showGoal && (
-                    <div className={`text-xs font-semibold ${isComplete ? 'text-emerald-600' : getColorClasses(item.color, 'text')}`}>
+                    <div
+                      className={`text-xs font-semibold ${
+                        isComplete
+                          ? "text-emerald-600"
+                          : getColorClasses(item.color, "text")
+                      }`}
+                    >
                       {item.percentage.toFixed(0)}%
                     </div>
                   )}
@@ -353,11 +569,14 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
               {item.showProgressBar && (
                 <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${getColorClasses(item.color, 'bg')} transition-all duration-500 ease-out rounded-full`}
+                    className={`h-full ${getColorClasses(
+                      item.color,
+                      "bg"
+                    )} transition-all duration-500 ease-out rounded-full`}
                     style={{ width: `${item.percentage}%` }}
                   >
                     {/* Animated shine effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
                   </div>
                 </div>
               )}
@@ -366,8 +585,16 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
               {isComplete && item.showProgressBar && (
                 <div className="flex justify-end mt-2">
                   <div className="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>Goal Reached!</span>
                   </div>
@@ -380,7 +607,7 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
 
       {/* Summary Stats */}
       <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-5 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">
               {weeklyResolvedTickets}
@@ -399,9 +626,20 @@ export default function ITProgressStats({ data }: ITProgressStatsProps) {
             </div>
             <div className="text-xs text-gray-500 mt-1">Total Tickets</div>
           </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-indigo-600">
+              {weeklyLaptopReleases}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Laptop Release</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-cyan-600">
+              {weeklyPeripheralReleases}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Peripheral Release</div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

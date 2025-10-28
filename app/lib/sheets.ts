@@ -56,6 +56,8 @@ export interface ITDashboardStats {
   topAccount: string;
   topTroubleshootingType: string;
   satisfactionRate: number;
+  laptopReleases: number;
+  peripheralReleases: number;
 }
 
 export interface ITSummaryStats {
@@ -663,12 +665,24 @@ export async function fetchITData(sheetUrl: string): Promise<ITData[]> {
     // Parse ALL rows including header and summary rows (we'll use them for pre-calculated data)
     const allRows: ITData[] = [];
 
+    console.log(`📊 Parsing ${lines.length} rows from Google Sheets`);
+
     for (let i = 0; i < lines.length; i++) {
       const columns = parseCSVLine(lines[i]);
 
       // Skip completely empty rows
       if (columns.length === 0 || !columns.some((col) => col?.trim())) {
         continue;
+      }
+
+      // Debug: Log first few rows to see the structure
+      if (i < 5) {
+        console.log(`Row ${i}:`, {
+          timestamp: columns[0]?.trim(),
+          timeResolved: columns[9]?.trim(),
+          status: columns[6]?.trim(),
+          columns: columns.length,
+        });
       }
 
       allRows.push({
@@ -681,14 +695,14 @@ export async function fetchITData(sheetUrl: string): Promise<ITData[]> {
         status: columns[6]?.trim() || "",
         assigned: columns[7]?.trim() || "",
         statusChange: columns[8]?.trim() || "",
-        timeResolved: columns[10]?.trim() || "", // Column K (index 10)
-        employeeRating: columns[11]?.trim() || "", // Column L (index 11)
-        remarks: columns[12]?.trim() || "", // Column M (index 12)
-        calculatedResolutionTime: columns[10]?.trim() || "", // Same as timeResolved - Column K
-        calculatedColumnN: columns[13]?.trim() || "", // Column N (index 13)
-        calculatedColumnO: columns[14]?.trim() || "", // Column O (index 14)
-        calculatedColumnP: columns[15]?.trim() || "", // Column P (index 15)
-        calculatedColumnQ: columns[16]?.trim() || "", // Column Q (index 16)
+        timeResolved: columns[9]?.trim() || "", // Column J (index 9) - Time Resolved
+        employeeRating: columns[10]?.trim() || "", // Column K (index 10) - Employee Rating
+        remarks: columns[11]?.trim() || "", // Column L (index 11) - Remarks
+        calculatedResolutionTime: columns[9]?.trim() || "", // Column J (index 9) - Same as timeResolved
+        calculatedColumnN: columns[12]?.trim() || "", // Column M (index 12)
+        calculatedColumnO: columns[13]?.trim() || "", // Column N (index 13)
+        calculatedColumnP: columns[14]?.trim() || "", // Column O (index 14)
+        calculatedColumnQ: columns[15]?.trim() || "", // Column P (index 15)
       });
     }
 
@@ -998,6 +1012,15 @@ export function calculateITStats(data: ITData[]): ITDashboardStats {
     ""
   );
 
+  // Calculate Laptop Release and Peripheral Release counts
+  const laptopReleases = actualTickets.filter((item) =>
+    item.troubleshootingType?.toLowerCase().includes("laptop release")
+  ).length;
+
+  const peripheralReleases = actualTickets.filter((item) =>
+    item.troubleshootingType?.toLowerCase().includes("peripheral release")
+  ).length;
+
   return {
     totalTickets,
     resolvedTickets,
@@ -1007,6 +1030,8 @@ export function calculateITStats(data: ITData[]): ITDashboardStats {
     topAccount,
     topTroubleshootingType,
     satisfactionRate,
+    laptopReleases,
+    peripheralReleases,
   };
 }
 
