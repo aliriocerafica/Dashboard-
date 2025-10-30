@@ -207,7 +207,7 @@ export default function DPOPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Data Privacy Officer Dashboard
+                  Data Protection Officer Dashboard
                 </h1>
                 <p className="text-sm text-gray-600">
                   Monitor DPO WIG tasks, compliance activities, and privacy

@@ -138,7 +138,7 @@ export default function Sidebar() {
         name: "DPO",
         href: "/dpo",
         icon: ShieldCheckIcon,
-        description: "Data Privacy Officer",
+        description: "Data Protection Officer",
         color: "bg-blue-50 text-blue-600",
       },
     ],

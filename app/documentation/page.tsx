@@ -337,7 +337,7 @@ export default function DocumentationPage() {
               <ExclamationTriangleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
-                  Data Privacy
+                  Data Protection
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-700">
                   While the system uses authentication, sensitive data should be
