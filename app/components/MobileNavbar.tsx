@@ -65,6 +65,12 @@ const departments: Department[] = [
     color: "text-indigo-600",
   },
   {
+    name: "DPO",
+    href: "/dpo",
+    icon: ShieldCheckIcon,
+    color: "text-blue-600",
+  },
+  {
     name: "President",
     href: "/president",
     icon: BuildingOfficeIcon,

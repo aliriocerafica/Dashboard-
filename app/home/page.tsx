@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
   ComputerDesktopIcon,
   BuildingOffice2Icon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import {
   isAuthenticated,
@@ -103,6 +104,14 @@ export default function HomePage() {
       description: "Executive initiatives and strategic planning",
       color: "from-red-500 to-red-600",
       stats: "Executive Overview",
+    },
+    {
+      name: "DPO",
+      href: "/dpo",
+      icon: ShieldCheckIcon,
+      description: "Data privacy oversight and compliance",
+      color: "from-blue-500 to-blue-600",
+      stats: "Privacy Metrics",
     },
   ];
 
