@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       totalRows: wigTrackerData.length,
       headers: headers,
       lastUpdated: new Date().toISOString(),
-      source: `Google Sheets: ${sheetId}`,
+      source: "Google Sheets: Weekly WIG Tracker",
     });
   } catch (error) {
     console.error("Error fetching Weekly WIG Tracker data:", error);
