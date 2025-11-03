@@ -1,48 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Single published document base. We'll select the Weekly WIG Tracker tab by gid.
+const PUBLISHED_DOC_BASE =
+  process.env.NEXT_PUBLIC_PUBLISHED_DOC_BASE ||
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu6xGRE5ah-2airOT9EXJePKOMAseMIkyKunz0c7VDpxFCT3He0qSxURfdXXsGFJo-2VQE0cUtm_Sv/pub?output=csv";
+const buildCsvUrl = (gid: string) => `${PUBLISHED_DOC_BASE}&single=true&gid=${gid}`;
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const sheetUrl =
-      searchParams.get("sheetUrl") || process.env.NEXT_PUBLIC_SHEET_URL;
-    const gid = searchParams.get("gid") || "0"; // Default to first sheet
-
-    if (!sheetUrl) {
-      return NextResponse.json(
-        { error: "Missing sheetUrl parameter" },
-        { status: 400 }
-      );
-    }
-
-    // Extract sheet ID from URL
-    let sheetId = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];
-
-    if (!sheetId) {
-      sheetId = sheetUrl.split("/d/")[1]?.split("/")[0];
-    }
-
-    if (!sheetId) {
-      return NextResponse.json(
-        { error: "Invalid Google Sheets URL" },
-        { status: 400 }
-      );
-    }
-
-    console.log(
-      `Fetching Weekly WIG Tracker data from sheet ID: ${sheetId}, gid: ${gid}`
-    );
-    console.log("Sheet URL:", sheetUrl);
-
-    // Use the published CSV URL directly
-    const csvUrl =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu6xGRE5ah-2airOT9EXJePKOMAseMIkyKunz0c7VDpxFCT3He0qSxURfdXXsGFJo-2VQE0cUtm_Sv/pub?output=csv";
+    // Use the published CSV URL directly for Weekly WIG Tracker tab
+    const csvUrl = `${buildCsvUrl("1673922593")}&timestamp=${Date.now()}`;
 
     console.log("CSV URL:", csvUrl);
 
     const response = await fetch(csvUrl, {
       cache: "no-store",
       headers: {
-        Accept: "text/csv",
+        Accept: "text/csv, */*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (compatible; Dashboard/1.0)",
       },
     });
 
@@ -79,11 +54,7 @@ export async function GET(request: NextRequest) {
     const csvText = await response.text();
     console.log("CSV text length:", csvText.length);
 
-    if (
-      !csvText ||
-      csvText.includes("<!DOCTYPE") ||
-      csvText.includes("<html")
-    ) {
+    if (!csvText || csvText.includes("<!DOCTYPE") || csvText.includes("<html")) {
       throw new Error(
         "Sheet is not publicly accessible. Please publish it to the web."
       );
@@ -101,77 +72,55 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse CSV data
-    const headers = parseCSVLine(lines[0]);
+    const headers = parseCSVLine(lines[0]).map((h) => (h || "").trim());
     console.log("Headers:", headers);
 
-    const wigTrackerData = [];
+    const wigTrackerData: any[] = [];
 
     // Process data rows (skip header)
     for (let i = 1; i < lines.length; i++) {
-      const columns = parseCSVLine(lines[i]);
-
-      if (columns.length === 0 || !columns.some((col) => col?.trim())) {
-        continue;
-      }
-
-      // Skip empty rows or rows that look like headers
-      const firstCol = columns[0]?.trim().toLowerCase() || "";
-      if (
-        firstCol === "session date" ||
-        firstCol === "date" ||
-        firstCol === "" ||
-        firstCol.includes("total") ||
-        firstCol.includes("count")
-      ) {
-        continue;
-      }
+      const columns = parseCSVLine(lines[i]).map((c) => (c || "").trim());
+      if (!columns.length || !columns.some((c) => c)) continue;
 
       const rowData: any = {};
 
-      // Map columns to data object
       headers.forEach((header, index) => {
-        const cleanHeader = header?.trim().toLowerCase() || "";
-        const value = columns[index]?.trim() || "";
+        const cleanHeader = (header || "").trim().toLowerCase();
+        const value = columns[index] || "";
 
-        // Map common column names
-        if (
-          cleanHeader.includes("session date") ||
-          cleanHeader.includes("date")
-        ) {
+        if (cleanHeader === "session date" || cleanHeader === "date") {
           rowData.sessionDate = value;
-        } else if (cleanHeader.includes("department")) {
+        } else if (cleanHeader === "department (dropdown)" || cleanHeader === "department") {
           rowData.department = value;
         } else if (
-          cleanHeader.includes("sub-department") ||
-          cleanHeader.includes("sub department")
+          cleanHeader === "sub-department (dropdown)" ||
+          cleanHeader === "sub-department" ||
+          cleanHeader === "sub department"
         ) {
           rowData.subDepartment = value;
-        } else if (
-          cleanHeader.includes("lead statement") ||
-          cleanHeader.includes("statement")
-        ) {
+        } else if (cleanHeader === "lead statement") {
           rowData.leadStatement = value;
-        } else if (cleanHeader.includes("commitment")) {
+        } else if (cleanHeader === "commitment") {
           rowData.commitment = value;
-        } else if (
-          cleanHeader.includes("due date") ||
-          cleanHeader.includes("due")
-        ) {
+        } else if (cleanHeader === "due date" || cleanHeader === "due") {
           rowData.dueDate = value;
-        } else if (cleanHeader.includes("status")) {
+        } else if (cleanHeader === "status") {
           rowData.status = value;
-        } else {
-          // Use original header name for unmapped columns
-          rowData[header?.trim() || `column_${index}`] = value;
+        } else if (header) {
+          rowData[header] = value;
         }
       });
 
-      // Only add rows that have meaningful data
-      if (rowData.sessionDate || rowData.department || rowData.leadStatement) {
-        wigTrackerData.push({
-          id: i,
-          ...rowData,
-        });
+      // Add any row that has at least one of the primary fields
+      if (
+        rowData.sessionDate ||
+        rowData.department ||
+        rowData.subDepartment ||
+        rowData.leadStatement ||
+        rowData.commitment ||
+        rowData.status
+      ) {
+        wigTrackerData.push({ id: i, ...rowData });
       }
     }
 

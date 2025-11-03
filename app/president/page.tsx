@@ -75,11 +75,9 @@ export default function PresidentDashboard() {
   const [data, setData] = useState<WIGDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("weekly-tracker");
-  const [wigTrackerData, setWigTrackerData] = useState<any[]>([]);
-  const [wigTrackerLoading, setWigTrackerLoading] = useState(false);
-  const [wigTrackerError, setWigTrackerError] = useState<string | null>(null);
 
   // Export functions
   const exportToCSV = (data: any[], filename: string) => {
@@ -131,8 +129,9 @@ export default function PresidentDashboard() {
     }
   };
 
-  useEffect(() => {
-    const fetchWIGData = async () => {
+const refreshWIGData = async () => {
+  setRefreshing(true);
+  setError(null);
       try {
         const response = await fetch("/api/get-wig-dashboard");
         if (!response.ok) {
@@ -140,47 +139,21 @@ export default function PresidentDashboard() {
         }
         const result = await response.json();
         setData(result.data);
+    setLastUpdated(result.lastUpdated || new Date().toISOString());
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
+    setRefreshing(false);
         setLoading(false);
       }
     };
 
-    fetchWIGData();
+useEffect(() => {
+  // Do not auto-fetch on mount; user can refresh on demand
+  setLoading(false);
   }, []);
 
-  // Fetch Weekly WIG Tracker data when tab is active
-  useEffect(() => {
-    const fetchWigTrackerData = async () => {
-      if (activeTab === "data-table" && wigTrackerData.length === 0) {
-        setWigTrackerLoading(true);
-        setWigTrackerError(null);
-
-        try {
-          const response = await fetch("/api/get-weekly-wig-tracker");
-          if (!response.ok) {
-            throw new Error("Failed to fetch Weekly WIG Tracker data");
-          }
-
-          const result = await response.json();
-          if (result.success) {
-            setWigTrackerData(result.data);
-          } else {
-            throw new Error(result.error || "Failed to fetch data");
-          }
-        } catch (err) {
-          setWigTrackerError(
-            err instanceof Error ? err.message : "An error occurred"
-          );
-        } finally {
-          setWigTrackerLoading(false);
-        }
-      }
-    };
-
-    fetchWigTrackerData();
-  }, [activeTab, wigTrackerData.length]);
+  // No secondary data table fetching; dashboard uses aggregated API only
 
   if (loading) {
     return (
@@ -210,7 +183,27 @@ export default function PresidentDashboard() {
     );
   }
 
-  if (!data) return null;
+  if (!data)
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="text-center">
+            <p className="text-gray-700 mb-4">Click the button below to load the latest data from Google Sheets.</p>
+            <button
+              onClick={refreshWIGData}
+              disabled={refreshing}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg transition-colors font-medium text-sm ${
+                refreshing
+                  ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+              }`}
+            >
+              {refreshing ? "Refreshing..." : "Refresh Data"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
 
   const { summary, officeScores, unitScores, recentCommitments, trends } = data;
 
@@ -249,6 +242,28 @@ export default function PresidentDashboard() {
                 Wildly Important Goals tracking and performance metrics
               </p>
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={refreshWIGData}
+                disabled={refreshing}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium text-sm ${
+                  refreshing
+                    ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                }`}
+              >
+                {refreshing ? (
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M20 4l-6 6M4 20l6-6" />
+                  </svg>
+                )}
+                {refreshing ? "Refreshing..." : "Refresh Data"}
+              </button>
             <a
               href="https://docs.google.com/spreadsheets/d/1qp_5G8qnw_T1AUYMW4zQhgTzSo5kfX8AczOEM6jO-xw/edit?gid=1673922593#gid=1673922593"
               target="_blank"
@@ -270,39 +285,27 @@ export default function PresidentDashboard() {
               </svg>
               View Original Sheet
             </a>
+            </div>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+          
+
+        
+
+        {/* Single Tab Header */}
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab("weekly-tracker")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "weekly-tracker"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Weekly WIG Tracker
-              </button>
-              <button
-                onClick={() => setActiveTab("data-table")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "data-table"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Data Table
-              </button>
+              <span className="py-2 px-1 border-b-2 font-medium text-sm border-emerald-500 text-emerald-600">
+                Dashboard
+              </span>
             </nav>
           </div>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === "weekly-tracker" && (
+        {/* Dashboard Content */}
+        {
           <>
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -379,53 +382,11 @@ export default function PresidentDashboard() {
               </Card>
             </div>
 
-            {/* Charts Section */}
+            {/* Overview Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Office Performance Chart */}
               <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Office Performance Scores
-                  </h3>
-                  <Button
-                    size="sm"
-                    color="primary"
-                    variant="solid"
-                    onPress={() => setSelectedChart("office-performance")}
-                    className="text-xs bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    View More
-                  </Button>
-                </CardHeader>
-                <CardBody>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={officeScores}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                      <XAxis
-                        dataKey="office"
-                        tick={{ fontSize: 10 }}
-                        angle={-45}
-                        textAnchor="end"
-                        height={100}
-                      />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        dataKey="score"
-                        fill="#3B82F6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardBody>
-              </Card>
-
-              {/* Weekly Trends Chart */}
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Weekly Commitment Trends
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Weekly Commitment Trends</h3>
                   <Button
                     size="sm"
                     color="primary"
@@ -437,165 +398,155 @@ export default function PresidentDashboard() {
                   </Button>
                 </CardHeader>
                 <CardBody>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={340}>
                     <LineChart data={trends.weeklyCommitments}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                       <XAxis dataKey="week" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
                       <Tooltip content={<CustomTooltip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="commitments"
-                        stroke="#3B82F6"
-                        strokeWidth={3}
-                        dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: "#3B82F6", strokeWidth: 2 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="completed"
-                        stroke="#10B981"
-                        strokeWidth={3}
-                        dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
-                      />
+                      <Line type="monotone" dataKey="commitments" stroke="#3B82F6" strokeWidth={3} />
+                      <Line type="monotone" dataKey="completed" stroke="#10B981" strokeWidth={3} />
                     </LineChart>
+                  </ResponsiveContainer>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <h3 className="text-xl font-semibold text-gray-900">Commitment Score Per Office</h3>
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="solid"
+                    onPress={() => setSelectedChart("office-performance")}
+                    className="text-xs bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    View More
+                  </Button>
+                </CardHeader>
+                <CardBody>
+                  <ResponsiveContainer width="100%" height={340}>
+                    <BarChart data={officeScores}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                      <XAxis dataKey="office" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={100} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="score" fill="#3B82F6" radius={[4,4,0,0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </CardBody>
               </Card>
             </div>
 
-            {/* Unit Performance Table */}
+            {/* Performance Tables (moved out of modal) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+              {/* Detailed Performance Data (Per Office) */}
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl overflow-hidden">
                 <CardHeader>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Unit Performance Scores
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Detailed Performance Data</h3>
                 </CardHeader>
                 <CardBody>
-                  <div className="space-y-4">
-                    {unitScores.slice(0, 8).map((unit, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {unit.unit}
-                          </p>
-                          <Progress
-                            value={unit.score}
-                            className="mt-1"
-                            color={
-                              unit.score >= 60
-                                ? "success"
-                                : unit.score >= 40
-                                ? "warning"
-                                : "danger"
-                            }
-                          />
-                        </div>
-                        <div className="ml-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left py-2 text-gray-900 font-semibold">Office</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Score</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Status</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Trend</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {officeScores.map((office, index) => (
+                          <tr key={index} className="border-b border-gray-100">
+                            <td className="py-2 font-medium text-gray-900">{office.office}</td>
+                            <td className="text-right py-2 font-bold text-gray-900">{office.score}%</td>
+                            <td className="text-right py-2">
                           <span
-                            className={`text-sm font-bold ${
-                              unit.score >= 60
-                                ? "text-green-700"
-                                : unit.score >= 40
-                                ? "text-orange-700"
-                                : "text-red-700"
-                            }`}
-                          >
-                            {unit.score}%
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  office.score >= 70
+                                    ? "bg-green-100 text-green-800"
+                                    : office.score >= 50
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {office.score >= 70
+                                  ? "Excellent"
+                                  : office.score >= 50
+                                  ? "Good"
+                                  : "Needs Improvement"}
                           </span>
-                        </div>
-                      </div>
-                    ))}
+                            </td>
+                            <td className="text-right py-2">
+                              {office.score >= 60 ? (
+                                <ArrowTrendingUpIcon className="w-4 h-4 text-green-600 inline" />
+                              ) : (
+                                <ArrowTrendingDownIcon className="w-4 h-4 text-red-600 inline" />
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </CardBody>
               </Card>
 
-              {/* Recent Commitments */}
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
+              {/* Weekly Performance Data */}
+              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl overflow-hidden">
                 <CardHeader>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Recent Commitments
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Weekly Performance Data</h3>
                 </CardHeader>
                 <CardBody>
-                  <div className="space-y-4">
-                    {recentCommitments.map((commitment, index) => (
-                      <div
-                        key={index}
-                        className="border-l-4 border-blue-500 pl-4"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full ${
-                              commitment.status === "Completed"
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left py-2 text-gray-900 font-semibold">Week</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Total Commitments</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Completed</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Completion Rate</th>
+                          <th className="text-right py-2 text-gray-900 font-semibold">Performance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {trends.weeklyCommitments.map((week, index) => {
+                          const rate = week.commitments
+                            ? ((week.completed / week.commitments) * 100).toFixed(1)
+                            : "0.0";
+                          const rateNum = parseFloat(rate);
+                          const perfClass =
+                            rateNum >= 70
                                 ? "bg-green-100 text-green-800"
-                                : "bg-orange-100 text-orange-800"
-                            }`}
-                          >
-                            {commitment.status}
-                          </span>
-                          <span className="text-xs text-gray-800 font-semibold">
-                            {commitment.dueDate}
-                          </span>
-                        </div>
-                        <p className="text-sm font-medium text-gray-900 mb-1">
-                          {commitment.department}
-                        </p>
-                        <p className="text-xs text-gray-900 line-clamp-2">
-                          {commitment.leadStatement}
-                        </p>
-                      </div>
-                    ))}
+                              : rateNum >= 50
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800";
+                          const perfLabel = rateNum >= 70 ? "Excellent" : rateNum >= 50 ? "Good" : "Needs Improvement";
+                          return (
+                            <tr key={index} className="border-b border-gray-100">
+                              <td className="py-2 font-medium text-gray-900">{week.week}</td>
+                              <td className="text-right py-2 font-bold text-gray-900">{week.commitments}</td>
+                              <td className="text-right py-2 font-bold text-green-600">{week.completed}</td>
+                              <td className="text-right py-2 font-bold text-gray-900">{rate}%</td>
+                              <td className="text-right py-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${perfClass}`}>{perfLabel}</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </CardBody>
               </Card>
             </div>
 
-            {/* Department Performance Trends */}
-            <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Department Performance Trends
-                </h3>
-              </CardHeader>
-              <CardBody>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {trends.departmentPerformance.map((dept, index) => (
-                    <div key={index} className="text-center">
-                      <div className="flex items-center justify-center mb-2">
-                        {dept.trend === "up" ? (
-                          <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
-                        ) : dept.trend === "down" ? (
-                          <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />
-                        ) : (
-                          <div className="w-5 h-5 bg-gray-400 rounded-full" />
-                        )}
-                      </div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {dept.department}
-                      </p>
-                      <p
-                        className={`text-lg font-bold ${
-                          dept.change > 0
-                            ? "text-green-600"
-                            : dept.change < 0
-                            ? "text-red-600"
-                            : "text-gray-900"
-                        }`}
-                      >
-                        {dept.change > 0 ? "+" : ""}
-                        {dept.change}%
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardBody>
-            </Card>
+            {/* Removed secondary duplicate charts per request */}
+
+            {/* Removed Unit Performance list and Recent Commitments per request */}
+
+            {/* Removed Department Performance Trends per request */}
 
             {/* Full View Modal */}
             <Modal
@@ -872,218 +823,9 @@ export default function PresidentDashboard() {
               </ModalContent>
             </Modal>
           </>
-        )}
+        }
 
-        {/* Data Table Tab Content */}
-        {activeTab === "data-table" && (
-          <div className="space-y-6 -mx-4 sm:-mx-6 lg:-mx-8">
-            <div className="mb-6 px-4 sm:px-6 lg:px-8">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Data</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Live data from Google Sheets
-                </p>
-              </div>
-            </div>
-
-            {(() => {
-              // Filter out empty rows
-              const filteredData = wigTrackerData.filter((row) => {
-                return (
-                  row.sessionDate?.trim() ||
-                  row.department?.trim() ||
-                  row.subDepartment?.trim() ||
-                  row.leadStatement?.trim() ||
-                  row.commitment?.trim() ||
-                  row.dueDate?.trim() ||
-                  row.status?.trim()
-                );
-              });
-
-              // Check which columns have data
-              const hasSessionDate = filteredData.some((row) =>
-                row.sessionDate?.trim()
-              );
-              const hasDepartment = filteredData.some((row) =>
-                row.department?.trim()
-              );
-              const hasSubDepartment = filteredData.some((row) =>
-                row.subDepartment?.trim()
-              );
-              const hasLeadStatement = filteredData.some((row) =>
-                row.leadStatement?.trim()
-              );
-              const hasCommitment = filteredData.some((row) =>
-                row.commitment?.trim()
-              );
-              const hasDueDate = filteredData.some((row) =>
-                row.dueDate?.trim()
-              );
-              const hasStatus = filteredData.some((row) => row.status?.trim());
-
-              return (
-                <>
-                  {wigTrackerLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner size="md" text="Loading data..." />
-                    </div>
-                  ) : wigTrackerError ? (
-                    <div className="text-center py-8">
-                      <div className="text-red-600 text-4xl mb-4">⚠️</div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                        Error Loading WIG Tracker Data
-                      </h4>
-                      <p className="text-gray-600 mb-4">{wigTrackerError}</p>
-                      <Button
-                        onClick={() => {
-                          setWigTrackerData([]);
-                          setWigTrackerError(null);
-                        }}
-                        className="bg-blue-600 text-white hover:bg-blue-700"
-                      >
-                        Try Again
-                      </Button>
-                    </div>
-                  ) : wigTrackerData.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-400 text-4xl mb-4">📊</div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                        No Data Available
-                      </h4>
-                      <p className="text-gray-600">
-                        No data found in the Google Sheet.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                      <div className="overflow-x-auto max-h-[75vh] overflow-y-auto">
-                        <table className="w-full">
-                          <thead className="sticky top-0 z-10">
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                              {hasSessionDate && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Session Date
-                                </th>
-                              )}
-                              {hasDepartment && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Department
-                                </th>
-                              )}
-                              {hasSubDepartment && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Sub-Department
-                                </th>
-                              )}
-                              {hasLeadStatement && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Lead Statement
-                                </th>
-                              )}
-                              {hasCommitment && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Commitment
-                                </th>
-                              )}
-                              {hasDueDate && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Due Date
-                                </th>
-                              )}
-                              {hasStatus && (
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">
-                                  Status
-                                </th>
-                              )}
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredData.map((row, index) => (
-                              <tr
-                                key={index}
-                                className="hover:bg-gray-50 transition-colors duration-150"
-                              >
-                                {hasSessionDate && (
-                                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                    {row.sessionDate?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasDepartment && (
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {row.department?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasSubDepartment && (
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {row.subDepartment?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasLeadStatement && (
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {row.leadStatement?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasCommitment && (
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {row.commitment?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasDueDate && (
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {row.dueDate?.trim() || "-"}
-                                  </td>
-                                )}
-                                {hasStatus && (
-                                  <td className="px-4 py-3">
-                                    {row.status?.trim() ? (
-                                      <span
-                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                          row.status
-                                            .toLowerCase()
-                                            .includes("completed")
-                                            ? "bg-green-100 text-green-800"
-                                            : row.status
-                                                .toLowerCase()
-                                                .includes("in progress")
-                                            ? "bg-blue-100 text-blue-800"
-                                            : row.status
-                                                .toLowerCase()
-                                                .includes("pending")
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : row.status
-                                                .toLowerCase()
-                                                .includes("incomplete")
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-gray-100 text-gray-800"
-                                        }`}
-                                      >
-                                        {row.status}
-                                      </span>
-                                    ) : (
-                                      <span className="text-gray-400 text-sm">
-                                        -
-                                      </span>
-                                    )}
-                                  </td>
-                                )}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-                        <p className="text-sm text-gray-600 text-center">
-                          Showing {filteredData.length} of{" "}
-                          {wigTrackerData.length} results
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        )}
+        {/* Data table removed as requested */}
       </div>
     </div>
   );

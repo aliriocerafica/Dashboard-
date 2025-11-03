@@ -1,14 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GOOGLE_SHEET_URL =
+// Single published document base (provided). We'll target tabs by gid.
+const PUBLISHED_DOC_BASE =
+  process.env.NEXT_PUBLIC_PUBLISHED_DOC_BASE ||
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu6xGRE5ah-2airOT9EXJePKOMAseMIkyKunz0c7VDpxFCT3He0qSxURfdXXsGFJo-2VQE0cUtm_Sv/pub?output=csv";
+
+// Helper to build a CSV URL for a specific gid within the published document
+const buildCsvUrl = (gid: string) =>
+  `${PUBLISHED_DOC_BASE}&single=true&gid=${gid}`;
+
+// Sheet ID and Dashboard GID sourced from the "View Original Sheet" link used in the President page
+// This allows us to read the computed metrics that the Dashboard tab already calculates
+const PRESIDENT_SHEET_ID =
+  process.env.NEXT_PUBLIC_PRESIDENT_SHEET_ID ||
+  "1qp_5G8qnw_T1AUYMW4zQhgTz5o5kX8AczOEM6jO-xw";
+// Published Dashboard tab gid (provided link from user)
+const DASHBOARD_GID = process.env.NEXT_PUBLIC_PRESIDENT_DASHBOARD_GID || "1634851984";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("Fetching WIG dashboard data from:", GOOGLE_SHEET_URL);
+    console.log("Fetching WIG dashboard data from published base:", PUBLISHED_DOC_BASE);
 
-    // Fetch data from Google Sheets CSV (cache-busting timestamp)
-    const csvUrl = `${GOOGLE_SHEET_URL}&timestamp=${Date.now()}`;
+    // Fetch raw Data sheet rows (cache-busting timestamp)
+    const csvUrl = `${buildCsvUrl("1443822639")}&timestamp=${Date.now()}`; // Data tab
     const response = await fetch(csvUrl, {
       cache: "no-store",
       headers: {
@@ -137,16 +151,16 @@ export async function GET(request: NextRequest) {
         !!(r.leadStatement && r.leadStatement.trim())
     );
 
-    // Summary metrics
-    const totalCommitments = commitmentRows.length;
-    const completedCommitments = commitmentRows.filter((r) =>
+    // Summary metrics (initially from row-level parsing)
+    let totalCommitments = commitmentRows.length;
+    let completedCommitments = commitmentRows.filter((r) =>
       (r.status || "").toLowerCase().includes("completed")
     ).length;
-    const incompleteCommitments = Math.max(
+    let incompleteCommitments = Math.max(
       0,
       totalCommitments - completedCommitments
     );
-    const commitmentRate = totalCommitments
+    let commitmentRate = totalCommitments
       ? parseFloat(((completedCommitments / totalCommitments) * 100).toFixed(2))
       : 0;
 
@@ -186,39 +200,248 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.score - a.score)
       .slice(0, 15);
 
-    // Recent commitments (use latest by sessionDate if parseable or last rows)
-    const parseDate = (s?: string) => (s ? Date.parse(s) || 0 : 0);
-    const recentCommitments = [...commitmentRows]
-      .sort((a, b) => parseDate(b.sessionDate) - parseDate(a.sessionDate))
-      .slice(0, 10)
-      .map((r) => ({
-        sessionDate: r.sessionDate || "",
-        department: r.department || "",
-        leadStatement: r.leadStatement || r.commitment || "",
-        status: r.status || "",
-        dueDate: r.dueDate || "",
-      }));
+    // Recent commitments will be read from Weekly WIG Tracker tab below
 
-    // Weekly trends by Week column if present; else fallback by sessionDate week text
-    const weekKey = (r: Row) => (r.week?.trim() ? r.week.trim() : "");
-    const weekMap: Record<string, { total: number; done: number }> = {};
-    commitmentRows.forEach((r) => {
-      const wk = weekKey(r) || "Unknown";
-      if (!weekMap[wk]) weekMap[wk] = { total: 0, done: 0 };
-      weekMap[wk].total += 1;
-      if ((r.status || "").toLowerCase().includes("completed")) weekMap[wk].done += 1;
-    });
-    const weeklyCommitments = Object.entries(weekMap)
-      .map(([week, { total, done }]) => ({ week, commitments: total, completed: done }))
-      .sort((a, b) => a.week.localeCompare(b.week));
+    // Weekly trends and recent commitments will be derived from the Weekly WIG Tracker tab for reliability
+    let weeklyCommitments: { week: string; commitments: number; completed: number }[] = [];
+    let recentCommitments = [] as {
+      sessionDate: string;
+      department: string;
+      leadStatement: string;
+      status: string;
+      dueDate: string;
+    }[];
+    try {
+      const weeklyCsvUrl = `${buildCsvUrl("1673922593")}&timestamp=${Date.now()}`;
+      const weeklyRes = await fetch(weeklyCsvUrl, { cache: "no-store", headers: { Accept: "text/csv" } });
+      if (weeklyRes.ok) {
+        const weeklyCsv = await weeklyRes.text();
+        if (!weeklyCsv.includes("<!DOCTYPE") && !weeklyCsv.includes("<html")) {
+          const wLines = weeklyCsv.split("\n").filter((l) => l.trim());
+          const wHeaders = parseCSVLine(wLines[0]).map((h) => (h || "").trim().toLowerCase());
+          const idx = {
+            date: wHeaders.findIndex((h) => h === "session date" || h === "date"),
+            dept: wHeaders.findIndex((h) => h.startsWith("department")),
+            sub: wHeaders.findIndex((h) => h.startsWith("sub-")),
+            lead: wHeaders.findIndex((h) => h.includes("lead statement")),
+            commit: wHeaders.findIndex((h) => h === "commitment"),
+            due: wHeaders.findIndex((h) => h === "due date" || h === "due"),
+            status: wHeaders.findIndex((h) => h === "status"),
+            week: wHeaders.findIndex((h) => h === "week"),
+          };
 
-    // Department performance simple trend vs previous week (delta of completion rate)
-    const departmentPerformance = Object.keys(officeMap).map((dept) => ({
-      department: dept,
-      // Without historical breakdown per week per dept, set neutral change
-      trend: "stable",
-      change: 0,
+          const wRows: any[] = [];
+          for (let i = 1; i < wLines.length; i++) {
+            const cols = parseCSVLine(wLines[i]);
+            if (!cols.length || !cols.some((c) => (c || "").trim())) continue;
+            const get = (n: number) => (n >= 0 ? (cols[n] || "").trim() : "");
+            wRows.push({
+              sessionDate: get(idx.date),
+              department: get(idx.dept),
+              subDepartment: get(idx.sub),
+              leadStatement: get(idx.lead) || get(idx.commit),
+              dueDate: get(idx.due),
+              status: get(idx.status),
+              week: get(idx.week),
+            });
+          }
+
+          // Weekly aggregation
+          const wMap: Record<string, { total: number; done: number }> = {};
+          wRows.forEach((r) => {
+            const wk = (r.week || "").toString() || "Unknown";
+            if (!wMap[wk]) wMap[wk] = { total: 0, done: 0 };
+            wMap[wk].total += 1;
+            if ((r.status || "").toLowerCase().includes("completed")) wMap[wk].done += 1;
+          });
+          weeklyCommitments = Object.entries(wMap)
+            .map(([week, { total, done }]) => ({ week, commitments: total, completed: done }))
+            .sort((a, b) => a.week.localeCompare(b.week));
+
+          // Recent commitments
+          const parseDT = (s?: string) => (s ? Date.parse(s) || 0 : 0);
+          recentCommitments = [...wRows]
+            .sort((a, b) => parseDT(b.sessionDate) - parseDT(a.sessionDate))
+            .slice(0, 10)
+            .map((r) => ({
+              sessionDate: r.sessionDate || "",
+              department: r.department || "",
+              leadStatement: r.leadStatement || "",
+              status: r.status || "",
+              dueDate: r.dueDate || "",
+            }));
+        }
+      }
+    } catch (e) {
+      // ignore; will leave arrays empty
+    }
+
+    // Department performance: surface current completion rate per department
+    // Map from officeScores so UI shows non-zero percentages
+    const departmentPerformance = officeScores.map((o) => ({
+      department: o.office,
+      // Reuse completion rate as the displayed percentage
+      change: o.score,
+      // Simple qualitative trend based on thresholds
+      trend: o.score >= 60 ? "up" : o.score >= 40 ? "stable" : "down",
     }));
+
+    // Try to override counts and percentages from the Dashboard sheet which contains authoritative metrics
+    try {
+      // Prefer published CSV endpoint to avoid auth issues
+      const dashboardCsvUrl = `${buildCsvUrl(DASHBOARD_GID)}&timestamp=${Date.now()}`; // Dashboard tab
+      const dashRes = await fetch(dashboardCsvUrl, { cache: "no-store", headers: { Accept: "text/csv" } });
+      if (dashRes.ok) {
+        const dashCsv = await dashRes.text();
+        if (dashCsv.includes("<!DOCTYPE") || dashCsv.includes("<html")) {
+          throw new Error("Dashboard sheet not publicly published; received HTML");
+        }
+        const dashLines = dashCsv.split("\n");
+
+        // Helper to coerce percentage like 57.96% or 57% into number 57.xx
+        const toPercent = (val: string): number | null => {
+          const cleaned = (val || "").trim().replace(/%/g, "");
+          if (!cleaned) return null;
+          const num = parseFloat(cleaned);
+          return Number.isFinite(num) ? parseFloat(num.toFixed(2)) : null;
+        };
+
+        // Reuse parser to scan each row
+        // 1) Count of Commitment
+        for (const line of dashLines) {
+          const cols = parseCSVLine(line);
+          const idx = cols.findIndex(
+            (c) => (c || "").trim().toLowerCase() === "count of commitment"
+          );
+          if (idx !== -1) {
+            for (let j = idx + 1; j < cols.length; j++) {
+              const raw = (cols[j] || "").trim();
+              if (/^\d+(\.\d+)?$/.test(raw)) {
+                const n = Math.round(parseFloat(raw));
+                if (!Number.isNaN(n) && n > 0) totalCommitments = n;
+                break;
+              }
+            }
+            break;
+          }
+        }
+
+        // 2) Completed and Incomplete Commitments
+        for (const line of dashLines) {
+          const cols = parseCSVLine(line);
+          const lower = cols.map((c) => (c || "").trim().toLowerCase());
+          const completedIdx = lower.findIndex(
+            (c) => c === "count of complete commitments"
+          );
+          if (completedIdx !== -1) {
+            for (let j = completedIdx + 1; j < cols.length; j++) {
+              const raw = (cols[j] || "").trim();
+              if (/^\d+(\.\d+)?$/.test(raw)) {
+                const n = Math.round(parseFloat(raw));
+                if (!Number.isNaN(n)) completedCommitments = n;
+                break;
+              }
+            }
+          }
+
+          const incompleteIdx = lower.findIndex(
+            (c) => c === "count of incomplete commitments"
+          );
+          if (incompleteIdx !== -1) {
+            for (let j = incompleteIdx + 1; j < cols.length; j++) {
+              const raw = (cols[j] || "").trim();
+              if (/^\d+(\.\d+)?$/.test(raw)) {
+                const n = Math.round(parseFloat(raw));
+                if (!Number.isNaN(n)) incompleteCommitments = n;
+                break;
+              }
+            }
+          }
+        }
+
+        // 3) Commitment Rate to the Primary WIG
+        for (const line of dashLines) {
+          const cols = parseCSVLine(line);
+          const idx = cols.findIndex(
+            (c) =>
+              (c || "").trim().toLowerCase() ===
+              "commitment rate to the primary wig"
+          );
+          if (idx !== -1) {
+            for (let j = idx + 1; j < cols.length; j++) {
+              const p = toPercent(cols[j] || "");
+              if (p !== null) {
+                // override commitmentRate with Dashboard value
+                commitmentRate = p;
+                break;
+              }
+            }
+            break;
+          }
+        }
+
+        // 4) Commitment Score Per Office table
+        const officeScoresFromDash: { office: string; score: number }[] = [];
+        let inOfficeTable = false;
+        for (const line of dashLines) {
+          const cols = parseCSVLine(line);
+          const joined = cols.map((c) => (c || "").trim().toLowerCase()).join(" ");
+          if (!inOfficeTable && joined.includes("commitment score per office")) {
+            inOfficeTable = true;
+            continue;
+          }
+          if (inOfficeTable) {
+            // Expect label in one col and % in another; find first % value
+            const percentIndex = cols.findIndex((c) => /%\s*$/.test((c || "").trim()));
+            if (percentIndex !== -1) {
+              const pct = toPercent(cols[percentIndex] || "");
+              const nameCols = cols.slice(0, percentIndex).filter((c) => (c || "").trim());
+              const name = (nameCols[nameCols.length - 1] || "").trim();
+              if (name && pct !== null) {
+                officeScoresFromDash.push({ office: name, score: pct });
+              }
+            } else if (cols.every((c) => !(c || "").trim())) {
+              // blank row ends table
+              break;
+            }
+          }
+        }
+        if (officeScoresFromDash.length > 0) {
+          officeScores.splice(0, officeScores.length, ...officeScoresFromDash);
+        }
+
+        // 5) Commitment Score Per Unit table
+        const unitScoresFromDash: { unit: string; score: number }[] = [];
+        let inUnitTable = false;
+        for (const line of dashLines) {
+          const cols = parseCSVLine(line);
+          const rowLower = cols.map((c) => (c || "").trim().toLowerCase());
+          if (!inUnitTable && rowLower.join(" ").includes("commitment score per unit")) {
+            inUnitTable = true;
+            continue;
+          }
+          if (inUnitTable) {
+            const percentIndex = cols.findIndex((c) => /%\s*$/.test((c || "").trim()));
+            if (percentIndex !== -1) {
+              const pct = toPercent(cols[percentIndex] || "");
+              const nameCols = cols.slice(0, percentIndex).filter((c) => (c || "").trim());
+              const name = (nameCols[nameCols.length - 1] || "").trim();
+              if (name && pct !== null) {
+                unitScoresFromDash.push({ unit: name, score: pct });
+              }
+            } else if (cols.every((c) => !(c || "").trim())) {
+              break;
+            }
+          }
+        }
+        if (unitScoresFromDash.length > 0) {
+          unitScores.splice(0, unitScores.length, ...unitScoresFromDash);
+        }
+      }
+    } catch (e) {
+      // Non-fatal: keep computed counts if dashboard fetch fails
+      console.warn("Dashboard sheet fetch failed, using computed totals");
+    }
 
     const wigDashboardData = {
       summary: {
