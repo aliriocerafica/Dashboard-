@@ -723,8 +723,8 @@ export default function HRDashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                HR Dashboard
-              </h1>
+            HR Dashboard
+          </h1>
               <p className="text-sm sm:text-base text-gray-900">
                 WIG tracking and scorecard
                 {dashboardDate && (
@@ -736,27 +736,27 @@ export default function HRDashboard() {
             </div>
             <a
               href="https://docs.google.com/spreadsheets/d/e/2PACX-1vTUUgA13D4kJNNDEN6DmsJDO1EqDT29U8RBusME4ra-pmy2RYqynOYLLz1LO21UI2WmiwSzaaDsxZ8f/pubhtml"
-              target="_blank"
-              rel="noopener noreferrer"
+                  target="_blank"
+                  rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
               View Sheet
-            </a>
-          </div>
-        </div>
+                </a>
+              </div>
+            </div>
 
         {/* Navigation Tabs */}
         <div className="mb-6">
@@ -1340,8 +1340,8 @@ export default function HRDashboard() {
                           ))}
                         </tbody>
                       </table>
-                    </div>
-                  </div>
+          </div>
+        </div>
                 </div>
               </div>
             )}

@@ -2,140 +2,73 @@
 
 import { useState, useEffect } from "react";
 import {
-  CurrencyDollarIcon,
   BanknotesIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ClockIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
+  ClockIcon,
+  ArrowPathIcon,
+  EyeIcon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import MobileTable from "@/app/components/MobileTable";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Progress,
-  Chip,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@heroui/react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { LineChart, Line, PieChart, Pie, Cell } from "recharts";
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState("payroll");
   const [payrollData, setPayrollData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // Fetch real payroll concerns data
-  useEffect(() => {
-    const fetchPayrollData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/get-payroll-concerns");
-        if (!response.ok) {
-          throw new Error("Failed to fetch payroll concerns");
-        }
-        const result = await response.json();
-        if (result.success) {
-          setPayrollData(result.data);
-        } else {
-          throw new Error(result.error || "Failed to fetch data");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        console.error("Error fetching payroll data:", err);
-      } finally {
-        setLoading(false);
+  // Fetch payroll concerns data
+  const fetchPayrollData = async () => {
+    try {
+      setLoading(true);
+      // Add cache-busting timestamp to ensure fresh data
+      const response = await fetch(`/api/get-payroll-concerns?t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch payroll concerns");
       }
-    };
-
-    fetchPayrollData();
-  }, []);
-
-  // Sample data for Client Invoice Commitment
-  const invoiceData = {
-    summary: {
-      totalInvoices: 28,
-      pendingInvoices: 8,
-      paidInvoices: 20,
-      totalAmount: 450000,
-    },
-    commitments: [
-      {
-        id: 1,
-        client: "ABC Corporation",
-        invoiceNumber: "INV-2024-001",
-        amount: 25000,
-        dueDate: "2024-01-25",
-        status: "Pending",
-        priority: "High",
-      },
-      {
-        id: 2,
-        client: "XYZ Ltd",
-        invoiceNumber: "INV-2024-002",
-        amount: 15000,
-        dueDate: "2024-01-30",
-        status: "Overdue",
-        priority: "Critical",
-      },
-      {
-        id: 3,
-        client: "Tech Solutions Inc",
-        invoiceNumber: "INV-2024-003",
-        amount: 35000,
-        dueDate: "2024-02-05",
-        status: "Paid",
-        priority: "Medium",
-      },
-    ],
+      const result = await response.json();
+      if (result.success) {
+        setPayrollData(result.data);
+        setLastUpdated(new Date());
+        setError(null);
+      } else {
+        throw new Error(result.error || "Failed to fetch data");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching payroll data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const monthlyRevenue = [
-    { month: "Jan", revenue: 120000, expenses: 80000 },
-    { month: "Feb", revenue: 135000, expenses: 85000 },
-    { month: "Mar", revenue: 150000, expenses: 90000 },
-    { month: "Apr", revenue: 140000, expenses: 88000 },
-    { month: "May", revenue: 160000, expenses: 95000 },
-    { month: "Jun", revenue: 175000, expenses: 100000 },
-  ];
+  // Initial fetch and real-time updates
+  useEffect(() => {
+    fetchPayrollData();
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg border border-gray-700">
-          <p className="font-semibold text-white">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p
-              key={index}
-              style={{ color: entry.color }}
-              className="text-white"
-            >
-              {`${entry.dataKey}: $${entry.value.toLocaleString()}`}
-            </p>
-          ))}
-        </div>
-      );
+    // Set up auto-refresh every 30 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchPayrollData();
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusBadgeColor = (status: string) => {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === "resolved") {
+      return "bg-green-100 text-green-800";
+    } else if (lowerStatus === "pending") {
+      return "bg-orange-100 text-orange-800";
+    } else if (lowerStatus === "on process" || lowerStatus === "onprocess") {
+      return "bg-blue-100 text-blue-800";
+    } else {
+      return "bg-gray-100 text-gray-800";
     }
-    return null;
   };
 
   return (
@@ -153,7 +86,7 @@ export default function FinancePage() {
               </p>
             </div>
             <a
-              href="https://docs.google.com/spreadsheets/d/1D2Du8AeSWHVMSsHfe6Yxu6WxbLXrLvuMWU-h83YOgQQ/edit?gid=222330370#gid=222330370"
+              href="https://docs.google.com/spreadsheets/d/1D2Du8AeSWHVMSsHfe6Yxu6WxbLXrLvuMWU-h83YOgQQ/edit?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
@@ -206,7 +139,7 @@ export default function FinancePage() {
 
         {/* Payroll Concerns Tab */}
         {activeTab === "payroll" && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {loading ? (
               <div className="bg-white rounded-2xl p-6 shadow-sm">
                 <div className="text-center">
@@ -230,449 +163,398 @@ export default function FinancePage() {
               </div>
             ) : payrollData ? (
               <>
-                {/* Mobile App Summary Cards */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <BanknotesIcon className="w-5 h-5" />
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Total Concerns */}
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <BanknotesIcon className="w-6 h-6 text-white" />
                       </div>
-                      <span className="text-xs opacity-80">Total</span>
                     </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-3xl font-bold text-white mb-1">
                       {payrollData.summary.totalConcerns}
                     </div>
-                    <div className="text-xs opacity-80">Concerns</div>
+                    <div className="text-sm font-medium text-white/90">
+                      Total Concerns
+                    </div>
                   </div>
 
-                  <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <ClockIcon className="w-5 h-5" />
+                  {/* Resolved Concerns */}
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <CheckCircleIcon className="w-6 h-6 text-white" />
                       </div>
-                      <span className="text-xs opacity-80">Pending</span>
                     </div>
-                    <div className="text-2xl font-bold">
-                      {payrollData.summary.pendingConcerns}
-                    </div>
-                    <div className="text-xs opacity-80">Awaiting</div>
-                  </div>
-
-                  <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <CheckCircleIcon className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs opacity-80">Resolved</span>
-                    </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-3xl font-bold text-white mb-1">
                       {payrollData.summary.resolvedConcerns}
                     </div>
-                    <div className="text-xs opacity-80">Completed</div>
+                    <div className="text-sm font-medium text-white/90">
+                      Resolved Concerns
+                    </div>
                   </div>
 
-                  <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <ExclamationTriangleIcon className="w-5 h-5" />
+                  {/* Pending Concerns */}
+                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <ClockIcon className="w-6 h-6 text-white" />
                       </div>
-                      <span className="text-xs opacity-80">In Review</span>
                     </div>
-                    <div className="text-2xl font-bold">
-                      {payrollData.summary.inReviewConcerns}
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {payrollData.summary.pendingConcerns}
                     </div>
-                    <div className="text-xs opacity-80">Processing</div>
+                    <div className="text-sm font-medium text-white/90">
+                      Pending
+                    </div>
+                  </div>
+
+                  {/* On Process Concerns */}
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <ArrowPathIcon className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {payrollData.summary.onProcessConcerns}
+                    </div>
+                    <div className="text-sm font-medium text-white/90">
+                      On Process
+                    </div>
                   </div>
                 </div>
 
-                {/* Mobile App Weekly Chart */}
-                <div className="bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Weekly Trends
-                    </h3>
-                    <span className="text-sm text-gray-500">
-                      Concerns raised
-                    </span>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={(() => {
-                          // Group concerns by week
-                          const weeklyGroups: { [key: string]: number } = {};
-
-                          console.log(
-                            "Total concerns from API:",
-                            payrollData.concerns.length
-                          );
-                          console.log("All concerns:", payrollData.concerns);
-
-                          payrollData.concerns.forEach(
-                            (concern: any, index: number) => {
-                              const dateStr = concern.payrollDate;
-                              console.log(`Concern ${index + 1}:`, {
-                                payrollDate: dateStr,
-                                concernType: concern.concernType,
-                                status: concern.status,
-                              });
-
-                              if (!dateStr || dateStr.trim() === "") {
-                                console.log(
-                                  `Concern ${
-                                    index + 1
-                                  } has no date - grouping into 'No Date' category`
-                                );
-                                // Group concerns with no date into a special category
-                                weeklyGroups["no-date"] =
-                                  (weeklyGroups["no-date"] || 0) + 1;
-                                return;
-                              }
-
-                              const date = new Date(dateStr);
-                              console.log(
-                                `Parsing date "${dateStr}" -> ${date.toISOString()}`
-                              );
-
-                              // Check if date is valid
-                              if (isNaN(date.getTime())) {
-                                console.warn("Invalid date:", dateStr);
-                                return; // Skip invalid dates
-                              }
-
-                              // Get the start of the week (Sunday)
-                              const weekStart = new Date(date);
-                              weekStart.setDate(date.getDate() - date.getDay());
-                              weekStart.setHours(0, 0, 0, 0);
-
-                              const weekKey = weekStart
-                                .toISOString()
-                                .split("T")[0];
-
-                              console.log(
-                                `Concern ${index + 1} grouped into week:`,
-                                weekKey
-                              );
-
-                              // Count concerns for this week
-                              weeklyGroups[weekKey] =
-                                (weeklyGroups[weekKey] || 0) + 1;
-                            }
-                          );
-
-                          // Convert to array and sort by date
-                          const weeklyData = Object.entries(weeklyGroups)
-                            .map(([weekKey, concerns], index) => {
-                              // Handle the special "no-date" category
-                              if (weekKey === "no-date") {
-                                return {
-                                  week: "No Date",
-                                  concerns: concerns,
-                                  date: "no-date",
-                                };
-                              }
-                              return {
-                                week: `Week ${index + 1}`,
-                                concerns: concerns,
-                                date: weekKey,
-                              };
-                            })
-                            .sort((a, b) => {
-                              // Put "no-date" at the end
-                              if (a.date === "no-date") return 1;
-                              if (b.date === "no-date") return -1;
-                              return (
-                                new Date(a.date).getTime() -
-                                new Date(b.date).getTime()
-                              );
-                            });
-
-                          console.log("Weekly groups:", weeklyGroups);
-                          console.log("Final weekly data:", weeklyData);
-
-                          // Return data or fallback
-                          return weeklyData.length > 0
-                            ? weeklyData
-                            : [{ week: "No Data", concerns: 0, date: "" }];
-                        })()}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis
-                          dataKey="week"
-                          stroke="#6b7280"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis
-                          stroke="#6b7280"
-                          fontSize={12}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                          }}
-                          labelStyle={{ color: "#374151", fontWeight: "600" }}
-                        />
-                        <Bar
-                          dataKey="concerns"
-                          fill="#3b82f6"
-                          radius={[4, 4, 0, 0]}
-                          stroke="#2563eb"
-                          strokeWidth={1}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Mobile App Concerns List */}
-                <div className="bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Recent Concerns
-                    </h3>
-                    <span className="text-sm text-gray-500">
-                      {payrollData.summary.totalConcerns} total
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {payrollData.concerns.slice(0, 5).map((concern: any) => (
-                      <div
-                        key={concern.id}
-                        className="p-3 bg-gray-50 rounded-xl"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-900">
-                            {concern.concernType}
+                {/* Concerns Table */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        All Payroll Concerns
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Complete list of all submitted concerns
+                        {lastUpdated && (
+                          <span className="ml-2 text-xs">
+                            • Last updated: {lastUpdated.toLocaleTimeString()}
                           </span>
-                          <span
-                            className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                              concern.status === "Resolved"
-                                ? "bg-green-100 text-green-800"
-                                : concern.status === "In Review"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {concern.status}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {concern.payrollDate}
-                        </div>
-                        {concern.dateResolved && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            Resolved: {concern.dateResolved}
-                          </div>
                         )}
-                      </div>
-                    ))}
+                      </p>
+                    </div>
                     {payrollData.concerns.length > 5 && (
-                      <button className="w-full py-2 text-blue-500 text-sm font-medium">
-                        View All {payrollData.concerns.length} Concerns
+                      <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                      >
+                        <span className="text-lg">+</span>
+                        View All
                       </button>
                     )}
                   </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Payroll Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Type of Concern
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Details
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date Resolved
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {payrollData.concerns.length > 0 ? (
+                          payrollData.concerns.slice(0, 5).map((concern: any) => (
+                            <tr key={concern.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {concern.id}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {concern.payrollDate || "N/A"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                {concern.concernType || "N/A"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                                {concern.details || "N/A"}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {concern.status && concern.status.trim() !== "" ? (
+                                  <span
+                                    className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
+                                      concern.status
+                                    )}`}
+                                  >
+                                    {concern.status}
+                                  </span>
+                                ) : (
+                                  <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    N/A
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {concern.dateResolved && concern.dateResolved.trim() !== "" ? concern.dateResolved : "N/A"}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                              <td
+                                colSpan={6}
+                                className="px-6 py-8 text-center text-sm text-gray-500"
+                              >
+                                No concerns found
+                              </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+
+                {/* Modal for View All Concerns */}
+                {isModalOpen && (
+                  <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex min-h-screen items-center justify-center p-4">
+                      <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
+                        onClick={() => setIsModalOpen(false)}
+                      ></div>
+
+                      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              All Payroll Concerns
+                            </h2>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Complete list of all submitted concerns with search and filter
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                          >
+                            <XMarkIcon className="w-6 h-6 text-gray-500" />
+                          </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="p-6 border-b border-gray-200">
+                          <div className="relative">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                              type="text"
+                              placeholder="Search by email, concern type, status, or details..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2">
+                            {
+                              payrollData.concerns.filter(
+                                (concern: any) =>
+                                  concern.email
+                                    ?.toLowerCase()
+                                    .includes(searchTerm.toLowerCase()) ||
+                                  concern.concernType
+                                    ?.toLowerCase()
+                                    .includes(searchTerm.toLowerCase()) ||
+                                  concern.status
+                                    ?.toLowerCase()
+                                    .includes(searchTerm.toLowerCase()) ||
+                                  concern.details
+                                    ?.toLowerCase()
+                                    .includes(searchTerm.toLowerCase()) ||
+                                  concern.payrollDate
+                                    ?.toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                              ).length
+                            }{" "}
+                            of {payrollData.concerns.length} concerns match your search
+                          </p>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  ID
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Payroll Date
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Type of Concern
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Details
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Status
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Date Resolved
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {payrollData.concerns
+                                .filter(
+                                  (concern: any) =>
+                                    concern.email
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.concernType
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.status
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.details
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.payrollDate
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase())
+                                ).length > 0 ? (
+                                payrollData.concerns
+                                  .filter(
+                                    (concern: any) =>
+                                      concern.email
+                                        ?.toLowerCase()
+                                        .includes(searchTerm.toLowerCase()) ||
+                                      concern.concernType
+                                        ?.toLowerCase()
+                                        .includes(searchTerm.toLowerCase()) ||
+                                      concern.status
+                                        ?.toLowerCase()
+                                        .includes(searchTerm.toLowerCase()) ||
+                                      concern.details
+                                        ?.toLowerCase()
+                                        .includes(searchTerm.toLowerCase()) ||
+                                      concern.payrollDate
+                                        ?.toLowerCase()
+                                        .includes(searchTerm.toLowerCase())
+                                  )
+                                  .map((concern: any) => (
+                                  <tr
+                                    key={concern.id}
+                                    className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors"
+                                  >
+                                    <td className="py-3 px-4 text-gray-900 font-medium">
+                                      {concern.id}
+                                    </td>
+                                    <td className="py-3 px-4 text-gray-600">
+                                      {concern.payrollDate || "N/A"}
+                                    </td>
+                                    <td className="py-3 px-4 text-gray-600">
+                                      {concern.concernType || "N/A"}
+                                    </td>
+                                    <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
+                                      {concern.details || "N/A"}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      {concern.status && concern.status.trim() !== "" ? (
+                                        <span
+                                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
+                                            concern.status
+                                          )}`}
+                                        >
+                                          {concern.status}
+                                        </span>
+                                      ) : (
+                                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                          N/A
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-4 text-gray-600">
+                                      {concern.dateResolved && concern.dateResolved.trim() !== "" ? concern.dateResolved : "N/A"}
+                                    </td>
+                                  </tr>
+                                  ))
+                              ) : (
+                                <tr>
+                                  <td
+                                    colSpan={6}
+                                    className="py-8 px-4 text-center text-sm text-gray-500"
+                                  >
+                                    No concerns found matching your search
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm text-gray-600">
+                              Total: {payrollData.concerns.length} concerns | Filtered:{" "}
+                              {
+                                payrollData.concerns.filter(
+                                  (concern: any) =>
+                                    concern.email
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.concernType
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.status
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.details
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase()) ||
+                                    concern.payrollDate
+                                      ?.toLowerCase()
+                                      .includes(searchTerm.toLowerCase())
+                                ).length
+                              }{" "}
+                              concerns
+                            </p>
+                            <button
+                              onClick={() => setIsModalOpen(false)}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             ) : null}
           </div>
         )}
 
-        {/* Client Invoice Commitment Tab */}
+        {/* Invoices Tab */}
         {activeTab === "invoices" && (
-          <div className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                <CardBody className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        Total Invoices
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {invoiceData.summary.totalInvoices}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <DocumentTextIcon className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                <CardBody className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        Pending Invoices
-                      </p>
-                      <p className="text-2xl font-bold text-orange-600">
-                        {invoiceData.summary.pendingInvoices}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <ClockIcon className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                <CardBody className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        Paid Invoices
-                      </p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {invoiceData.summary.paidInvoices}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <CheckCircleIcon className="w-6 h-6 text-green-600" />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-
-              <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-                <CardBody className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">
-                        Total Amount
-                      </p>
-                      <p className="text-2xl font-bold text-purple-600">
-                        ${invoiceData.summary.totalAmount.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <CurrencyDollarIcon className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-            </div>
-
-            {/* Revenue Chart */}
-            <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Monthly Revenue vs Expenses
-                </h3>
-              </CardHeader>
-              <CardBody>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyRevenue}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar
-                      dataKey="revenue"
-                      fill="#10B981"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar
-                      dataKey="expenses"
-                      fill="#EF4444"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardBody>
-            </Card>
-
-            {/* Invoice Commitments Table */}
-            <Card className="bg-white shadow-lg border border-gray-100 rounded-xl">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Client Invoice Commitments
-                </h3>
-              </CardHeader>
-              <CardBody>
-                <Table aria-label="Invoice commitments table">
-                  <TableHeader>
-                    <TableColumn className="text-black font-semibold">
-                      CLIENT
-                    </TableColumn>
-                    <TableColumn className="text-black font-semibold">
-                      INVOICE #
-                    </TableColumn>
-                    <TableColumn className="text-black font-semibold">
-                      AMOUNT
-                    </TableColumn>
-                    <TableColumn className="text-black font-semibold">
-                      DUE DATE
-                    </TableColumn>
-                    <TableColumn className="text-black font-semibold">
-                      STATUS
-                    </TableColumn>
-                    <TableColumn className="text-black font-semibold">
-                      PRIORITY
-                    </TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {invoiceData.commitments.map((commitment) => (
-                      <TableRow key={commitment.id}>
-                        <TableCell className="font-medium text-black">
-                          {commitment.client}
-                        </TableCell>
-                        <TableCell className="text-black">
-                          {commitment.invoiceNumber}
-                        </TableCell>
-                        <TableCell className="text-black">
-                          ${commitment.amount.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-black">
-                          {commitment.dueDate}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            color={
-                              commitment.status === "Paid"
-                                ? "success"
-                                : commitment.status === "Overdue"
-                                ? "danger"
-                                : "warning"
-                            }
-                            variant="flat"
-                            className="text-black"
-                          >
-                            {commitment.status}
-                          </Chip>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            color={
-                              commitment.priority === "Critical"
-                                ? "danger"
-                                : commitment.priority === "High"
-                                ? "warning"
-                                : "default"
-                            }
-                            variant="flat"
-                            className="text-black"
-                          >
-                            {commitment.priority}
-                          </Chip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardBody>
-            </Card>
+          <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+            <p className="text-gray-600">Invoices section coming soon</p>
           </div>
         )}
       </div>
