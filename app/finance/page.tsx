@@ -9,6 +9,7 @@ import {
   EyeIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
+  ArrowPathRoundedSquareIcon,
 } from "@heroicons/react/24/outline";
 
 export default function FinancePage() {
@@ -19,11 +20,16 @@ export default function FinancePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch payroll concerns data
-  const fetchPayrollData = async () => {
+  const fetchPayrollData = async (showRefreshing = false) => {
     try {
-      setLoading(true);
+      if (showRefreshing) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       // Add cache-busting timestamp to ensure fresh data
       const response = await fetch(`/api/get-payroll-concerns?t=${Date.now()}`);
       if (!response.ok) {
@@ -42,21 +48,19 @@ export default function FinancePage() {
       console.error("Error fetching payroll data:", err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
-  // Initial fetch and real-time updates
+  // Initial fetch on mount
   useEffect(() => {
     fetchPayrollData();
-
-    // Set up auto-refresh every 30 seconds for real-time updates
-    const interval = setInterval(() => {
-      fetchPayrollData();
-    }, 30000); // 30 seconds
-
-    // Cleanup interval on unmount
-    return () => clearInterval(interval);
   }, []);
+
+  // Handle manual refresh
+  const handleRefresh = () => {
+    fetchPayrollData(true);
+  };
 
   const getStatusBadgeColor = (status: string) => {
     const lowerStatus = status.toLowerCase();
@@ -242,15 +246,25 @@ export default function FinancePage() {
                         )}
                       </p>
                     </div>
-                    {payrollData.concerns.length > 5 && (
+                    <div className="flex items-center gap-3">
                       <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <span className="text-lg">+</span>
-                        View All
+                        <ArrowPathRoundedSquareIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
                       </button>
-                    )}
+                      {payrollData.concerns.length > 5 && (
+                        <button
+                          onClick={() => setIsModalOpen(true)}
+                          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                        >
+                          <span className="text-lg">+</span>
+                          View All
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
