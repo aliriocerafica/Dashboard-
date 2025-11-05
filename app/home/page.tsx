@@ -14,6 +14,9 @@ import {
   BuildingOffice2Icon,
   ShieldCheckIcon,
   InformationCircleIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import {
   isAuthenticated,
@@ -27,6 +30,8 @@ import LoginForm from "../components/LoginForm";
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
   const router = useRouter();
 
   useEffect(() => {
@@ -40,6 +45,19 @@ export default function HomePage() {
       }
     }
   }, []);
+
+  // Handle ESC key to close zoom modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isZoomModalOpen) {
+        setIsZoomModalOpen(false);
+        setZoomLevel(100);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isZoomModalOpen]);
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
@@ -196,12 +214,25 @@ export default function HomePage() {
 
           {/* SVG Image Container */}
           <div className="bg-white rounded-xl p-6 sm:p-8 shadow-md border border-gray-200 mb-8 overflow-hidden">
-            <div className="relative w-full aspect-video bg-gray-50 rounded-lg flex items-center justify-center p-4">
+            <div 
+              className="relative w-full aspect-video bg-gray-50 rounded-lg flex items-center justify-center p-4 cursor-pointer group hover:bg-gray-100 transition-all duration-300"
+              onClick={() => setIsZoomModalOpen(true)}
+            >
               <img
                 src="/HowITworks.svg"
                 alt="How the Dashboard System Works"
-                className="w-full h-full object-contain max-h-[600px]"
+                className="w-full h-full object-contain max-h-[600px] transition-transform duration-300 group-hover:scale-105"
               />
+              {/* Overlay with zoom icon */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg flex items-center justify-center transition-all duration-300">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
+                  <ArrowsPointingOutIcon className="w-8 h-8 text-blue-600" />
+                </div>
+              </div>
+              {/* Hint text */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg">
+                Click to zoom
+              </div>
             </div>
           </div>
 
@@ -292,6 +323,126 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Zoom Modal */}
+        {isZoomModalOpen && (
+          <div 
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsZoomModalOpen(false);
+                setZoomLevel(100);
+              }
+            }}
+          >
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div 
+                className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      How It Works - Detailed View
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Zoom in/out to explore the system workflow
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsZoomModalOpen(false);
+                      setZoomLevel(100);
+                    }}
+                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6 text-gray-500" />
+                  </button>
+                </div>
+
+                {/* Zoom Controls */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setZoomLevel(Math.max(50, zoomLevel - 25))}
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm flex items-center gap-2"
+                    >
+                      <MagnifyingGlassIcon className="w-4 h-4 text-gray-600" />
+                      Zoom Out
+                    </button>
+                    <span className="text-sm font-medium text-gray-700 min-w-[60px] text-center">
+                      {zoomLevel}%
+                    </span>
+                    <button
+                      onClick={() => setZoomLevel(Math.min(200, zoomLevel + 25))}
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm flex items-center gap-2"
+                    >
+                      <MagnifyingGlassIcon className="w-4 h-4 text-gray-600 rotate-180" />
+                      Zoom In
+                    </button>
+                    <button
+                      onClick={() => setZoomLevel(100)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Use mouse wheel or pinch to zoom • Drag to pan
+                  </div>
+                </div>
+
+                {/* Zoomable Image Container */}
+                <div className="flex-1 overflow-auto bg-gray-100 p-8">
+                  <div 
+                    className="relative w-full h-full flex items-center justify-center"
+                    style={{
+                      cursor: zoomLevel > 100 ? 'grab' : 'default',
+                      userSelect: 'none',
+                    }}
+                    onWheel={(e) => {
+                      e.preventDefault();
+                      const delta = e.deltaY > 0 ? -10 : 10;
+                      setZoomLevel(Math.max(50, Math.min(200, zoomLevel + delta)));
+                    }}
+                  >
+                    <div
+                      className="bg-white rounded-lg shadow-2xl p-8 transition-transform duration-300"
+                      style={{
+                        transform: `scale(${zoomLevel / 100})`,
+                        transformOrigin: 'center',
+                      }}
+                    >
+                      <img
+                        src="/HowITworks.svg"
+                        alt="How the Dashboard System Works - Zoomed View"
+                        className="max-w-full h-auto select-none"
+                        draggable={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex justify-between items-center">
+                  <p className="text-sm text-gray-600">
+                    Click outside or press ESC to close
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsZoomModalOpen(false);
+                      setZoomLevel(100);
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="mt-16 bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
