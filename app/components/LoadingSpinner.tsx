@@ -15,8 +15,10 @@ export default function LoadingSpinner({
   className = "",
 }: LoadingSpinnerProps) {
   const [step, setStep] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     const id = setInterval(() => setStep((s) => (s + 1) % 3), 650);
     return () => clearInterval(id);
   }, []);
@@ -36,6 +38,19 @@ export default function LoadingSpinner({
     { label: "Fetching from Sheets" },
     { label: "Rendering" },
   ];
+
+  // During SSR (before hydration), render a simple deterministic placeholder
+  if (!hydrated) {
+    const sizeClasses = { sm: "h-4 w-4", md: "h-8 w-8", lg: "h-12 w-12" } as const;
+    return (
+      <div className={`flex flex-col items-center justify-center ${className}`}>
+        <div
+          className={`animate-spin rounded-full border-b-2 border-blue-600 ${sizeClasses[size]}`}
+        />
+        {text && <p className="mt-2 text-sm text-gray-600">{text}</p>}
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
