@@ -435,7 +435,7 @@ export default function PresidentDashboard() {
                 Office of the President
               </h1>
               <p className="text-sm sm:text-base text-gray-900">
-                WIG tracking and scorecard (reset — rebuilding)
+                WIG Tracking and Scorecard
               </p>
             </div>
             <a

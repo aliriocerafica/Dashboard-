@@ -727,7 +727,7 @@ export default function HRDashboard() {
             HR Dashboard
           </h1>
               <p className="text-sm sm:text-base text-gray-900">
-                WIG tracking and scorecard
+                WIG Tracking and Scorecard
                 {dashboardDate && (
                   <span className="ml-2 text-gray-600">
                     • Last updated: {dashboardDate}
