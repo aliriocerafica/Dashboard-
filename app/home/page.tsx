@@ -13,6 +13,7 @@ import {
   ComputerDesktopIcon,
   BuildingOffice2Icon,
   ShieldCheckIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   isAuthenticated,
@@ -178,6 +179,118 @@ export default function HomePage() {
               <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-200 transition-all duration-500 ease-in-out" />
             </Link>
           ))}
+        </div>
+
+        {/* How It Works Section */}
+        <div className="mt-16 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 lg:p-12">
+          <div className="flex items-center gap-3 mb-6">
+            <InformationCircleIcon className="w-8 h-8 text-blue-600" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              How It Works
+            </h2>
+          </div>
+          <p className="text-gray-600 mb-8 text-base sm:text-lg max-w-3xl">
+            Our dashboard system connects seamlessly with Google Sheets to provide
+            real-time data visualization and analytics. Here's how the system works:
+          </p>
+
+          {/* SVG Image Container */}
+          <div className="bg-white rounded-xl p-6 sm:p-8 shadow-md border border-gray-200 mb-8 overflow-hidden">
+            <div className="relative w-full aspect-video bg-gray-50 rounded-lg flex items-center justify-center p-4">
+              <img
+                src="/HowITworks.svg"
+                alt="How the Dashboard System Works"
+                className="w-full h-full object-contain max-h-[600px]"
+              />
+            </div>
+          </div>
+
+          {/* Highlighted Sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Step 1 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-blue-200 hover:border-blue-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  1
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Data Source</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Google Sheets serve as the central data repository. Each department
+                maintains their own sheets with real-time updates.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-purple-200 hover:border-purple-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  2
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">API Integration</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Our system fetches data from published Google Sheets via CSV URLs,
+                ensuring automatic synchronization without manual exports.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-green-200 hover:border-green-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  3
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Data Processing</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Data is parsed, transformed, and processed to calculate metrics,
+                statistics, and generate insights for each department.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-orange-200 hover:border-orange-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  4
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Visualization</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Interactive charts, graphs, and tables display the processed data
+                in an intuitive, easy-to-understand format.
+              </p>
+            </div>
+
+            {/* Step 5 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-red-200 hover:border-red-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  5
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Real-time Updates</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Users can refresh data on-demand to get the latest information
+                from Google Sheets, ensuring always up-to-date dashboards.
+              </p>
+            </div>
+
+            {/* Step 6 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border-2 border-indigo-200 hover:border-indigo-400 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  6
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Secure Access</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Role-based authentication ensures that only authorized users can
+                access department-specific dashboards and data.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Quick Stats */}
