@@ -21,7 +21,7 @@ export default function InactivityMonitor() {
   const [remainingSeconds, setRemainingSeconds] = useState(60);
 
   // Pages that don't require authentication (shouldn't trigger inactivity)
-  const publicPages = ["/", "/home", "/splash", "/documentation"];
+  const publicPages = ["/", "/home", "/splash", "/how-it-works"];
   const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {

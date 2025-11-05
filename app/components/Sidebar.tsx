@@ -274,23 +274,23 @@ export default function Sidebar() {
               )}
             </Link>
 
-            {/* Documentation Link */}
+            {/* How It Works Link */}
             <Link
-              href="/documentation"
+              href="/how-it-works"
               className={`flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
                 isSidebarCollapsed
                   ? "justify-center px-2 py-3"
                   : "gap-3 px-4 py-3"
               } ${
-                isActiveLink("/documentation")
+                isActiveLink("/how-it-works")
                   ? "bg-emerald-50 text-emerald-600 border-l-4 border-emerald-600"
                   : "text-gray-700 bg-transparent hover:text-emerald-600"
               }`}
-              title={isSidebarCollapsed ? "Documentation" : ""}
+              title={isSidebarCollapsed ? "How It Works" : ""}
             >
               <DocumentTextIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
               {!isSidebarCollapsed && (
-                <span className="relative z-10">Documentation</span>
+                <span className="relative z-10">How It Works</span>
               )}
             </Link>
 
@@ -566,18 +566,18 @@ export default function Sidebar() {
                   <span className="relative z-10">Home</span>
                 </Link>
 
-                {/* Documentation Link */}
+                {/* How It Works Link */}
                 <Link
-                  href="/documentation"
+                  href="/how-it-works"
                   className={`nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
-                    isActiveLink("/documentation")
+                    isActiveLink("/how-it-works")
                       ? "bg-emerald-50 text-emerald-600 border-l-4 border-emerald-600"
                       : "text-gray-700 hover:text-emerald-600"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <DocumentTextIcon className="w-5 h-5" />
-                  <span className="relative z-10">Documentation</span>
+                  <span className="relative z-10">How It Works</span>
                 </Link>
 
                 {/* Processes Section */}
