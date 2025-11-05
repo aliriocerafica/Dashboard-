@@ -14,7 +14,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { MegaphoneIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { MegaphoneIcon, ArrowPathIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 interface Lead {
@@ -75,6 +75,12 @@ export default function MarketingPage() {
   const [errorGantt, setErrorGantt] = useState<string | null>(null);
   const [ganttData, setGanttData] = useState<GanttData | null>(null);
   const [lastUpdatedGantt, setLastUpdatedGantt] = useState<string | null>(null);
+
+  // Modal and search states
+  const [isLeadsModalOpen, setIsLeadsModalOpen] = useState(false);
+  const [isGanttModalOpen, setIsGanttModalOpen] = useState(false);
+  const [leadsSearchTerm, setLeadsSearchTerm] = useState("");
+  const [ganttSearchTerm, setGanttSearchTerm] = useState("");
 
   const MARKETING_SHEET_URL =
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmD1pwH70Jmk99umPEi-XNJrvAxCiIOb-3S40eFHmHxT8-YKQ_I2hWbIwsQ4909AAMTByWZcr7jhTj/pub?gid=1083366093&single=true&output=csv";
@@ -161,8 +167,8 @@ export default function MarketingPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                Marketing Dashboard
-              </h1>
+            Marketing Dashboard
+          </h1>
               <p className="text-sm sm:text-base text-gray-900">
                 {activeTab === "dashboard" ? (
                   <>
@@ -182,7 +188,7 @@ export default function MarketingPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
+                <button
                 onClick={handleRefresh}
                 disabled={activeTab === "dashboard" ? loading : loadingGantt}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg transition-colors font-medium text-sm"
@@ -191,30 +197,30 @@ export default function MarketingPage() {
                   className={`w-4 h-4 ${activeTab === "dashboard" ? (loading ? "animate-spin" : "") : (loadingGantt ? "animate-spin" : "")}`}
                 />
                 {(activeTab === "dashboard" ? loading : loadingGantt) ? "Refreshing..." : "Refresh Data"}
-              </button>
-              <a
+                </button>
+                <a
                 href={
                   activeTab === "dashboard"
                     ? "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmD1pwH70Jmk99umPEi-XNJrvAxCiIOb-3S40eFHmHxT8-YKQ_I2hWbIwsQ4909AAMTByWZcr7jhTj/edit#gid=1083366093"
                     : "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmD1pwH70Jmk99umPEi-XNJrvAxCiIOb-3S40eFHmHxT8-YKQ_I2hWbIwsQ4909AAMTByWZcr7jhTj/edit#gid=240728240"
                 }
-                target="_blank"
-                rel="noopener noreferrer"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
                 View Sheet
               </a>
             </div>
@@ -372,95 +378,94 @@ export default function MarketingPage() {
               </div>
             </div>
 
-            {/* Leads List */}
-            <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+            {/* Leads List Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  WIG Leads
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {data.leads.length === 0 ? (
-                  <div className="px-6 py-12 text-center text-gray-500">
-                    No leads found
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      WIG Leads
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {data.leads.length} Total
+                    </p>
                   </div>
-                ) : (
-                  data.leads.map((lead, index) => (
-                    <div key={index} className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
-                              {lead.leadNumber}
-                            </span>
-                            <span
-                              className={`text-xs font-medium px-3 py-1 rounded-full ${
-                                lead.status === "Completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : lead.status === "Drafting"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : lead.status === "Approved"
-                                  ? "bg-purple-100 text-purple-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {lead.status}
-                            </span>
-                          </div>
-                          <p className="text-gray-900 font-medium">
-                            {lead.leadStatement}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Activities */}
-                      {lead.activities.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                            Activities ({lead.activities.length}):
-                          </h4>
-                          <div className="space-y-2">
-                            {lead.activities.map((activity, actIndex) => (
-                              <div
-                                key={actIndex}
-                                className="bg-gray-50 rounded-lg p-3 border border-gray-200"
-                              >
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1">
-                                    <p className="text-sm text-gray-900">
-                                      {activity.activity}
-                                    </p>
-                                    {activity.notes && (
-                                      <p className="text-xs text-gray-600 mt-1">
-                                        {activity.notes}
-                                      </p>
-                                    )}
-                                  </div>
-                                  {activity.status && (
-                                    <span
-                                      className={`text-xs font-medium px-2 py-1 rounded whitespace-nowrap ${
-                                        activity.status === "Completed"
-                                          ? "bg-green-100 text-green-800"
-                                          : activity.status === "Drafting"
-                                          ? "bg-orange-100 text-orange-800"
-                                          : activity.status === "In progress"
-                                          ? "bg-blue-100 text-blue-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }`}
-                                    >
-                                      {activity.status}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
+                  <button
+                    onClick={() => setIsLeadsModalOpen(true)}
+                    className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                  >
+                    + View All
+                  </button>
+                </div>
               </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                        Lead
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                        Statement
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                        Activities
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.leads.slice(0, 3).map((lead, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
+                            {lead.leadNumber}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 font-medium max-w-md">
+                            {lead.leadStatement}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                              lead.status === "Completed"
+                                ? "bg-green-100 text-green-800"
+                                : lead.status === "Drafting"
+                                ? "bg-orange-100 text-orange-800"
+                                : lead.status === "Approved"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-gray-600">
+                            {lead.activities.length} activities
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {data.leads.length > 3 && (
+                <div className="px-6 py-3 bg-gray-50/50 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 text-center">
+                    Showing 3 of {data.leads.length} results
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Status Counts Summary */}
@@ -510,6 +515,170 @@ export default function MarketingPage() {
           </div>
         )}
 
+        {/* Leads Modal */}
+        {isLeadsModalOpen && data && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div
+                className="fixed inset-0 bg-white/20 backdrop-blur-md transition-opacity"
+                onClick={() => setIsLeadsModalOpen(false)}
+              ></div>
+
+              <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-slate-50 to-gray-50 rounded-t-2xl">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      All WIG Leads
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Complete list of all leads with activities and search capabilities
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsLeadsModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6 text-gray-500" />
+                  </button>
+                </div>
+
+                {/* Search Bar */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by lead number, statement, or status..."
+                      value={leadsSearchTerm}
+                      onChange={(e) => setLeadsSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {data.leads.filter(
+                      (lead) =>
+                        lead.leadNumber.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                        lead.leadStatement.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                        lead.status.toLowerCase().includes(leadsSearchTerm.toLowerCase())
+                    ).length}{" "}
+                    of {data.leads.length} leads match your search
+                  </p>
+                </div>
+
+                {/* Modal Body */}
+                <div className="flex-1 overflow-auto">
+                  <div className="divide-y divide-gray-200">
+                    {data.leads
+                      .filter(
+                        (lead) =>
+                          lead.leadNumber.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                          lead.leadStatement.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                          lead.status.toLowerCase().includes(leadsSearchTerm.toLowerCase())
+                      )
+                      .map((lead, index) => (
+                        <div key={index} className="p-6 hover:bg-gray-50/50 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
+                                  {lead.leadNumber}
+                                </span>
+                                <span
+                                  className={`text-xs font-medium px-3 py-1 rounded-full ${
+                                    lead.status === "Completed"
+                                      ? "bg-green-100 text-green-800"
+                                      : lead.status === "Drafting"
+                                      ? "bg-orange-100 text-orange-800"
+                                      : lead.status === "Approved"
+                                      ? "bg-purple-100 text-purple-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {lead.status}
+                                </span>
+                              </div>
+                              <p className="text-gray-900 font-medium">
+                                {lead.leadStatement}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Activities */}
+                          {lead.activities.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                Activities ({lead.activities.length}):
+                              </h4>
+                              <div className="space-y-2">
+                                {lead.activities.map((activity, actIndex) => (
+                                  <div
+                                    key={actIndex}
+                                    className="bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1">
+                                        <p className="text-sm text-gray-900">
+                                          {activity.activity}
+                                        </p>
+                                        {activity.notes && (
+                                          <p className="text-xs text-gray-600 mt-1">
+                                            {activity.notes}
+                                          </p>
+                                        )}
+                                      </div>
+                                      {activity.status && (
+                                        <span
+                                          className={`text-xs font-medium px-2 py-1 rounded whitespace-nowrap ${
+                                            activity.status === "Completed"
+                                              ? "bg-green-100 text-green-800"
+                                              : activity.status === "Drafting"
+                                              ? "bg-orange-100 text-orange-800"
+                                              : activity.status === "In progress"
+                                              ? "bg-blue-100 text-blue-800"
+                                              : "bg-gray-100 text-gray-800"
+                                          }`}
+                                        >
+                                          {activity.status}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      Total: {data.leads.length} leads | Filtered:{" "}
+                      {data.leads.filter(
+                        (lead) =>
+                          lead.leadNumber.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                          lead.leadStatement.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
+                          lead.status.toLowerCase().includes(leadsSearchTerm.toLowerCase())
+                      ).length}{" "}
+                      leads
+                    </p>
+                    <button
+                      onClick={() => setIsLeadsModalOpen(false)}
+                      className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Gantt Tab */}
         {activeTab === "gantt" && (
           <div className="space-y-6">
@@ -547,33 +716,51 @@ export default function MarketingPage() {
                 )}
 
                 {/* Items Table */}
-                <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">Updated Gantt Items</h3>
-                    {lastUpdatedGantt && (
-                      <span className="text-sm text-gray-600">Last updated: {new Date(lastUpdatedGantt).toLocaleString()}</span>
-                    )}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Updated Gantt Items
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {ganttData.items.length} Total
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setIsGanttModalOpen(true)}
+                        className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                      >
+                        + View All
+                      </button>
+                    </div>
                   </div>
+
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[900px] text-sm">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">Activity</th>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">Status</th>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">Start</th>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">End</th>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">Duration</th>
-                          <th className="text-left py-3 px-6 font-semibold text-gray-700 tracking-wide">Notes</th>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                            Activity
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                            Start
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                            End
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                            Duration
+                          </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-100">
-                        {ganttData.items.length === 0 ? (
-                          <tr>
-                            <td colSpan={6} className="py-12 text-center text-gray-500">No items found</td>
-                          </tr>
-                        ) : (
-                          ganttData.items.map((it, idx) => {
-                            const badgeClass = it.status?.toLowerCase() === "completed"
+                      <tbody>
+                        {ganttData.items.slice(0, 3).map((it, idx) => {
+                          const badgeClass =
+                            it.status?.toLowerCase() === "completed"
                               ? "bg-green-100 text-green-800"
                               : it.status?.toLowerCase() === "ongoing" || it.status?.toLowerCase() === "on-going"
                               ? "bg-blue-100 text-blue-800"
@@ -585,29 +772,50 @@ export default function MarketingPage() {
                               ? "bg-purple-100 text-purple-800"
                               : "bg-gray-100 text-gray-800";
 
-                            return (
-                              <tr key={idx}>
-                                <td className="py-2 px-6 align-top text-gray-900">
-                                  <div className={`leading-snug ${it.isSubtask ? "pl-4" : "font-medium"}`}>{it.name}</div>
-                                </td>
-                                <td className="py-2 px-6 align-top">
-                                  {it.status ? (
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${badgeClass}`}>{it.status}</span>
-                                  ) : (
-                                    <span className="text-gray-400">—</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-6 align-top text-gray-700">{it.start || "—"}</td>
-                                <td className="py-2 px-6 align-top text-gray-700">{it.end || "—"}</td>
-                                <td className="py-2 px-6 align-top text-gray-700">{it.duration || "—"}</td>
-                                <td className="py-2 px-6 align-top text-gray-700 max-w-[360px]"><div className="line-clamp-2" title={it.notes || ""}>{it.notes || "—"}</div></td>
-                              </tr>
-                            );
-                          })
-                        )}
+                          return (
+                            <tr
+                              key={idx}
+                              className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                            >
+                              <td className="px-6 py-4">
+                                <div className={`text-sm text-gray-900 ${it.isSubtask ? "pl-4" : "font-medium"}`}>
+                                  {it.name}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                {it.status ? (
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${badgeClass}`}
+                                  >
+                                    {it.status}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">—</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.start || "—"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.end || "—"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.duration || "—"}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
+
+                  {ganttData.items.length > 3 && (
+                    <div className="px-6 py-3 bg-gray-50/50 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 text-center">
+                        Showing 3 of {ganttData.items.length} results
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -626,6 +834,175 @@ export default function MarketingPage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Gantt Modal */}
+        {isGanttModalOpen && ganttData && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div
+                className="fixed inset-0 bg-white/20 backdrop-blur-md transition-opacity"
+                onClick={() => setIsGanttModalOpen(false)}
+              ></div>
+
+              <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-slate-50 to-gray-50 rounded-t-2xl">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      All Gantt Items
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Complete list of all Gantt items with search and filter capabilities
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsGanttModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6 text-gray-500" />
+                  </button>
+                </div>
+
+                {/* Search Bar */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by activity name, status, start, or end date..."
+                      value={ganttSearchTerm}
+                      onChange={(e) => setGanttSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {ganttData.items.filter(
+                      (it) =>
+                        it.name.toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                        (it.status || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                        (it.start || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                        (it.end || "").toLowerCase().includes(ganttSearchTerm.toLowerCase())
+                    ).length}{" "}
+                    of {ganttData.items.length} items match your search
+                  </p>
+                </div>
+
+                {/* Modal Body */}
+                <div className="flex-1 overflow-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          Activity
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          Start
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          End
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          Duration
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
+                          Notes
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ganttData.items
+                        .filter(
+                          (it) =>
+                            it.name.toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                            (it.status || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                            (it.start || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                            (it.end || "").toLowerCase().includes(ganttSearchTerm.toLowerCase())
+                        )
+                        .map((it, idx) => {
+                          const badgeClass =
+                            it.status?.toLowerCase() === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : it.status?.toLowerCase() === "ongoing" || it.status?.toLowerCase() === "on-going"
+                              ? "bg-blue-100 text-blue-800"
+                              : it.status?.toLowerCase() === "on hold" || it.status?.toLowerCase() === "on-hold"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : it.status?.toLowerCase() === "delayed"
+                              ? "bg-red-100 text-red-800"
+                              : it.status?.toLowerCase() === "target"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-gray-100 text-gray-800";
+
+                          return (
+                            <tr
+                              key={idx}
+                              className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                            >
+                              <td className="px-6 py-4">
+                                <div className={`text-sm text-gray-900 ${it.isSubtask ? "pl-4" : "font-medium"}`}>
+                                  {it.name}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                {it.status ? (
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${badgeClass}`}
+                                  >
+                                    {it.status}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">—</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.start || "—"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.end || "—"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">
+                                {it.duration || "—"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600 max-w-md">
+                                <div className="line-clamp-2" title={it.notes || ""}>
+                                  {it.notes || "—"}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      Total: {ganttData.items.length} items | Filtered:{" "}
+                      {ganttData.items.filter(
+                        (it) =>
+                          it.name.toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                          (it.status || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                          (it.start || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
+                          (it.end || "").toLowerCase().includes(ganttSearchTerm.toLowerCase())
+                      ).length}{" "}
+                      items
+                    </p>
+                    <button
+                      onClick={() => setIsGanttModalOpen(false)}
+                      className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Close
+                    </button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
         )}
       </div>
     </div>
