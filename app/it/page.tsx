@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import LoadingSpinner from "../components/LoadingSpinner";
 import LoginForm from "../components/LoginForm";
 import ITProgressStats from "../components/ITProgressStats";
 import {
@@ -138,10 +139,7 @@ export default function ITPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading IT dashboard...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading IT dashboard..." />
       </div>
     );
   }

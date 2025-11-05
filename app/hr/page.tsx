@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function HRDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -1039,8 +1040,7 @@ export default function HRDashboard() {
             {/* Loading / Error */}
             {loading && (
               <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading dashboard data...</p>
+                <LoadingSpinner size="lg" text="Loading dashboard data..." />
               </div>
             )}
             {error && (

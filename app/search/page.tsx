@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { isAuthenticated } from "../lib/auth";
 import LoginForm from "../components/LoginForm";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface SearchResult {
   id: string;
@@ -346,8 +347,7 @@ export default function SearchPage() {
         <div className="space-y-4">
           {isSearching && (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Searching...</p>
+              <LoadingSpinner size="md" text="Searching..." />
             </div>
           )}
 

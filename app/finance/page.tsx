@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import LoadingSpinner from "../components/LoadingSpinner";
 import {
   BanknotesIcon,
   CheckCircleIcon,
@@ -145,11 +146,8 @@ export default function FinancePage() {
         {activeTab === "payroll" && (
           <div className="space-y-6">
             {loading ? (
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading payroll concerns...</p>
-                </div>
+              <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                <LoadingSpinner size="lg" text="Loading payroll concerns..." />
               </div>
             ) : error ? (
               <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
