@@ -12,6 +12,17 @@ import {
   MagnifyingGlassIcon,
   ArrowPathRoundedSquareIcon,
 } from "@heroicons/react/24/outline";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell
+} from "recharts";
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState("payroll");
@@ -30,6 +41,7 @@ export default function FinancePage() {
   const [filteredPaymentStatus, setFilteredPaymentStatus] = useState<string>("");
   const [filteredClientName, setFilteredClientName] = useState<string>("");
   const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
   // Fetch payroll concerns data
   const fetchPayrollData = async (showRefreshing = false) => {
@@ -709,6 +721,88 @@ export default function FinancePage() {
                   </div>
                 </div>
 
+                {/* Payment Status Chart */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Payment Status by Client
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Compare payment performance across all clients
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsChartModalOpen(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                      View Full Graph
+                    </button>
+                  </div>
+                  <div className="px-4 py-3">
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart
+                        data={(() => {
+                          // Prepare chart data
+                          return Object.keys(clientPaymentData.clientHistory).map((clientName) => {
+                            const history = clientPaymentData.clientHistory[clientName];
+                            const paidEarly = history.filter((p: any) => p.status === "Paid Early").length;
+                            const paidOnTime = history.filter((p: any) => p.status === "Paid On Time").length;
+                            const paidLate = history.filter((p: any) => p.status === "Paid Late").length;
+                            
+                            return {
+                              client: clientName,
+                              "Paid Early": paidEarly,
+                              "Paid On Time": paidOnTime,
+                              "Paid Late": paidLate,
+                            };
+                          }).sort((a, b) => {
+                            // Sort by total payments descending
+                            const totalA = a["Paid Early"] + a["Paid On Time"] + a["Paid Late"];
+                            const totalB = b["Paid Early"] + b["Paid On Time"] + b["Paid Late"];
+                            return totalB - totalA;
+                          });
+                        })()}
+                        margin={{ top: 10, right: 20, left: 10, bottom: 50 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="client" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                          tick={{ fontSize: 11 }}
+                          stroke="#6b7280"
+                        />
+                        <YAxis 
+                          stroke="#6b7280"
+                          tick={{ fontSize: 11 }}
+                          width={40}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '10px' }}
+                          iconType="circle"
+                          iconSize={10}
+                        />
+                        <Bar dataKey="Paid Early" fill="#10b981" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="Paid On Time" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="Paid Late" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
                 {/* Client History Cards */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
@@ -1155,6 +1249,125 @@ export default function FinancePage() {
                               Close
                             </button>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Chart Modal */}
+                {isChartModalOpen && clientPaymentData && (
+                  <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex min-h-screen items-center justify-center p-4">
+                      <div
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+                        onClick={() => setIsChartModalOpen(false)}
+                      />
+                      
+                      <div className="relative bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-between">
+                          <div>
+                            <h2 className="text-xl font-bold text-white">
+                              Payment Status by Client - Full View
+                            </h2>
+                            <p className="text-sm text-blue-100 mt-1">
+                              Detailed comparison of payment performance across all clients
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => setIsChartModalOpen(false)}
+                            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                          >
+                            <XMarkIcon className="w-6 h-6 text-white" />
+                          </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-8">
+                          <ResponsiveContainer width="100%" height={600}>
+                            <BarChart
+                              data={(() => {
+                                // Prepare chart data
+                                return Object.keys(clientPaymentData.clientHistory).map((clientName) => {
+                                  const history = clientPaymentData.clientHistory[clientName];
+                                  const paidEarly = history.filter((p: any) => p.status === "Paid Early").length;
+                                  const paidOnTime = history.filter((p: any) => p.status === "Paid On Time").length;
+                                  const paidLate = history.filter((p: any) => p.status === "Paid Late").length;
+                                  
+                                  return {
+                                    client: clientName,
+                                    "Paid Early": paidEarly,
+                                    "Paid On Time": paidOnTime,
+                                    "Paid Late": paidLate,
+                                  };
+                                }).sort((a, b) => {
+                                  // Sort by total payments descending
+                                  const totalA = a["Paid Early"] + a["Paid On Time"] + a["Paid Late"];
+                                  const totalB = b["Paid Early"] + b["Paid On Time"] + b["Paid Late"];
+                                  return totalB - totalA;
+                                });
+                              })()}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                              <XAxis 
+                                dataKey="client" 
+                                angle={-45}
+                                textAnchor="end"
+                                height={120}
+                                tick={{ fontSize: 13 }}
+                                stroke="#6b7280"
+                              />
+                              <YAxis 
+                                stroke="#6b7280"
+                                tick={{ fontSize: 13 }}
+                                label={{ value: 'Number of Payments', angle: -90, position: 'insideLeft' }}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'white',
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: '12px',
+                                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                                  padding: '12px'
+                                }}
+                                cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                              />
+                              <Legend 
+                                wrapperStyle={{ paddingTop: '30px' }}
+                                iconType="circle"
+                                iconSize={12}
+                              />
+                              <Bar dataKey="Paid Early" fill="#10b981" radius={[8, 8, 0, 0]} />
+                              <Bar dataKey="Paid On Time" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                              <Bar dataKey="Paid Late" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex items-center justify-between">
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                              <span className="text-sm font-medium text-gray-700">Paid Early</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                              <span className="text-sm font-medium text-gray-700">Paid On Time</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                              <span className="text-sm font-medium text-gray-700">Paid Late</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setIsChartModalOpen(false)}
+                            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                          >
+                            Close
+                          </button>
                         </div>
                       </div>
                     </div>
