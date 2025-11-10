@@ -179,16 +179,6 @@ export default function FinancePage() {
               >
                 Client Payment Update
               </button>
-              <button
-                onClick={() => setActiveTab("invoices")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "invoices"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Invoices
-              </button>
             </nav>
           </div>
         </div>
@@ -1229,12 +1219,6 @@ export default function FinancePage() {
           </div>
         )}
 
-        {/* Invoices Tab */}
-        {activeTab === "invoices" && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-            <p className="text-gray-600">Invoices section coming soon</p>
-          </div>
-        )}
       </div>
     </div>
   );

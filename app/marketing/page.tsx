@@ -117,6 +117,15 @@ export default function MarketingPage() {
     }
   };
 
+  // Auto-fetch data on mount based on active tab
+  useEffect(() => {
+    if (activeTab === "dashboard" && !data) {
+      fetchData();
+    } else if (activeTab === "gantt" && !ganttData) {
+      fetchGantt();
+    }
+  }, [activeTab]);
+
   const handleRefresh = () => {
     if (activeTab === "dashboard") {
       fetchData();
