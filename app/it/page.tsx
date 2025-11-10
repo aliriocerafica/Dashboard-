@@ -350,7 +350,7 @@ export default function ITPage() {
         {activeTab === "itUpdate" && (
           <>
             {/* Row 1: KPI tiles (6 cols) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
           {/* Total Tickets */}
           <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
             <div className="flex items-center justify-between mb-2">
@@ -638,7 +638,7 @@ export default function ITPage() {
             {!taskLoading && !taskError && taskData && (
               <>
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                   {/* Total Tasks */}
                   <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">

@@ -290,7 +290,7 @@ export default function MarketingPage() {
         {activeTab === "dashboard" && !loading && !error && data && (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white">
                 <div className="text-sm font-medium text-white/90 mb-2">Total Leads</div>
                 <div className="text-3xl font-bold text-white mt-1">
@@ -483,7 +483,7 @@ export default function MarketingPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Status Summary
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {Object.entries(data.summary.statusCounts).map(
                     ([status, count]) => (
                       <div
@@ -714,7 +714,7 @@ export default function MarketingPage() {
               <>
                 {/* Status Summary Cards */}
                 {Object.keys(ganttData.statusCounts || {}).length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
                     {Object.entries(ganttData.statusCounts).map(([label, count]) => {
                       // Determine color based on status label
                       const getStatusColor = (status: string) => {

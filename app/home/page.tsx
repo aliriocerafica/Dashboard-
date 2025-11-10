@@ -131,80 +131,74 @@ export default function HomePage() {
         </div>
 
         {/* Department Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {departments.map((dept, index) => (
             <Link
               key={dept.name}
               href={dept.href}
-              className="group flowing-hover bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 relative overflow-hidden"
-              style={{
-                transitionDelay: `${index * 50}ms`,
-              }}
+              className="group block"
             >
-              {/* Animated background gradient on hover */}
-              <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out rounded-2xl" />
+              <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl border border-gray-100 p-4 sm:p-5 relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                {/* Background gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-              {/* Content with relative positioning */}
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
-                  <div
-                    className={`icon-float w-16 h-16 bg-linear-to-br ${dept.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-500 ease-in-out`}
-                    style={{
-                      transitionDelay: `${index * 50 + 100}ms`,
-                    }}
-                  >
-                    <dept.icon className="w-8 h-8 transition-transform duration-300" />
+                {/* Content */}
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <div
+                      className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${dept.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <dept.icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+                    <ArrowRightIcon className="w-5 h-5 text-gray-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
-                  <ArrowRightIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-500 ease-in-out" />
-                </div>
 
-                <h3 className="text-glow text-2xl font-bold text-gray-900 mb-2 transition-colors duration-300">
-                  {dept.name}
-                </h3>
-                <p className="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
-                  {dept.description}
-                </p>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors duration-300">
+                    {dept.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-3 line-clamp-2">
+                    {dept.description}
+                  </p>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
-                    {dept.stats}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 group-hover:font-bold transition-all duration-300">
-                    View Dashboard →
-                  </span>
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span className="text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors duration-300">
+                      {dept.stats}
+                    </span>
+                    <span className="text-xs font-bold text-blue-600 group-hover:text-blue-700 flex items-center gap-1">
+                      Open
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              {/* Animated border effect */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-200 transition-all duration-500 ease-in-out" />
             </Link>
           ))}
         </div>
 
 
         {/* Quick Stats */}
-        <div className="mt-16 bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        <div className="mt-8 sm:mt-12">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 text-center">
             Quick Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">7</div>
-              <div className="text-sm text-gray-600">Departments</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">8</div>
+              <div className="text-xs sm:text-sm text-white/90 font-medium">Departments</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-emerald-600 mb-2">
-                24/7
-              </div>
-              <div className="text-sm text-gray-600">Real-time Data</div>
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
+              <div className="text-xs sm:text-sm text-white/90 font-medium">Real-time Data</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">100%</div>
-              <div className="text-sm text-gray-600">Secure Access</div>
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
+              <div className="text-xs sm:text-sm text-white/90 font-medium">Secure Access</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 mb-2">∞</div>
-              <div className="text-sm text-gray-600">Scalable</div>
+            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">∞</div>
+              <div className="text-xs sm:text-sm text-white/90 font-medium">Scalable</div>
             </div>
           </div>
         </div>

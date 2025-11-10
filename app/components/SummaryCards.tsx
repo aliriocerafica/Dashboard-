@@ -62,9 +62,9 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
   ).length;
 
   return (
-    <div className="grid grid-cols-1 gap-2">
+    <div className="grid grid-cols-1 gap-3">
       {/* Month Tile */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-2 sm:p-3">
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl border-2 border-blue-100 shadow-md p-3 sm:p-4 transform transition-all duration-300 hover:scale-105">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -105,7 +105,7 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
       </div>
 
       {/* Week Tile */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-2 sm:p-3">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-2 border-green-100 shadow-md p-3 sm:p-4 transform transition-all duration-300 hover:scale-105">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
             <ChartBarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -142,7 +142,7 @@ export default function SummaryCards({ stats, data }: SummaryCardsProps) {
       </div>
 
       {/* Lead Status Tile - Cold/Warm/Hot */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-2 sm:p-3">
+      <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl border-2 border-orange-100 shadow-md p-3 sm:p-4 transform transition-all duration-300 hover:scale-105">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
             <span className="text-[10px] sm:text-xs font-bold">🔥</span>

@@ -216,7 +216,7 @@ export default function SecurityDashboard() {
           </h3>
         </CardHeader>
         <CardBody className="pt-0">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-gray-900">
                 {securityStatus.metrics.totalEvents}

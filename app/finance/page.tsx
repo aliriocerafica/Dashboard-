@@ -223,7 +223,7 @@ export default function FinancePage() {
             ) : payrollData ? (
               <>
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Total Concerns */}
                   <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
@@ -644,7 +644,7 @@ export default function FinancePage() {
             ) : clientPaymentData ? (
               <>
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {/* Total Clients */}
                   <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
