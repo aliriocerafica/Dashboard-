@@ -801,7 +801,7 @@ export default function FinancePage() {
                               <div className="mt-4 pt-4 border-t border-gray-200">
                                 <h5 className="font-semibold text-gray-900 mb-3 text-sm">Payment History</h5>
                                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                                  {history.slice().reverse().map((payment, idx) => (
+                                  {history.slice().reverse().map((payment: any, idx) => (
                                     <div
                                       key={idx}
                                       className="flex items-center justify-between text-xs bg-white rounded-lg p-3 border border-gray-100"
