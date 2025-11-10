@@ -26,6 +26,10 @@ export default function FinancePage() {
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentSearchTerm, setPaymentSearchTerm] = useState("");
+  const [isFilteredModalOpen, setIsFilteredModalOpen] = useState(false);
+  const [filteredPaymentStatus, setFilteredPaymentStatus] = useState<string>("");
+  const [filteredClientName, setFilteredClientName] = useState<string>("");
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
 
   // Fetch payroll concerns data
   const fetchPayrollData = async (showRefreshing = false) => {
@@ -742,469 +746,411 @@ export default function FinancePage() {
                     </div>
                   </div>
 
+                  {/* Search Bar */}
+                  <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search clients by name..."
+                        value={clientSearchTerm}
+                        onChange={(e) => setClientSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">
+                      {Object.keys(clientPaymentData.clientHistory).filter((clientName) =>
+                        clientName.toLowerCase().includes(clientSearchTerm.toLowerCase())
+                      ).length}{" "}
+                      of {Object.keys(clientPaymentData.clientHistory).length} clients match your search
+                    </p>
+                  </div>
+
                   {/* Client Cards Grid */}
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {Object.keys(clientPaymentData.clientHistory).map((clientName) => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {Object.keys(clientPaymentData.clientHistory)
+                        .filter((clientName) =>
+                          clientName.toLowerCase().includes(clientSearchTerm.toLowerCase())
+                        )
+                        .map((clientName) => {
                         const history = clientPaymentData.clientHistory[clientName];
                         const latestPayment = history[history.length - 1];
+                        
+                        // Calculate client statistics
+                        const totalInvoices = history.length;
+                        const paidEarly = history.filter((p: any) => p.status === "Paid Early").length;
+                        const paidLate = history.filter((p: any) => p.status === "Paid Late").length;
+                        const notYetPaid = history.filter((p: any) => p.status === "Not Yet Paid").length;
+                        
+                        // Calculate class distribution from clientPaymentData.payments
+                        const clientPayments = clientPaymentData.payments.filter((p: any) => p.clientName === clientName);
+                        const classCounts: Record<string, number> = {};
+                        clientPayments.forEach((p: any) => {
+                          if (p.class) {
+                            classCounts[p.class] = (classCounts[p.class] || 0) + 1;
+                          }
+                        });
+                        
+                        // Find the predominant class
+                        let predominantClass = "";
+                        let maxCount = 0;
+                        Object.entries(classCounts).forEach(([className, count]) => {
+                          if (count > maxCount) {
+                            maxCount = count;
+                            predominantClass = className;
+                          }
+                        });
+                        
+                        const classDisplay = predominantClass ? `Class ${predominantClass} (${maxCount})` : "No Class";
                         
                         return (
                           <div
                             key={clientName}
-                            className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
-                            onClick={() => setSelectedClient(selectedClient === clientName ? null : clientName)}
+                            className="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
                           >
-                            <div className="flex items-start justify-between mb-3">
-                              <h4 className="font-bold text-gray-900 text-lg">{clientName}</h4>
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                latestPayment.status === "Paid Early" 
-                                  ? "bg-green-100 text-green-800" 
-                                  : latestPayment.status === "Paid Late"
-                                  ? "bg-orange-100 text-orange-800"
-                                  : latestPayment.status === "Not Yet Paid"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-blue-100 text-blue-800"
+                            <div className="flex items-start justify-between mb-5">
+                              <div>
+                                <h4 className="font-bold text-gray-900 text-xl mb-1">{clientName}</h4>
+                                <p className="text-xs text-gray-500">Payment Performance</p>
+                              </div>
+                              <span className={`px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
+                                predominantClass === "A" 
+                                  ? "bg-green-500 text-white" 
+                                  : predominantClass === "B"
+                                  ? "bg-blue-500 text-white"
+                                  : predominantClass === "C"
+                                  ? "bg-yellow-500 text-white"
+                                  : predominantClass === "D"
+                                  ? "bg-orange-500 text-white"
+                                  : "bg-gray-500 text-white"
                               }`}>
-                                {latestPayment.status}
+                                {classDisplay}
                               </span>
                             </div>
                             
-                            {/* Latest Payment Info */}
-                            <div className="space-y-2 mb-3">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Latest Period:</span>
-                                <span className="font-medium text-gray-900">{latestPayment.coverageDate}</span>
+                            {/* Client Statistics */}
+                            <div className="grid grid-cols-2 gap-3 mb-5">
+                              {/* Total Invoices - Clickable */}
+                              <div 
+                                className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFilteredClientName(clientName);
+                                  setFilteredPaymentStatus("All");
+                                  setIsFilteredModalOpen(true);
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
                               </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Due Date:</span>
-                                <span className="font-medium text-gray-900">{latestPayment.dueDate || "N/A"}</span>
+                                <div className="text-3xl font-bold text-indigo-600 mb-1">{totalInvoices}</div>
+                                <div className="text-xs font-semibold text-indigo-700">Total Invoices</div>
                               </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Payment Date:</span>
-                                <span className="font-medium text-gray-900">{latestPayment.paymentDate}</span>
+
+                              {/* Paid Early - Clickable */}
+                              <div 
+                                className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFilteredClientName(clientName);
+                                  setFilteredPaymentStatus("Paid Early");
+                                  setIsFilteredModalOpen(true);
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
                               </div>
+                                <div className="text-3xl font-bold text-green-600 mb-1">{paidEarly}</div>
+                                <div className="text-xs font-semibold text-green-700">Paid Early</div>
                             </div>
 
-                            {/* Payment History */}
-                            {selectedClient === clientName && (
-                              <div className="mt-4 pt-4 border-t border-gray-200">
-                                <h5 className="font-semibold text-gray-900 mb-3 text-sm">Payment History</h5>
-                                <div className="space-y-2 max-h-64 overflow-y-auto">
-                                  {history.slice().reverse().map((payment: any, idx: number) => (
-                                    <div
-                                      key={idx}
-                                      className="flex items-center justify-between text-xs bg-white rounded-lg p-3 border border-gray-100"
-                                    >
-                                      <div className="flex-1">
-                                        <div className="font-medium text-gray-900">{payment.coverageDate}</div>
-                                        <div className="text-gray-500 mt-1">
-                                          Due: {payment.dueDate} | Paid: {payment.paymentDate}
+                              {/* Paid Late - Clickable */}
+                              <div 
+                                className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFilteredClientName(clientName);
+                                  setFilteredPaymentStatus("Paid Late");
+                                  setIsFilteredModalOpen(true);
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
                                         </div>
+                                <div className="text-3xl font-bold text-orange-600 mb-1">{paidLate}</div>
+                                <div className="text-xs font-semibold text-orange-700">Paid Late</div>
                                       </div>
-                                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ml-2 ${
-                                        payment.status === "Paid Early" 
-                                          ? "bg-green-100 text-green-800" 
-                                          : payment.status === "Paid Late"
-                                          ? "bg-orange-100 text-orange-800"
-                                          : payment.status === "Not Yet Paid"
-                                          ? "bg-red-100 text-red-800"
-                                          : "bg-blue-100 text-blue-800"
-                                      }`}>
-                                        {payment.status}
-                                      </span>
+
+                              {/* Not Yet Paid - Clickable */}
+                              <div 
+                                className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFilteredClientName(clientName);
+                                  setFilteredPaymentStatus("Not Yet Paid");
+                                  setIsFilteredModalOpen(true);
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
                                     </div>
-                                  ))}
+                                <div className="text-3xl font-bold text-red-600 mb-1">{notYetPaid}</div>
+                                <div className="text-xs font-semibold text-red-700">Not Yet Paid</div>
                                 </div>
                               </div>
-                            )}
-
-                            <button className="mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium">
-                              {selectedClient === clientName ? "Hide History ▲" : "View History ▼"}
-                            </button>
+                            
+                            {/* Latest Payment Info */}
+                            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-4 border border-gray-200">
+                              <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Latest Payment</h5>
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-gray-600 font-medium">Period:</span>
+                                  <span className="text-sm font-bold text-gray-900">{latestPayment.coverageDate}</span>
                           </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-gray-600 font-medium">Due Date:</span>
+                                  <span className="text-sm font-bold text-gray-900">{latestPayment.dueDate || "N/A"}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-gray-600 font-medium">Payment Date:</span>
+                                  <span className="text-sm font-bold text-gray-900">{latestPayment.paymentDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                    </div>
                         );
                       })}
-                    </div>
+                      
+                      {/* No Results Message */}
+                      {Object.keys(clientPaymentData.clientHistory)
+                        .filter((clientName) =>
+                          clientName.toLowerCase().includes(clientSearchTerm.toLowerCase())
+                        ).length === 0 && (
+                        <div className="col-span-2 text-center py-12">
+                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                            <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">No clients found</h3>
+                          <p className="text-gray-500">
+                            No clients match your search term "{clientSearchTerm}"
+                          </p>
+                        </div>
+                      )}
+                  </div>
                   </div>
                 </div>
 
-                {/* All Payments Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        All Payment Records
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Complete list of all client payments
-                      </p>
-                    </div>
-                    {clientPaymentData.payments.length > 10 && (
-                      <button
-                        onClick={() => setIsPaymentModalOpen(true)}
-                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
-                      >
-                        <span className="text-lg">+</span>
-                        View All
-                      </button>
-                    )}
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Client Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Coverage Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Invoice Sent
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Payment Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Due Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Class
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {clientPaymentData.payments.length > 0 ? (
-                          clientPaymentData.payments.slice(0, 10).map((payment: any, idx: number) => (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {payment.clientName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {payment.coverageDate || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {payment.dateInvoiceSent || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {payment.paymentDate || "Pending"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {payment.dueDate || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  payment.daysAfterDue.toLowerCase() === "paid before due date" || payment.daysAfterDue.toLowerCase() === "paid on time"
-                                    ? "bg-green-100 text-green-800"
-                                    : payment.daysAfterDue.toLowerCase() === "not yet paid" || payment.class === "Not yet paid"
-                                    ? "bg-red-100 text-red-800"
-                                    : payment.class === "B" || payment.class === "C" || payment.class === "D"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-blue-100 text-blue-800"
-                                }`}>
-                                  {payment.daysAfterDue}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  payment.class === "A"
-                                    ? "bg-green-100 text-green-800"
-                                    : payment.class === "B"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : payment.class === "C"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : payment.class === "D"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }`}>
-                                  {payment.class}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td
-                              colSpan={7}
-                              className="px-6 py-8 text-center text-sm text-gray-500"
-                            >
-                              No payment records found
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Modal for View All Payments */}
-                {isPaymentModalOpen && (
+                {/* Filtered Payments Modal */}
+                {isFilteredModalOpen && clientPaymentData && (
                   <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex min-h-screen items-center justify-center p-4">
                       <div
                         className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
-                        onClick={() => setIsPaymentModalOpen(false)}
+                        onClick={() => setIsFilteredModalOpen(false)}
                       ></div>
 
                       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                        <div className={`flex items-center justify-between p-6 border-b border-gray-200 rounded-t-2xl ${
+                          filteredPaymentStatus === "Paid Early" ? "bg-gradient-to-r from-green-50 to-green-100" :
+                          filteredPaymentStatus === "Paid Late" ? "bg-gradient-to-r from-orange-50 to-orange-100" :
+                          filteredPaymentStatus === "Not Yet Paid" ? "bg-gradient-to-r from-red-50 to-red-100" :
+                          filteredPaymentStatus === "All" ? "bg-gradient-to-r from-indigo-50 to-indigo-100" :
+                          "bg-gradient-to-r from-blue-50 to-blue-100"
+                        }`}>
                           <div>
                             <h2 className="text-2xl font-bold text-gray-900">
-                              All Payment Records
+                              {filteredClientName} - {filteredPaymentStatus === "All" ? "All Invoices" : filteredPaymentStatus}
                             </h2>
                             <p className="text-sm text-gray-600 mt-1">
-                              Complete list of all client payments with search and filter
+                              {filteredPaymentStatus === "All" ? "Complete payment history" : `All payments with status: ${filteredPaymentStatus}`}
                             </p>
                           </div>
                           <button
-                            onClick={() => setIsPaymentModalOpen(false)}
+                            onClick={() => setIsFilteredModalOpen(false)}
                             className="p-2 hover:bg-white/50 rounded-lg transition-colors"
                           >
                             <XMarkIcon className="w-6 h-6 text-gray-500" />
                           </button>
                         </div>
 
-                        {/* Search Bar */}
-                        <div className="p-6 border-b border-gray-200">
-                          <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              placeholder="Search by client name, coverage date, payment date, status..."
-                              value={paymentSearchTerm}
-                              onChange={(e) => setPaymentSearchTerm(e.target.value)}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                        {/* Info Section */}
+                        <div className="p-6 border-b border-gray-200 bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-3 rounded-lg ${
+                                filteredPaymentStatus === "Paid Early" ? "bg-green-100" :
+                                filteredPaymentStatus === "Paid Late" ? "bg-orange-100" :
+                                filteredPaymentStatus === "Not Yet Paid" ? "bg-red-100" :
+                                filteredPaymentStatus === "All" ? "bg-indigo-100" :
+                                "bg-blue-100"
+                              }`}>
+                                <svg className={`w-6 h-6 ${
+                                  filteredPaymentStatus === "Paid Early" ? "text-green-600" :
+                                  filteredPaymentStatus === "Paid Late" ? "text-orange-600" :
+                                  filteredPaymentStatus === "Not Yet Paid" ? "text-red-600" :
+                                  filteredPaymentStatus === "All" ? "text-indigo-600" :
+                                  "text-blue-600"
+                                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                           </div>
-                          <p className="text-sm text-gray-500 mt-2">
-                            {
-                              clientPaymentData.payments.filter(
-                                (payment: any) =>
-                                  payment.clientName
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.coverageDate
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.dateInvoiceSent
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.paymentDate
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.dueDate
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.daysAfterDue
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase()) ||
-                                  payment.class
-                                    ?.toLowerCase()
-                                    .includes(paymentSearchTerm.toLowerCase())
-                              ).length
-                            }{" "}
-                            of {clientPaymentData.payments.length} payment records match your search
-                          </p>
+                              <div>
+                                <p className="text-sm text-gray-600">
+                                  {filteredPaymentStatus === "All" ? "Showing all payments for" : `Showing ${filteredPaymentStatus} payments for`}
+                                </p>
+                                <p className="text-lg font-bold text-gray-900">{filteredClientName}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-3xl font-bold text-gray-900">
+                                {filteredPaymentStatus === "All" 
+                                  ? clientPaymentData.clientHistory[filteredClientName]?.length || 0
+                                  : clientPaymentData.clientHistory[filteredClientName]?.filter(
+                                      (p: any) => p.status === filteredPaymentStatus
+                                    ).length || 0
+                                }
+                              </p>
+                              <p className="text-sm text-gray-600">Total Records</p>
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Modal Body */}
-                        <div className="flex-1 overflow-auto">
-                          <table className="w-full text-sm">
-                            <thead className="bg-gray-50 sticky top-0">
-                              <tr className="border-b border-gray-200">
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Client Name
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Coverage Date
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Invoice Sent
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Payment Date
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Due Date
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Days After Invoice
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Status
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Class
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {clientPaymentData.payments
-                                .filter(
-                                  (payment: any) =>
-                                    payment.clientName
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.coverageDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.dateInvoiceSent
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.paymentDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.dueDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.daysAfterDue
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.class
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase())
-                                ).length > 0 ? (
-                                clientPaymentData.payments
-                                  .filter(
-                                    (payment: any) =>
-                                      payment.clientName
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.coverageDate
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.dateInvoiceSent
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.paymentDate
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.dueDate
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.daysAfterDue
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase()) ||
-                                      payment.class
-                                        ?.toLowerCase()
-                                        .includes(paymentSearchTerm.toLowerCase())
-                                  )
-                                  .map((payment: any, idx: number) => (
-                                    <tr
+                        {/* Modal Body - Grid Layout */}
+                        <div className="flex-1 overflow-auto p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {(filteredPaymentStatus === "All" 
+                              ? clientPaymentData.clientHistory[filteredClientName]
+                              : clientPaymentData.clientHistory[filteredClientName]?.filter((payment: any) => payment.status === filteredPaymentStatus)
+                            )?.map((payment: any, idx: number) => {
+                              // Determine card color based on payment status
+                              const cardColorClass = 
+                                payment.status === "Paid Early" ? "from-green-50 to-green-100 border-green-200" :
+                                payment.status === "Paid Late" ? "from-orange-50 to-orange-100 border-orange-200" :
+                                payment.status === "Not Yet Paid" ? "from-red-50 to-red-100 border-red-200" :
+                                "from-blue-50 to-blue-100 border-blue-200";
+                              
+                              const badgeColorClass =
+                                payment.status === "Paid Early" ? "bg-green-500 text-white" :
+                                payment.status === "Paid Late" ? "bg-orange-500 text-white" :
+                                payment.status === "Not Yet Paid" ? "bg-red-500 text-white" :
+                                "bg-blue-500 text-white";
+                                
+                              return (
+                                <div
                                       key={idx}
-                                      className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors"
-                                    >
-                                      <td className="py-3 px-4 text-gray-900 font-medium">
-                                        {payment.clientName}
-                                      </td>
-                                      <td className="py-3 px-4 text-gray-600">
-                                        {payment.coverageDate || "N/A"}
-                                      </td>
-                                      <td className="py-3 px-4 text-gray-600">
-                                        {payment.dateInvoiceSent || "N/A"}
-                                      </td>
-                                      <td className="py-3 px-4 text-gray-600">
-                                        {payment.paymentDate || "Pending"}
-                                      </td>
-                                      <td className="py-3 px-4 text-gray-600">
-                                        {payment.dueDate || "N/A"}
-                                      </td>
-                                      <td className="py-3 px-4 text-gray-600">
-                                        {payment.daysAfterInvoice || "N/A"}
-                                      </td>
-                                      <td className="py-3 px-4">
-                                        <span
-                                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            payment.daysAfterDue.toLowerCase() === "paid before due date" ||
-                                            payment.daysAfterDue.toLowerCase() === "paid on time"
-                                              ? "bg-green-100 text-green-800"
-                                              : payment.daysAfterDue.toLowerCase() === "not yet paid" ||
-                                                payment.class === "Not yet paid"
-                                              ? "bg-red-100 text-red-800"
-                                              : payment.class === "B" ||
-                                                payment.class === "C" ||
-                                                payment.class === "D"
-                                              ? "bg-orange-100 text-orange-800"
-                                              : "bg-blue-100 text-blue-800"
-                                          }`}
-                                        >
-                                          {payment.daysAfterDue}
+                                  className={`bg-gradient-to-br rounded-xl p-5 border-2 shadow-md hover:shadow-xl transition-all duration-200 ${cardColorClass}`}
+                                >
+                                  {/* Coverage Date Header */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                      <p className="text-xs text-gray-600 font-medium">Coverage Period</p>
+                                      <h4 className="text-lg font-bold text-gray-900">{payment.coverageDate}</h4>
+                                    </div>
+                                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${badgeColorClass}`}>
+                                      {payment.status}
                                         </span>
-                                      </td>
-                                      <td className="py-3 px-4">
-                                        <span
-                                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            payment.class === "A"
-                                              ? "bg-green-100 text-green-800"
-                                              : payment.class === "B"
-                                              ? "bg-blue-100 text-blue-800"
-                                              : payment.class === "C"
-                                              ? "bg-yellow-100 text-yellow-800"
-                                              : payment.class === "D"
-                                              ? "bg-orange-100 text-orange-800"
-                                              : "bg-gray-100 text-gray-800"
-                                          }`}
-                                        >
-                                          {payment.class}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))
-                              ) : (
-                                <tr>
-                                  <td
-                                    colSpan={8}
-                                    className="py-8 px-4 text-center text-sm text-gray-500"
-                                  >
-                                    No payment records found matching your search
-                                  </td>
-                                </tr>
+                                  </div>
+
+                                  {/* Payment Details Grid */}
+                                  <div className="space-y-3">
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                                      <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span className="text-sm text-gray-600 font-medium">Due Date</span>
+                                      </div>
+                                      <span className="text-sm font-bold text-gray-900">{payment.dueDate || "N/A"}</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                                      <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span className="text-sm text-gray-600 font-medium">Payment Date</span>
+                                      </div>
+                                      <span className="text-sm font-bold text-gray-900">{payment.paymentDate || "Pending"}</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-2">
+                                      <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span className="text-sm text-gray-600 font-medium">Days After Due</span>
+                                      </div>
+                                      <span className="text-sm font-bold text-gray-900">{payment.daysAfterDue || "N/A"}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            }) || (
+                                <div className="col-span-2 py-12 text-center">
+                                  <div className="text-gray-400 text-6xl mb-4">📭</div>
+                                  <p className="text-gray-600 font-medium">No payments found with this status</p>
+                                </div>
                               )}
-                            </tbody>
-                          </table>
+                          </div>
                         </div>
 
                         {/* Modal Footer */}
                         <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
                           <div className="flex justify-between items-center">
-                            <p className="text-sm text-gray-600">
-                              Total: {clientPaymentData.payments.length} payment records | Filtered:{" "}
-                              {
-                                clientPaymentData.payments.filter(
-                                  (payment: any) =>
-                                    payment.clientName
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.coverageDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.dateInvoiceSent
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.paymentDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.dueDate
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.daysAfterDue
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase()) ||
-                                    payment.class
-                                      ?.toLowerCase()
-                                      .includes(paymentSearchTerm.toLowerCase())
-                                ).length
-                              }{" "}
-                              payment records
-                            </p>
+                            <div className="flex items-center gap-4">
+                              <p className="text-sm font-bold text-gray-900">
+                                {filteredPaymentStatus === "All" 
+                                  ? `${clientPaymentData.clientHistory[filteredClientName]?.length || 0} Total Invoices`
+                                  : `${clientPaymentData.clientHistory[filteredClientName]?.filter(
+                                      (p: any) => p.status === filteredPaymentStatus
+                                    ).length || 0} ${filteredPaymentStatus} Payments`
+                                }
+                              </p>
+                              {filteredPaymentStatus !== "All" && (
+                                <>
+                                  <span className="text-gray-400">•</span>
+                                  <p className="text-sm text-gray-600">
+                                    Total for {filteredClientName}: {clientPaymentData.clientHistory[filteredClientName]?.length || 0}
+                                  </p>
+                                </>
+                              )}
+                            </div>
                             <button
-                              onClick={() => setIsPaymentModalOpen(false)}
-                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                              onClick={() => setIsFilteredModalOpen(false)}
+                              className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg text-white ${
+                                filteredPaymentStatus === "Paid Early" ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800" :
+                                filteredPaymentStatus === "Paid Late" ? "bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800" :
+                                filteredPaymentStatus === "Not Yet Paid" ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800" :
+                                filteredPaymentStatus === "All" ? "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800" :
+                                "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                              }`}
                             >
                               Close
                             </button>
