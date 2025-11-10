@@ -296,7 +296,7 @@ export default function PresidentDashboard() {
       } else if (ch === "," && !inQuotes) {
         result.push(current);
         current = "";
-      } else {
+          } else {
         current += ch;
       }
     }
@@ -499,8 +499,8 @@ export default function PresidentDashboard() {
               </h2>
               <p className="text-sm text-gray-600">
                 Track WIG commitments and accomplishment rates
-              </p>
-            </div>
+                      </p>
+                    </div>
 
             {/* Search Bar */}
             <div className="px-8 py-6 border-b border-gray-200">
@@ -513,8 +513,8 @@ export default function PresidentDashboard() {
                   onChange={(e) => setScoreSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                 />
-              </div>
-            </div>
+                    </div>
+                  </div>
 
             {/* Table Section */}
             <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
@@ -660,7 +660,7 @@ export default function PresidentDashboard() {
                               title={String(lead)}
                             >
                               {lead || "—"}
-                            </div>
+                    </div>
                           </td>
                           <td className="py-2 px-6 align-top text-center text-gray-900 font-medium">
                             {countCommit || "—"}
@@ -681,7 +681,7 @@ export default function PresidentDashboard() {
                               title={String(inProgress)}
                             >
                               {inProgress || "—"}
-                            </div>
+                    </div>
                           </td>
                         </tr>
                       );
@@ -689,7 +689,7 @@ export default function PresidentDashboard() {
                   })()}
                 </tbody>
               </table>
-            </div>
+                  </div>
 
             {/* Footer Summary */}
             <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
@@ -731,9 +731,9 @@ export default function PresidentDashboard() {
                     match your search
                   </span>
                 )}
-              </div>
-            </div>
-          </div>
+                    </div>
+                    </div>
+                  </div>
         )}
         {activeTab === "dashboard" && (
           <div className="space-y-6">
@@ -750,7 +750,7 @@ export default function PresidentDashboard() {
                   Failed to load data
                 </p>
                 <p className="text-gray-600">{error}</p>
-              </div>
+                    </div>
             )}
 
             {/* Summary Cards */}
@@ -760,13 +760,13 @@ export default function PresidentDashboard() {
                   <div className="text-sm text-gray-600">Total Commitments</div>
                   <div className="text-3xl font-bold text-gray-900 mt-1">
                     {summary?.total ?? dashboardData.totalCommitments}
+                    </div>
                   </div>
-                </div>
                 <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
                   <div className="text-sm text-gray-600">Completed</div>
                   <div className="text-3xl font-bold text-green-600 mt-1">
                     {summary?.complete ?? dashboardData.completeCommitments}
-                  </div>
+            </div>
                 </div>
                 <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
                   <div className="text-sm text-gray-600">Incomplete</div>
@@ -788,9 +788,9 @@ export default function PresidentDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                       Commitment Score per Office
-                    </h3>
+                  </h3>
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-gray-500">
                         Completion %
@@ -813,25 +813,25 @@ export default function PresidentDashboard() {
                         data={dashboardData.officeScores}
                         margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                        <XAxis
-                          dataKey="office"
-                          tick={{ fontSize: 10 }}
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                      <XAxis
+                        dataKey="office"
+                        tick={{ fontSize: 10 }}
                           angle={-35}
-                          textAnchor="end"
+                        textAnchor="end"
                           interval={0}
                           height={60}
-                        />
+                      />
                         <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} />
                         <Tooltip formatter={(v: any) => `${v}%`} />
-                        <Bar
-                          dataKey="score"
-                          fill="#3B82F6"
-                          radius={[4, 4, 0, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                      <Bar
+                        dataKey="score"
+                        fill="#3B82F6"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+            </div>
                   {/* Values list with progress bars - shown conditionally */}
                   {showOfficeScores && (
                     <div className="mt-4 overflow-x-auto">
@@ -854,13 +854,13 @@ export default function PresidentDashboard() {
                                 className="border-t border-gray-100 hover:bg-gray-50/80 transition-colors"
                               >
                                 <td className="py-2 pr-2 text-gray-600 w-12">
-                                  <span
+                          <span
                                     className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
                                       idx < 3 ? "bg-emerald-500" : "bg-gray-400"
                                     }`}
                                   >
                                     {idx + 1}
-                                  </span>
+                          </span>
                                 </td>
                                 <td className="py-2 pr-2 text-gray-900 whitespace-nowrap">
                                   {row.office}
@@ -873,7 +873,7 @@ export default function PresidentDashboard() {
                                         width: `${Math.min(row.score, 100)}%`,
                                       }}
                                     />
-                                  </div>
+                        </div>
                                 </td>
                                 <td className="py-2 pl-2 text-right font-semibold text-gray-900">
                                   <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-900">
@@ -885,15 +885,15 @@ export default function PresidentDashboard() {
                           })}
                         </tbody>
                       </table>
-                    </div>
+                      </div>
                   )}
-                </div>
+                  </div>
 
                 <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                       Commitment Score per Unit
-                    </h3>
+                  </h3>
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-gray-500">
                         Top 12 by completion %
@@ -906,10 +906,10 @@ export default function PresidentDashboard() {
                         <EyeIcon className="w-5 h-5 text-blue-700" />
                         <span className="text-sm font-medium text-blue-700">
                           View
-                        </span>
+                          </span>
                       </button>
-                    </div>
-                  </div>
+                        </div>
+                      </div>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
@@ -917,37 +917,37 @@ export default function PresidentDashboard() {
                         margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                        <XAxis
+                              <XAxis
                           dataKey="unit"
                           tick={{ fontSize: 10 }}
                           angle={-35}
-                          textAnchor="end"
+                                textAnchor="end"
                           interval={0}
                           height={60}
-                        />
+                              />
                         <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} />
                         <Tooltip formatter={(v: any) => `${v}%`} />
-                        <Bar
-                          dataKey="score"
+                              <Bar
+                                dataKey="score"
                           fill="#10B981"
-                          radius={[4, 4, 0, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
+                                radius={[4, 4, 0, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
                   </div>
                   {/* Values list with progress bars - shown conditionally */}
                   {showUnitScores && (
                     <div className="mt-4 overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
+                              <table className="w-full text-sm">
+                                <thead>
                           <tr className="text-gray-600">
                             <th className="text-left py-2 pr-2">Rank</th>
                             <th className="text-left py-2 pr-2">Unit</th>
                             <th className="text-left py-2">Progress</th>
                             <th className="text-right py-2 pl-2">Completion</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                                  </tr>
+                                </thead>
+                                <tbody>
                           {dashboardData.unitScores.map((row, idx) => {
                             const accent =
                               idx < 3 ? "bg-emerald-500" : "bg-indigo-500";
@@ -957,14 +957,14 @@ export default function PresidentDashboard() {
                                 className="border-t border-gray-100 hover:bg-gray-50/80 transition-colors"
                               >
                                 <td className="py-2 pr-2 text-gray-600 w-12">
-                                  <span
+                                        <span
                                     className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
                                       idx < 3 ? "bg-emerald-500" : "bg-gray-400"
                                     }`}
                                   >
                                     {idx + 1}
-                                  </span>
-                                </td>
+                                        </span>
+                                      </td>
                                 <td className="py-2 pr-2 text-gray-900 whitespace-nowrap">
                                   {row.unit}
                                 </td>
@@ -982,17 +982,17 @@ export default function PresidentDashboard() {
                                   <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-900">
                                     {row.score}%
                                   </span>
-                                </td>
-                              </tr>
+                                      </td>
+                                    </tr>
                             );
                           })}
-                        </tbody>
-                      </table>
-                    </div>
+                                </tbody>
+                              </table>
+                            </div>
                   )}
-                </div>
-              </div>
-            )}
+                          </div>
+                        </div>
+                      )}
 
             {/* Department Scores Modals */}
             {showOfficeModal && (
@@ -1028,11 +1028,11 @@ export default function PresidentDashboard() {
                             data={dashboardData.officeScores}
                             margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
                           >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              stroke="#E5E7EB"
-                            />
-                            <XAxis
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#E5E7EB"
+                              />
+                              <XAxis
                               dataKey="office"
                               tick={{ fontSize: 10 }}
                               angle={-25}
@@ -1048,34 +1048,34 @@ export default function PresidentDashboard() {
                               radius={[4, 4, 0, 0]}
                             />
                           </BarChart>
-                        </ResponsiveContainer>
+                          </ResponsiveContainer>
                       </div>
-                      <table className="w-full text-sm">
+                              <table className="w-full text-sm">
                         <thead className="bg-gray-50 sticky top-0">
-                          <tr className="border-b border-gray-200">
+                                  <tr className="border-b border-gray-200">
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Rank
-                            </th>
+                                    </th>
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Office
-                            </th>
+                                    </th>
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Progress
-                            </th>
+                                    </th>
                             <th className="text-right py-2 px-4 font-semibold text-gray-700">
                               Completion
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
                           {dashboardData.officeScores.map((row, idx) => (
                             <tr key={idx} className="border-b border-gray-100">
                               <td className="py-2 px-4 text-gray-600">
                                 {idx + 1}
-                              </td>
+                                          </td>
                               <td className="py-2 px-4 text-gray-900">
                                 {row.office}
-                              </td>
+                                          </td>
                               <td className="py-2 px-4">
                                 <div className="w-full h-2.5 bg-gray-100 rounded-full">
                                   <div
@@ -1085,18 +1085,18 @@ export default function PresidentDashboard() {
                                     }}
                                   />
                                 </div>
-                              </td>
+                                          </td>
                               <td className="py-2 px-4 text-right font-semibold text-gray-900">
                                 {row.score}%
-                              </td>
-                            </tr>
+                                          </td>
+                                        </tr>
                           ))}
-                        </tbody>
-                      </table>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-              </div>
             )}
 
             {showUnitModal && (
@@ -1113,10 +1113,10 @@ export default function PresidentDashboard() {
                         <h2 className="text-2xl font-bold text-gray-900">
                           Department Scores (Unit)
                         </h2>
-                        <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                           Completion percentage by unit
-                        </p>
-                      </div>
+                </p>
+              </div>
                       <button
                         onClick={() => setShowUnitModal(false)}
                         className="p-2 hover:bg-white/50 rounded-lg transition-colors"
@@ -1124,7 +1124,7 @@ export default function PresidentDashboard() {
                       >
                         <XMarkIcon className="w-6 h-6 text-gray-500" />
                       </button>
-                    </div>
+            </div>
                     <div className="flex-1 overflow-auto p-6">
                       <div className="mb-6 h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -1153,33 +1153,33 @@ export default function PresidentDashboard() {
                             />
                           </BarChart>
                         </ResponsiveContainer>
-                      </div>
+                    </div>
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr className="border-b border-gray-200">
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Rank
-                            </th>
+                                </th>
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Unit
-                            </th>
+                                </th>
                             <th className="text-left py-2 px-4 font-semibold text-gray-700">
                               Progress
-                            </th>
+                                </th>
                             <th className="text-right py-2 px-4 font-semibold text-gray-700">
                               Completion
-                            </th>
-                          </tr>
-                        </thead>
+                                </th>
+                            </tr>
+                          </thead>
                         <tbody>
                           {dashboardData.unitScores.map((row, idx) => (
                             <tr key={idx} className="border-b border-gray-100">
                               <td className="py-2 px-4 text-gray-600">
                                 {idx + 1}
-                              </td>
+                                  </td>
                               <td className="py-2 px-4 text-gray-900">
                                 {row.unit}
-                              </td>
+                                  </td>
                               <td className="py-2 px-4">
                                 <div className="w-full h-2.5 bg-gray-100 rounded-full">
                                   <div
@@ -1189,19 +1189,19 @@ export default function PresidentDashboard() {
                                     }}
                                   />
                                 </div>
-                              </td>
+                                  </td>
                               <td className="py-2 px-4 text-right font-semibold text-gray-900">
                                 {row.score}%
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                  </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                   </div>
-                </div>
-              </div>
-            )}
+                      </div>
+                    </div>
+                  )}
 
             {!loading && !error && (
               <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
