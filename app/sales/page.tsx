@@ -251,33 +251,30 @@ export default function SalesPage() {
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Left Column - Stats and Summary */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Row 1: Stats Cards - Total Leads | Ready to Engage | In Development | Needs Review */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
               <StatsCards stats={stats} />
             </div>
 
-            {/* Progress Stats */}
-            <ProgressStats data={data} />
+        {/* Row 2: Goal Progress & Weekly Growth Trend */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6 items-stretch">
+          <ProgressStats data={data} />
+          <SalesWeeklyTrend data={data} />
+        </div>
 
-            {/* Weekly Trend */}
-            <SalesWeeklyTrend data={data} />
-
-            {/* Data Table */}
-            <DataTable data={data} />
-          </div>
-
-          {/* Right Column - Summary and Charts */}
-          <div className="space-y-4 sm:space-y-6">
-            {/* Summary Cards */}
+        {/* Row 3: This Month | This Week | Lead Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
             <SummaryCards stats={stats} data={data} />
+        </div>
 
-            {/* Charts */}
+        {/* Row 4: Lead Status | Lead Source | Touch Points | Lead Responses - All Inline */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
             <Charts data={data} stats={stats} />
           </div>
+
+        {/* Sales Pipeline - Full Width Table */}
+        <div>
+          <DataTable data={data} />
         </div>
       </div>
     </div>

@@ -45,8 +45,8 @@ export default function Charts({ data, stats }: ChartsProps) {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid grid-cols-1 gap-1 h-full">
-      {/* Fit Level Distribution */}
+    <>
+      {/* Lead Status */}
       <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
@@ -57,7 +57,7 @@ export default function Charts({ data, stats }: ChartsProps) {
             <p className="text-xs text-gray-600">Distribution by fit level</p>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto max-h-60">
           <div className="flex justify-between items-center p-2 bg-emerald-50 rounded-lg border border-emerald-100">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
@@ -105,7 +105,7 @@ export default function Charts({ data, stats }: ChartsProps) {
             <p className="text-xs text-gray-600">Where leads come from</p>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto max-h-60">
           {Object.entries(sourceDistribution).map(([source, count]) => (
             <div
               key={source}
@@ -134,11 +134,11 @@ export default function Charts({ data, stats }: ChartsProps) {
             <HandRaisedIcon className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-gray-900">Touch Points</h3>
+            <h3 className="text-sm font-bold text-gray-900">Touch Point and SPF Status</h3>
             <p className="text-xs text-gray-600">Engagement methods</p>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto max-h-60">
           {Object.entries(touchPointDistribution).map(([touchPoint, count]) => (
             <div
               key={touchPoint}
@@ -171,7 +171,7 @@ export default function Charts({ data, stats }: ChartsProps) {
             <p className="text-xs text-gray-600">Response types</p>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto max-h-60">
           {Object.entries(leadResponseDistribution).map(([response, count]) => (
             <div
               key={response}
@@ -192,6 +192,6 @@ export default function Charts({ data, stats }: ChartsProps) {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

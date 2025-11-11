@@ -86,11 +86,11 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
 
   return (
     <>
-      <Card className="bg-white">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="bg-white rounded-xl shadow-lg border border-gray-100 h-full flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between p-3 sm:p-4 lg:p-6 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <ChartBarIcon className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
@@ -111,7 +111,7 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
             View More
           </Button>
         </CardHeader>
-        <CardBody>
+        <CardBody className="px-3 sm:px-4 lg:px-6 flex-1">
           {weeklyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={weeklyData}>
@@ -197,7 +197,7 @@ export default function SalesWeeklyTrend({ data }: SalesWeeklyTrendProps) {
         </CardBody>
 
         {/* Summary Cards inside the main card */}
-        <div className="px-6 pb-4">
+        <div className="px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6">
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">

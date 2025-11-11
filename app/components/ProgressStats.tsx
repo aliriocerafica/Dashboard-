@@ -179,7 +179,7 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl p-3 sm:p-4 lg:p-6 shadow-lg border border-gray-100">
+    <div className="bg-white rounded-xl p-3 sm:p-4 lg:p-6 shadow-lg border border-gray-100 h-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
@@ -255,7 +255,7 @@ export default function ProgressStats({ data }: ProgressStatsProps) {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 flex-1">
         {progressBars.map((item, index) => {
           const Icon = item.icon;
           const isComplete = item.percentage >= 100;
