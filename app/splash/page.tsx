@@ -7,20 +7,37 @@ import Image from "next/image";
 export default function SplashScreen() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
+    // Prevent loop by checking if we just came from splash
+    const lastSplash = sessionStorage.getItem('lastSplashVisit');
+    const now = Date.now();
+    
+    // If splash was shown less than 5 seconds ago, skip and go directly to login
+    if (lastSplash && now - parseInt(lastSplash) < 5000) {
+      router.replace("/login");
+      return;
+    }
+
+    // Mark that we visited splash
+    sessionStorage.setItem('lastSplashVisit', now.toString());
+
     // Show splash for 0.5 seconds, then redirect to login
     const timer = setTimeout(() => {
+      if (hasRedirected) return; // Prevent double redirect
+      
       setIsVisible(false);
+      setHasRedirected(true);
 
       // After fade-out animation (200ms), redirect to login
       setTimeout(() => {
-        router.push("/login");
+        router.replace("/login");
       }, 200);
     }, 500); // 0.5 seconds for much faster flow
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, hasRedirected]);
 
   return (
     <div

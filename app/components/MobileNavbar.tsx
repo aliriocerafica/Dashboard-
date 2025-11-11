@@ -17,6 +17,7 @@ import {
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   ShoppingCartIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { logout } from "../lib/auth";
 
@@ -183,6 +184,22 @@ export default function MobileNavbar() {
                           </span>
                         </Link>
                       ))}
+                    </div>
+                    
+                    {/* How it works link */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <Link
+                        href="/how-it-works"
+                        className={`flex items-center justify-center p-3 rounded-xl transition-colors ${
+                          isActive("/how-it-works")
+                            ? "bg-blue-100 text-blue-600"
+                            : "hover:bg-gray-50 text-gray-700"
+                        }`}
+                        onClick={() => setIsExpanded(false)}
+                      >
+                        <InformationCircleIcon className="w-5 h-5 mr-2 text-blue-600" />
+                        <span className="text-sm font-medium">How it works</span>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ export default function InactivityMonitor() {
   const [remainingSeconds, setRemainingSeconds] = useState(60);
 
   // Pages that don't require authentication (shouldn't trigger inactivity)
-  const publicPages = ["/", "/home", "/splash", "/how-it-works"];
+  const publicPages = ["/", "/splash", "/login", "/how-it-works"];
   const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {
@@ -81,6 +81,7 @@ export default function InactivityMonitor() {
     const interval = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
+          clearInterval(interval);
           logout();
           router.push("/home");
           return 0;
@@ -89,7 +90,9 @@ export default function InactivityMonitor() {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [showWarning, router]);
 
   if (isPublicPage || !showWarning) return null;
@@ -154,9 +157,16 @@ export default function InactivityMonitor() {
               </button>
               <button
                 onClick={() => {
+                  // Reset warning state immediately
                   setShowWarning(false);
+                  setRemainingSeconds(60);
+                  
+                  // Reset the inactivity timer
                   resetInactivityTimer(
-                    () => setShowWarning(true),
+                    () => {
+                      setShowWarning(true);
+                      setRemainingSeconds(60);
+                    },
                     () => {
                       logout();
                       router.push("/home");

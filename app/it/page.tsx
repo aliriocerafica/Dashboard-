@@ -701,7 +701,7 @@ export default function ITPage() {
                         {taskData.tasks.length} Total
                       </p>
                     </div>
-                    {taskData.tasks.length > 3 && (
+                    {taskData.tasks.length >= 5 && (
                       <button
                         onClick={() => setIsTaskModalOpen(true)}
                         className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
@@ -736,7 +736,7 @@ export default function ITPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {taskData.tasks.slice(0, 3).map((task, index) => {
+                        {taskData.tasks.slice(0, 5).map((task, index) => {
                             const getStatusColor = (status: string) => {
                               const statusLower = status.toLowerCase();
                               if (statusLower === "completed") {
