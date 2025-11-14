@@ -31,10 +31,20 @@ const defaultUsers: User[] = [
   {
     id: "2",
     username: "user",
-    password: "user123",
+    password: "user@123",
     role: "user",
     fullName: "Dashboard User",
     email: "user@company.com",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    username: "superadmin",
+    password: "superadmin@123",
+    role: "admin",
+    fullName: "Super Administrator",
+    email: "superadmin@company.com",
     isActive: true,
     createdAt: new Date().toISOString(),
   },
@@ -121,6 +131,11 @@ export function deleteUser(userId: string): boolean {
 export function isAdmin(username: string): boolean {
   const user = getUserByUsername(username);
   return user?.role === "admin" || false;
+}
+
+// Check if user is superadmin (bypasses all restrictions)
+export function isSuperAdmin(username: string): boolean {
+  return username === "superadmin";
 }
 
 // Force reset users to default (for debugging)

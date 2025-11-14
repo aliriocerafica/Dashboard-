@@ -180,9 +180,18 @@ export default function FinancePage() {
     }
   };
 
-  // Check if passkey is already verified in session
+  // Check if passkey is already verified in session OR if user is superadmin
   useEffect(() => {
+    const currentUser = sessionStorage.getItem("username");
     const verified = sessionStorage.getItem("finance_passkey_verified");
+    
+    // Superadmin bypasses passkey requirement
+    if (currentUser === "superadmin") {
+      setIsPasskeyVerified(true);
+      setIsCheckingPasskey(false);
+      return;
+    }
+    
     if (verified === "true") {
       setIsPasskeyVerified(true);
     }
