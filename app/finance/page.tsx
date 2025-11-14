@@ -28,6 +28,8 @@ export default function FinancePage() {
   const [activeTab, setActiveTab] = useState("payroll");
   const [payrollData, setPayrollData] = useState<any>(null);
   const [clientPaymentData, setClientPaymentData] = useState<any>(null);
+  const [attendanceBonusData, setAttendanceBonusData] = useState<any>(null);
+  const [qbData, setQbData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +51,17 @@ export default function FinancePage() {
   const [passkeyError, setPasskeyError] = useState("");
   const [isCheckingPasskey, setIsCheckingPasskey] = useState(true);
   const [showPasskey, setShowPasskey] = useState(false);
+  
+  // Quarterly Bonus sub-navigation
+  const [quarterlyBonusTab, setQuarterlyBonusTab] = useState("teamContinuity");
+  
+  // QB filters and search
+  const [qbSearchTerm, setQbSearchTerm] = useState("");
+  const [qbAccountFilter, setQbAccountFilter] = useState("All");
+  const [qbStatusFilter, setQbStatusFilter] = useState("All");
+  const [isQbModalOpen, setIsQbModalOpen] = useState(false);
+  const [isTeamContinuityModalOpen, setIsTeamContinuityModalOpen] = useState(false);
+  const [teamContinuitySearchTerm, setTeamContinuitySearchTerm] = useState("");
 
   // Fetch payroll concerns data
   const fetchPayrollData = async (showRefreshing = false) => {
@@ -109,6 +122,64 @@ export default function FinancePage() {
     }
   };
 
+  // Fetch attendance bonus data
+  const fetchAttendanceBonusData = async (showRefreshing = false) => {
+    try {
+      if (showRefreshing) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      const response = await fetch(`/api/get-attendance-bonus?t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch attendance bonus data");
+      }
+      const result = await response.json();
+      if (result.success) {
+        setAttendanceBonusData(result.data);
+        setLastUpdated(new Date());
+        setError(null);
+      } else {
+        throw new Error(result.error || "Failed to fetch data");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching attendance bonus data:", err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Fetch QB data
+  const fetchQBData = async (showRefreshing = false) => {
+    try {
+      if (showRefreshing) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      const response = await fetch(`/api/get-qb-data?t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch QB data");
+      }
+      const result = await response.json();
+      if (result.success) {
+        setQbData(result.data);
+        setLastUpdated(new Date());
+        setError(null);
+      } else {
+        throw new Error(result.error || "Failed to fetch data");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching QB data:", err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
   // Check if passkey is already verified in session
   useEffect(() => {
     const verified = sessionStorage.getItem("finance_passkey_verified");
@@ -140,8 +211,14 @@ export default function FinancePage() {
       fetchPayrollData();
     } else if (activeTab === "clientPayments") {
       fetchClientPaymentData();
+    } else if (activeTab === "attendanceBonus") {
+      if (quarterlyBonusTab === "teamContinuity") {
+        fetchAttendanceBonusData();
+      } else if (quarterlyBonusTab === "qb") {
+        fetchQBData();
+      }
     }
-  }, [activeTab, isPasskeyVerified]);
+  }, [activeTab, isPasskeyVerified, quarterlyBonusTab]);
 
   // Handle manual refresh
   const handleRefresh = () => {
@@ -149,6 +226,12 @@ export default function FinancePage() {
       fetchPayrollData(true);
     } else if (activeTab === "clientPayments") {
       fetchClientPaymentData(true);
+    } else if (activeTab === "attendanceBonus") {
+      if (quarterlyBonusTab === "teamContinuity") {
+        fetchAttendanceBonusData(true);
+      } else if (quarterlyBonusTab === "qb") {
+        fetchQBData(true);
+      }
     }
   };
 
@@ -411,6 +494,16 @@ export default function FinancePage() {
                 }`}
               >
                 Client Payment Update
+              </button>
+              <button
+                onClick={() => setActiveTab("attendanceBonus")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "attendanceBonus"
+                    ? "border-emerald-500 text-emerald-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Quarterly Bonus
               </button>
             </nav>
           </div>
@@ -1592,6 +1685,935 @@ export default function FinancePage() {
                 )}
               </>
             ) : null}
+          </div>
+        )}
+
+        {/* Quarterly Bonus Tab */}
+        {activeTab === "attendanceBonus" && (
+          <div className="space-y-6">
+            {/* Sub-Navigation */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setQuarterlyBonusTab("teamContinuity")}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all ${
+                    quarterlyBonusTab === "teamContinuity"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  Team Continuity
+                </button>
+                <button
+                  onClick={() => setQuarterlyBonusTab("qb")}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all ${
+                    quarterlyBonusTab === "qb"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  QB
+                </button>
+              </div>
+            </div>
+
+            {/* Team Continuity Sub-Tab */}
+            {quarterlyBonusTab === "teamContinuity" && (
+              <>
+                {loading ? (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                    <LoadingSpinner size="lg" text="Loading team continuity data..." />
+                  </div>
+                ) : error ? (
+              <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                <div className="text-red-600 text-6xl mb-4">⚠️</div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  Error Loading Data
+                </h2>
+                <p className="text-gray-600 mb-6">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : attendanceBonusData ? (
+              <>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                  {/* Total Teams */}
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-1">
+                      {attendanceBonusData.summary.totalTeams}
+                    </div>
+                    <div className="text-xs font-medium text-white/90">
+                      Total Teams
+                    </div>
+                  </div>
+
+                  {/* With Bonus */}
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <CheckCircleIcon className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-1">
+                      {attendanceBonusData.summary.withBonusCount}
+                    </div>
+                    <div className="text-xs font-medium text-white/90">
+                      With Bonus
+                    </div>
+                  </div>
+
+                  {/* Without Bonus */}
+                  <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <XMarkIcon className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-1">
+                      {attendanceBonusData.summary.withoutBonusCount}
+                    </div>
+                    <div className="text-xs font-medium text-white/90">
+                      Without Bonus
+                    </div>
+                  </div>
+
+                  {/* Total October */}
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <BanknotesIcon className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-1">
+                      {attendanceBonusData.totals.october}
+                    </div>
+                    <div className="text-xs font-medium text-white/90">
+                      October Total
+                    </div>
+                  </div>
+
+                  {/* Hired/Resigned October */}
+                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <ArrowPathIcon className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-1">
+                      {attendanceBonusData.hiredResigned.october}
+                    </div>
+                    <div className="text-xs font-medium text-white/90">
+                      Net Change
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team Performance Chart */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Team Continuity Performance
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Employee count by team across months
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRefresh}
+                      disabled={isRefreshing}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ArrowPathRoundedSquareIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+                    </button>
+                  </div>
+                  <div className="p-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={attendanceBonusData.teams}
+                        margin={{ top: 10, right: 20, left: 10, bottom: 50 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="account" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                          tick={{ fontSize: 11 }}
+                          stroke="#6b7280"
+                        />
+                        <YAxis 
+                          stroke="#6b7280"
+                          tick={{ fontSize: 12 }}
+                          label={{ value: 'Employee Count', angle: -90, position: 'insideLeft' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                          }}
+                        />
+                        <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                        <Bar dataKey="august" fill="#3b82f6" radius={[8, 8, 0, 0]} name="August" />
+                        <Bar dataKey="september" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="September" />
+                        <Bar dataKey="october" fill="#10b981" radius={[8, 8, 0, 0]} name="October" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Teams Table */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Team Continuity Bonus Details
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Complete breakdown by team
+                        {lastUpdated && (
+                          <span className="ml-2 text-xs">
+                            • Last updated: {lastUpdated.toLocaleTimeString()}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {attendanceBonusData.teams.length > 10 && (
+                      <button
+                        onClick={() => setIsTeamContinuityModalOpen(true)}
+                        className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                      >
+                        <span className="text-lg">+</span>
+                        View All
+                      </button>
+                    )}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Account
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            August
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            September
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            October
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Bonus Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {attendanceBonusData.teams.slice(0, 10).map((team: any, index: number) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                  <span className="text-white font-bold text-sm">
+                                    {team.account.substring(0, 2)}
+                                  </span>
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-bold text-gray-900">{team.account}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-2xl font-bold text-blue-600">{team.august}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-2xl font-bold text-purple-600">{team.september}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-2xl font-bold text-green-600">{team.october}</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              {team.withBonus ? (
+                                <span className="px-4 py-2 inline-flex items-center gap-2 text-sm leading-5 font-bold rounded-full bg-green-100 text-green-800">
+                                  <CheckCircleIcon className="w-5 h-5" />
+                                  Yes
+                                </span>
+                              ) : (
+                                <span className="px-4 py-2 inline-flex items-center gap-2 text-sm leading-5 font-bold rounded-full bg-red-100 text-red-800">
+                                  <XMarkIcon className="w-5 h-5" />
+                                  No
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {/* Totals Row */}
+                        <tr className="bg-gradient-to-r from-gray-50 to-blue-50 font-bold border-t-2 border-gray-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                            TOTAL
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-2xl font-bold text-blue-700">{attendanceBonusData.totals.august}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-2xl font-bold text-purple-700">{attendanceBonusData.totals.september}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-2xl font-bold text-green-700">{attendanceBonusData.totals.october}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-sm text-gray-600">-</span>
+                          </td>
+                        </tr>
+                        {/* Hired/Resigned Row */}
+                        <tr className="bg-gradient-to-r from-gray-50 to-orange-50 font-semibold">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                            Hired/Resigned
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-lg text-gray-400">-</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`text-xl font-bold ${attendanceBonusData.hiredResigned.september >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {attendanceBonusData.hiredResigned.september > 0 ? '+' : ''}{attendanceBonusData.hiredResigned.september}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`text-xl font-bold ${attendanceBonusData.hiredResigned.october >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {attendanceBonusData.hiredResigned.october > 0 ? '+' : ''}{attendanceBonusData.hiredResigned.october}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-sm text-gray-600">-</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Team Continuity Modal */}
+                {isTeamContinuityModalOpen && (
+                  <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex min-h-screen items-center justify-center p-4">
+                      <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
+                        onClick={() => setIsTeamContinuityModalOpen(false)}
+                      ></div>
+
+                      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              All Teams - Continuity Bonus
+                            </h2>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Complete list of all teams with search
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => setIsTeamContinuityModalOpen(false)}
+                            className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                          >
+                            <XMarkIcon className="w-6 h-6 text-gray-500" />
+                          </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="p-6 border-b border-gray-200">
+                          <div className="relative">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                              type="text"
+                              placeholder="Search by account name..."
+                              value={teamContinuitySearchTerm}
+                              onChange={(e) => setTeamContinuitySearchTerm(e.target.value)}
+                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2">
+                            {attendanceBonusData.teams.filter((team: any) =>
+                              team.account.toLowerCase().includes(teamContinuitySearchTerm.toLowerCase())
+                            ).length} of {attendanceBonusData.teams.length} teams match your search
+                          </p>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Account
+                                </th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                  August
+                                </th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                  September
+                                </th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                  October
+                                </th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                  Bonus Status
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {attendanceBonusData.teams
+                                .filter((team: any) =>
+                                  team.account.toLowerCase().includes(teamContinuitySearchTerm.toLowerCase())
+                                )
+                                .map((team: any, index: number) => (
+                                  <tr key={index} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                                    <td className="py-3 px-4">
+                                      <div className="flex items-center">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                          <span className="text-white font-bold text-sm">
+                                            {team.account.substring(0, 2)}
+                                          </span>
+                                        </div>
+                                        <div className="ml-3">
+                                          <div className="text-sm font-bold text-gray-900">{team.account}</div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 text-center">
+                                      <span className="text-xl font-bold text-blue-600">{team.august}</span>
+                                    </td>
+                                    <td className="py-3 px-4 text-center">
+                                      <span className="text-xl font-bold text-purple-600">{team.september}</span>
+                                    </td>
+                                    <td className="py-3 px-4 text-center">
+                                      <span className="text-xl font-bold text-green-600">{team.october}</span>
+                                    </td>
+                                    <td className="py-3 px-4 text-center">
+                                      {team.withBonus ? (
+                                        <span className="px-3 py-1.5 inline-flex items-center gap-2 text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800">
+                                          <CheckCircleIcon className="w-4 h-4" />
+                                          Yes
+                                        </span>
+                                      ) : (
+                                        <span className="px-3 py-1.5 inline-flex items-center gap-2 text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800">
+                                          <XMarkIcon className="w-4 h-4" />
+                                          No
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm text-gray-600">
+                              Total: {attendanceBonusData.teams.length} teams
+                            </p>
+                            <button
+                              onClick={() => setIsTeamContinuityModalOpen(false)}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : null}
+              </>
+            )}
+
+            {/* QB Sub-Tab */}
+            {quarterlyBonusTab === "qb" && (
+              <>
+                {loading ? (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                    <LoadingSpinner size="lg" text="Loading QB data..." />
+                  </div>
+                ) : error ? (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                    <div className="text-red-600 text-6xl mb-4">⚠️</div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      Error Loading Data
+                    </h2>
+                    <p className="text-gray-600 mb-6">{error}</p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : qbData ? (
+                  <>
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+                      {/* Total Employees */}
+                      <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {qbData.summary.totalEmployees}
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Total Employees
+                        </div>
+                      </div>
+
+                      {/* Total Bonus Payout */}
+                      <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <BanknotesIcon className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          ₱{(qbData.summary.totalBonusPayout / 1000).toFixed(0)}K
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Total Payout
+                        </div>
+                      </div>
+
+                      {/* Avg Bonus */}
+                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          ₱{qbData.summary.avgBonusPerEmployee.toFixed(0)}
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Avg/Employee
+                        </div>
+                      </div>
+
+                      {/* Regular */}
+                      <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <CheckCircleIcon className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {qbData.statusBreakdown.regular}
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Regular
+                        </div>
+                      </div>
+
+                      {/* Probationary */}
+                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <ClockIcon className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {qbData.statusBreakdown.probationary}
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Probationary
+                        </div>
+                      </div>
+
+                      {/* Resigned */}
+                      <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <XMarkIcon className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-white mb-1">
+                          {qbData.statusBreakdown.resigned}
+                        </div>
+                        <div className="text-xs font-medium text-white/90">
+                          Resigned
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bonus Breakdown Chart */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Bonus Breakdown by Account
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Total quarterly bonus distribution
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleRefresh}
+                          disabled={isRefreshing}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ArrowPathRoundedSquareIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                          {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+                        </button>
+                      </div>
+                      <div className="p-6">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart
+                            data={qbData.accountSummary}
+                            margin={{ top: 10, right: 20, left: 10, bottom: 50 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <XAxis 
+                              dataKey="account" 
+                              angle={-45}
+                              textAnchor="end"
+                              height={80}
+                              tick={{ fontSize: 11 }}
+                              stroke="#6b7280"
+                            />
+                            <YAxis 
+                              stroke="#6b7280"
+                              tick={{ fontSize: 11 }}
+                              label={{ value: 'Total Bonus (₱)', angle: -90, position: 'insideLeft' }}
+                            />
+                            <Tooltip 
+                              contentStyle={{
+                                backgroundColor: 'white',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '12px',
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                              }}
+                              formatter={(value: any) => `₱${value.toFixed(2)}`}
+                            />
+                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                            <Bar dataKey="totalAttendanceBonus" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Attendance" stackId="a" />
+                            <Bar dataKey="totalClientSatisfaction" fill="#10b981" radius={[0, 0, 0, 0]} name="Client Satisfaction" stackId="a" />
+                            <Bar dataKey="totalTeamContinuity" fill="#8b5cf6" radius={[0, 0, 0, 0]} name="Team Continuity" stackId="a" />
+                            <Bar dataKey="totalSupervisorAward" fill="#f59e0b" radius={[8, 8, 0, 0]} name="Supervisor Award" stackId="a" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    {/* Employee Table */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Employee Quarterly Bonus Details
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Top 10 employees
+                            {lastUpdated && (
+                              <span className="ml-2 text-xs">
+                                • Last updated: {lastUpdated.toLocaleTimeString()}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        {qbData.employees.length > 10 && (
+                          <button
+                            onClick={() => setIsQbModalOpen(true)}
+                            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                          >
+                            <span className="text-lg">+</span>
+                            View All
+                          </button>
+                        )}
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
+                                Name
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Account
+                              </th>
+                              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Attendance
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Client Sat.
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Team Cont.
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Supervisor
+                              </th>
+                              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50">
+                                Total Bonus
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {qbData.employees.slice(0, 10).map((emp: any) => (
+                                <tr key={emp.id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-3 whitespace-nowrap sticky left-0 bg-white">
+                                    <div className="font-medium text-gray-900">{emp.name}</div>
+                                    <div className="text-xs text-gray-500">{emp.weeksPresent} weeks present</div>
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap">
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                      {emp.account}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                      emp.status === 'Regular' ? 'bg-green-100 text-green-800' :
+                                      emp.status === 'Probationary' ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {emp.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-right text-gray-900">
+                                    ₱{emp.attendanceRelatedBonus.toFixed(2)}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-right text-gray-900">
+                                    {emp.clientSatisfaction > 0 ? `₱${emp.clientSatisfaction.toFixed(2)}` : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-right text-gray-900">
+                                    {emp.teamContinuity > 0 ? `₱${emp.teamContinuity.toFixed(2)}` : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-right text-gray-900">
+                                    {emp.supervisorAward > 0 ? `₱${emp.supervisorAward.toFixed(2)}` : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap text-right bg-blue-50">
+                                    <span className="font-bold text-blue-900">
+                                      ₱{emp.totalQuarterlyBonus.toFixed(2)}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* QB Employee Modal */}
+                    {isQbModalOpen && (
+                      <div className="fixed inset-0 z-50 overflow-y-auto">
+                        <div className="flex min-h-screen items-center justify-center p-4">
+                          <div
+                            className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
+                            onClick={() => setIsQbModalOpen(false)}
+                          ></div>
+
+                          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                              <div>
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                  All Employees - Quarterly Bonus
+                                </h2>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Complete list with search and filters
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => setIsQbModalOpen(false)}
+                                className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                              >
+                                <XMarkIcon className="w-6 h-6 text-gray-500" />
+                              </button>
+                            </div>
+
+                            {/* Filters and Search */}
+                            <div className="p-6 border-b border-gray-200 bg-gray-50">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Search */}
+                                <div className="relative">
+                                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                  <input
+                                    type="text"
+                                    placeholder="Search by name..."
+                                    value={qbSearchTerm}
+                                    onChange={(e) => setQbSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                  />
+                                </div>
+
+                                {/* Account Filter */}
+                                <select
+                                  value={qbAccountFilter}
+                                  onChange={(e) => setQbAccountFilter(e.target.value)}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                                  <option value="All">All Accounts</option>
+                                  {Array.from(new Set(qbData.employees.map((e: any) => e.account))).map((account: any) => (
+                                    <option key={account} value={account}>{account}</option>
+                                  ))}
+                                </select>
+
+                                {/* Status Filter */}
+                                <select
+                                  value={qbStatusFilter}
+                                  onChange={(e) => setQbStatusFilter(e.target.value)}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                >
+                                  <option value="All">All Status</option>
+                                  <option value="Regular">Regular</option>
+                                  <option value="Probationary">Probationary</option>
+                                  <option value="Resigned">Resigned</option>
+                                </select>
+                              </div>
+                              <p className="text-sm text-gray-500 mt-3">
+                                {qbData.employees.filter((emp: any) => {
+                                  const matchesSearch = emp.name.toLowerCase().includes(qbSearchTerm.toLowerCase());
+                                  const matchesAccount = qbAccountFilter === "All" || emp.account === qbAccountFilter;
+                                  const matchesStatus = qbStatusFilter === "All" || emp.status === qbStatusFilter;
+                                  return matchesSearch && matchesAccount && matchesStatus;
+                                }).length} of {qbData.employees.length} employees match your filters
+                              </p>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="flex-1 overflow-auto">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-50 sticky top-0">
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                      Name
+                                    </th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                      Account
+                                    </th>
+                                    <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                      Status
+                                    </th>
+                                    <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                                      Attendance
+                                    </th>
+                                    <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                                      Client Sat.
+                                    </th>
+                                    <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                                      Team Cont.
+                                    </th>
+                                    <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                                      Supervisor
+                                    </th>
+                                    <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-blue-50">
+                                      Total Bonus
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {qbData.employees
+                                    .filter((emp: any) => {
+                                      const matchesSearch = emp.name.toLowerCase().includes(qbSearchTerm.toLowerCase());
+                                      const matchesAccount = qbAccountFilter === "All" || emp.account === qbAccountFilter;
+                                      const matchesStatus = qbStatusFilter === "All" || emp.status === qbStatusFilter;
+                                      return matchesSearch && matchesAccount && matchesStatus;
+                                    })
+                                    .map((emp: any) => (
+                                      <tr key={emp.id} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                                        <td className="py-3 px-4 whitespace-nowrap">
+                                          <div className="font-medium text-gray-900">{emp.name}</div>
+                                          <div className="text-xs text-gray-500">{emp.weeksPresent} weeks</div>
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap">
+                                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {emp.account}
+                                          </span>
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-center">
+                                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                            emp.status === 'Regular' ? 'bg-green-100 text-green-800' :
+                                            emp.status === 'Probationary' ? 'bg-orange-100 text-orange-800' :
+                                            'bg-red-100 text-red-800'
+                                          }`}>
+                                            {emp.status}
+                                          </span>
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-right text-gray-900">
+                                          ₱{emp.attendanceRelatedBonus.toFixed(2)}
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-right text-gray-900">
+                                          {emp.clientSatisfaction > 0 ? `₱${emp.clientSatisfaction.toFixed(2)}` : '-'}
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-right text-gray-900">
+                                          {emp.teamContinuity > 0 ? `₱${emp.teamContinuity.toFixed(2)}` : '-'}
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-right text-gray-900">
+                                          {emp.supervisorAward > 0 ? `₱${emp.supervisorAward.toFixed(2)}` : '-'}
+                                        </td>
+                                        <td className="py-3 px-4 whitespace-nowrap text-right bg-blue-50">
+                                          <span className="font-bold text-blue-900">
+                                            ₱{emp.totalQuarterlyBonus.toFixed(2)}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                              <div className="flex justify-between items-center">
+                                <p className="text-sm text-gray-600">
+                                  Total: {qbData.employees.length} employees | 
+                                  Filtered: {qbData.employees.filter((emp: any) => {
+                                    const matchesSearch = emp.name.toLowerCase().includes(qbSearchTerm.toLowerCase());
+                                    const matchesAccount = qbAccountFilter === "All" || emp.account === qbAccountFilter;
+                                    const matchesStatus = qbStatusFilter === "All" || emp.status === qbStatusFilter;
+                                    return matchesSearch && matchesAccount && matchesStatus;
+                                  }).length}
+                                </p>
+                                <button
+                                  onClick={() => setIsQbModalOpen(false)}
+                                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+              </>
+            )}
           </div>
         )}
 
