@@ -8,6 +8,7 @@ import {
   UserIcon,
   EyeIcon,
   EyeSlashIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { setCurrentUsername } from "../lib/auth";
 import { triggerAuthChange } from "../lib/useAuth";
@@ -23,6 +24,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Load saved credentials on mount
   useEffect(() => {
@@ -91,10 +93,20 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const isFormFilled = username.trim() !== "" && password.trim() !== "";
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Column - GIF Background with Red Gradient Overlay */}
-      <div className="hidden lg:flex w-1/2 relative items-center justify-center p-8 overflow-hidden">
-        {/* Background Image */}
+    <div className="min-h-screen flex relative overflow-hidden">
+      {/* Animated Background Gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-red-50 via-pink-50 to-orange-50">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyMjEsMjEyLDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-40"></div>
+        
+        {/* Floating Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-[#ff6d74]/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-red-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Left Column - GIF Background with Modern Overlay */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center p-12 overflow-hidden">
+        {/* GIF Background */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/gif/Login.gif"
@@ -105,177 +117,260 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             className="object-cover"
           />
         </div>
-        {/* Gradient Overlay - Red Theme */}
-        <div className="absolute inset-0 bg-linear-to-br from-[#ff6d74]/85 via-[#ff6d74]/80 to-red-500/80 z-10"></div>
+        
+        {/* Modern Gradient Overlay with animation */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6d74]/90 via-red-500/85 to-pink-600/90 z-10"></div>
+        
+        {/* Animated Overlay Effects */}
+        <div className="absolute inset-0 z-10">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
 
-        {/* Content */}
-        <div className="relative z-20 max-w-md w-full text-white text-center">
-          <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
-          <p className="text-lg text-white/90 leading-relaxed">
-            Access powerful business intelligence and real-time analytics across
-            all your departments. Manage, monitor, and drive better decisions
-            with our comprehensive dashboard.
-          </p>
+        {/* Glassmorphism Content Card */}
+        <div className="relative z-20 max-w-lg w-full">
+          {/* Content Card */}
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <SparklesIcon className="w-8 h-8 text-yellow-300 animate-pulse" />
+              <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+                Welcome Back
+              </h2>
+            </div>
+            <p className="text-lg text-white/95 leading-relaxed mb-6 drop-shadow">
+              Access powerful business intelligence and real-time analytics across
+              all your departments.
+            </p>
+            
+            {/* Feature Pills */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                <span className="text-white/90 text-sm font-medium">Real-time Analytics</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-400/50" style={{ animationDelay: '0.5s' }}></div>
+                <span className="text-white/90 text-sm font-medium">Secure Access Control</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse shadow-lg shadow-purple-400/50" style={{ animationDelay: '1s' }}></div>
+                <span className="text-white/90 text-sm font-medium">Multi-Department Management</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Right Column - Login Form */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center px-4 py-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-8 relative z-10">
         <div className="max-w-md w-full">
-          {/* Form Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-[#ff6d74] rounded-xl mb-4 shadow-lg transition-all duration-300">
-              {isFormFilled ? (
-                <LockOpenIcon className="w-7 h-7 text-white animate-pulse" />
-              ) : (
-                <LockClosedIcon className="w-7 h-7 text-white" />
-              )}
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">User Login</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Sign in to your account
-            </p>
-          </div>
+          {/* Glassmorphism Card Container */}
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#ff6d74]/20 to-red-400/20 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-400/20 to-orange-400/20 rounded-full blur-3xl -z-10"></div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Username Field */}
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6d74] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="Enter your username"
-                  required
-                  autoComplete="username"
-                />
+            {/* Form Header */}
+            <div className="text-center mb-8">
+            {/* Animated Lock Icon */}
+            <div className="relative inline-block mb-4">
+              <div className={`absolute inset-0 bg-gradient-to-r ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl blur-xl opacity-50 animate-pulse transition-all duration-500`}></div>
+              <div className={`relative flex items-center justify-center w-16 h-16 bg-gradient-to-br ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl shadow-xl transition-all duration-500 transform ${isFormFilled ? 'scale-110' : 'scale-100'}`}>
+                {isFormFilled ? (
+                  <LockOpenIcon className="w-8 h-8 text-white animate-bounce" />
+                ) : (
+                  <LockClosedIcon className="w-8 h-8 text-white" />
+                )}
               </div>
             </div>
+            
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-red-900 to-[#ff6d74] bg-clip-text text-transparent mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-sm text-gray-600 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 bg-[#ff6d74] rounded-full animate-pulse"></span>
+              Sign in to continue
+            </p>
+            </div>
 
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6d74] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
-                  placeholder="Enter your password"
-                  required
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username Field */}
+              <div className="group">
+                <label
+                  htmlFor="username"
+                  className={`block text-sm font-semibold mb-2 transition-colors duration-300 ${
+                    focusedField === 'username' ? 'text-[#ff6d74]' : 'text-gray-700'
+                  }`}
                 >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  Username
+                </label>
+                <div className="relative">
+                  <div className={`absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300 z-10 ${
+                    focusedField === 'username' ? 'text-[#ff6d74]' : 'text-gray-500'
+                  }`}>
+                    <UserIcon className="h-5 w-5 stroke-2" />
+                  </div>
+                  <input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onFocus={() => setFocusedField('username')}
+                    onBlur={() => setFocusedField(null)}
+                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#ff6d74]/20 focus:border-[#ff6d74] outline-none transition-all duration-300 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                    placeholder="Enter your username"
+                    required
+                    autoComplete="username"
+                  />
+                  {focusedField === 'username' && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
                   )}
-                </button>
+                </div>
               </div>
-            </div>
 
-            {/* Remember Me Checkbox */}
-            <div className="flex items-center">
-              <input
-                id="rememberMe"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 accent-[#ff6d74]"
-                style={{ accentColor: "#ff6d74" }}
-              />
-              <label
-                htmlFor="rememberMe"
-                className="ml-2 text-sm text-gray-600 cursor-pointer"
-              >
-                Remember me
-              </label>
-              <a
-                href="#"
-                className="ml-auto text-sm text-[#ff6d74] hover:text-red-600"
-              >
-                Forgot password?
-              </a>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-2.5 px-4 rounded-lg text-white font-semibold transition-all duration-200 ${
-                isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[#ff6d74] hover:bg-red-600 shadow-md hover:shadow-lg"
-              }`}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+              {/* Password Field */}
+              <div className="group">
+                <label
+                  htmlFor="password"
+                  className={`block text-sm font-semibold mb-2 transition-colors duration-300 ${
+                    focusedField === 'password' ? 'text-[#ff6d74]' : 'text-gray-700'
+                  }`}
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className={`absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors duration-300 z-10 ${
+                    focusedField === 'password' ? 'text-[#ff6d74]' : 'text-gray-500'
+                  }`}>
+                    <LockClosedIcon className="h-5 w-5 stroke-2" />
+                  </div>
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    className="block w-full pl-12 pr-12 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#ff6d74]/20 focus:border-[#ff6d74] outline-none transition-all duration-300 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md"
+                    placeholder="Enter your password"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center group z-10"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                "LOGIN"
-              )}
-            </button>
-          </form>
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-500 group-hover:text-[#ff6d74] transition-colors duration-300 stroke-2" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-500 group-hover:text-[#ff6d74] transition-colors duration-300 stroke-2" />
+                    )}
+                  </button>
+                  {focusedField === 'password' && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
+                  )}
+                </div>
+              </div>
 
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Protected Dashboard • Contact administrator for access
-            </p>
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      id="rememberMe"
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-[#ff6d74] peer-checked:to-red-500 transition-all duration-300 shadow-inner"></div>
+                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-4 shadow-md"></div>
+                  </div>
+                  <span className="ml-3 text-sm text-gray-700 font-medium group-hover:text-[#ff6d74] transition-colors">
+                    Remember me
+                  </span>
+                </label>
+                <a
+                  href="#"
+                  className="text-sm font-medium text-[#ff6d74] hover:text-red-600 transition-colors duration-300"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="relative overflow-hidden bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm animate-shake shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10"></div>
+                  <div className="relative flex items-center gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">{error}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`relative w-full py-4 px-6 rounded-xl text-white font-bold text-lg overflow-hidden transition-all duration-300 transform ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#ff6d74] via-red-500 to-pink-600 hover:from-[#ff5964] hover:via-red-600 hover:to-pink-700 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                }`}
+              >
+                {/* Animated background on hover */}
+                {!isLoading && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#ff8b91] via-red-400 to-pink-400 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
+                )}
+                
+                <span className="relative flex items-center justify-center gap-3">
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-6 w-6 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Sign In</span>
+                      <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </span>
+              </button>
+            </form>
+
+            {/* Footer */}
+            <div className="mt-6 pt-6 border-t border-gray-200/50">
+              <p className="text-center text-xs text-gray-500">
+                Protected Dashboard • Contact administrator for access
+              </p>
+            </div>
           </div>
         </div>
       </div>
