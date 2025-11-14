@@ -194,6 +194,7 @@ export function logout(): void {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem("authenticated");
   sessionStorage.removeItem("username");
+  sessionStorage.removeItem("finance_passkey_verified"); // Clear finance passkey on logout
   // Remove cookie with proper attributes
   const isLocalhost =
     window.location.hostname === "localhost" ||
@@ -243,6 +244,7 @@ export function clearAllAuthData(): void {
   sessionStorage.removeItem("authenticated");
   sessionStorage.removeItem("username");
   sessionStorage.removeItem("currentPassword");
+  sessionStorage.removeItem("finance_passkey_verified"); // Clear finance passkey
 
   // Clear cookies
   const isLocalhost =
