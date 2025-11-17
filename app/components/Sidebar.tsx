@@ -25,7 +25,7 @@ import { logout, initializeAdminUser } from "../lib/auth";
 import { useAuth } from "../lib/useAuth";
 
 export default function Sidebar() {
-  const { username, isAdminUser, isLoading: authLoading } = useAuth();
+  const { username, isAdminUser, hasUserManagementAccess, isLoading: authLoading } = useAuth();
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProcessesOpen, setIsProcessesOpen] = useState(true);
@@ -310,7 +310,7 @@ export default function Sidebar() {
                 </button>
               ) : (
                 <div className="space-y-1">
-                  {isAdminUser && (
+                  {hasUserManagementAccess && (
                     <Link
                       href="/admin/user-management"
                       className={`flex items-center text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
@@ -330,7 +330,7 @@ export default function Sidebar() {
               )}
               {isProcessesOpen && !isSidebarCollapsed && (
                 <div className="space-y-1 mt-2">
-                  {isAdminUser && (
+                  {hasUserManagementAccess && (
                     <Link
                       href="/admin/user-management"
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-transparent hover:text-indigo-600 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
@@ -427,12 +427,13 @@ export default function Sidebar() {
                 <Link
                   href="/profile"
                   className="flex items-center space-x-3 mb-4 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                  title={username || "User"}
                 >
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <UserCircleIcon className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="text-sm font-medium text-gray-900 truncate" title={username || ""}>
                       {username}
                     </div>
                     <div className="text-xs text-gray-500 capitalize">
@@ -482,12 +483,13 @@ export default function Sidebar() {
                 href="/profile"
                 className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
                 onClick={() => setIsUserMenuOpen(false)}
+                title={username || "User"}
               >
-                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                   <UserCircleIcon className="w-5 h-5 text-indigo-600" />
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="min-w-0 overflow-hidden">
+                  <div className="text-sm font-medium text-gray-900 truncate" title={username || ""}>
                     {username}
                   </div>
                   <div className="text-xs text-gray-500 capitalize">
@@ -595,7 +597,7 @@ export default function Sidebar() {
                   </button>
                   {isProcessesOpen && (
                     <div className="space-y-1 mt-2">
-                      {isAdminUser && (
+                      {hasUserManagementAccess && (
                         <Link
                           href="/admin/user-management"
                           className="nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:text-indigo-600 rounded-lg transition-all"
@@ -651,11 +653,11 @@ export default function Sidebar() {
               {/* Mobile User Section */}
               <div className="shrink-0 border-t border-gray-200 p-4">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
                     <UserCircleIcon className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="text-sm font-medium text-gray-900 truncate" title={username || ""}>
                       {username}
                     </div>
                     <div className="text-xs text-gray-500 capitalize">

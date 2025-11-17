@@ -11,6 +11,7 @@ import {
   getUserByUsername,
   isAdmin,
   User,
+  canAccessUserManagement,
 } from "../lib/auth";
 import {
   EyeIcon,
@@ -112,7 +113,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <button
@@ -145,12 +145,15 @@ export default function ProfilePage() {
               </div>
 
               {/* User Info */}
-              <div className="text-center mb-6 border-b border-gray-200 pb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+              <div className="text-center mb-6 border-b border-gray-200 pb-6 px-2">
+                <h2 className="text-2xl font-bold text-gray-900 truncate px-2">
                   {user?.fullName || username}
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {user?.email || "No email"}
+                <p
+                  className="text-sm text-gray-600 mt-1 break-words px-2"
+                  title={user?.email || username}
+                >
+                  {user?.email || username}
                 </p>
                 <div className="inline-flex items-center gap-2 mt-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                   <div className="w-2 h-2 rounded-full bg-green-600"></div>
@@ -360,8 +363,8 @@ export default function ProfilePage() {
               </form>
             </div>
 
-            {/* Admin Features */}
-            {isUserAdmin && (
+            {/* Admin Features - Only for IT Admin */}
+            {canAccessUserManagement(username) && (
               <div className="bg-white rounded-2xl shadow-lg p-8 mt-8">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   Admin Features

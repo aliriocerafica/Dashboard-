@@ -22,6 +22,7 @@ import {
   isAdmin,
   getCurrentUsername,
   resetUsersToDefault,
+  canAccessUserManagement,
 } from "../../lib/auth";
 
 export default function UserManagement() {
@@ -128,11 +129,11 @@ export default function UserManagement() {
 
   const isCurrentUser = (username: string) => username === currentUser;
 
-  // Check if user is admin
-  const isUserAdmin = isAdmin(currentUser);
+  // Check if user can access user management
+  const hasAccess = canAccessUserManagement(currentUser);
 
-  // If not admin, show access denied
-  if (!isUserAdmin) {
+  // If no access, show access denied
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="py-8">

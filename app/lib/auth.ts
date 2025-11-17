@@ -48,6 +48,16 @@ const defaultUsers: User[] = [
     isActive: true,
     createdAt: new Date().toISOString(),
   },
+  {
+    id: "4",
+    username: "IT@ardent.com",
+    password: "P@55w0rd",
+    role: "admin",
+    fullName: "IT Administrator",
+    email: "IT@ardent.com",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  },
 ];
 
 // Get users from localStorage or use defaults
@@ -136,6 +146,11 @@ export function isAdmin(username: string): boolean {
 // Check if user is superadmin (bypasses all restrictions)
 export function isSuperAdmin(username: string): boolean {
   return username === "management@ardent.com";
+}
+
+// Check if user can access user management and profile features
+export function canAccessUserManagement(username: string): boolean {
+  return username === "IT@ardent.com";
 }
 
 // Force reset users to default (for debugging)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { isAuthenticated, getCurrentUsername, isAdmin } from "./auth";
+import { isAuthenticated, getCurrentUsername, isAdmin, canAccessUserManagement } from "./auth";
 
 // Custom event for auth changes within the same tab
 const AUTH_CHANGE_EVENT = "auth-change";
@@ -10,6 +10,7 @@ export function useAuth() {
   const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [isAdminUser, setIsAdminUser] = useState(false);
+  const [hasUserManagementAccess, setHasUserManagementAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -17,10 +18,12 @@ export function useAuth() {
       const auth = isAuthenticated();
       const currentUsername = getCurrentUsername();
       const adminStatus = currentUsername ? isAdmin(currentUsername) : false;
+      const userManagementAccess = currentUsername ? canAccessUserManagement(currentUsername) : false;
 
       setAuthenticated(auth);
       setUsername(currentUsername);
       setIsAdminUser(adminStatus);
+      setHasUserManagementAccess(userManagementAccess);
       setIsLoading(false);
     };
 
@@ -51,6 +54,7 @@ export function useAuth() {
     authenticated,
     username,
     isAdminUser,
+    hasUserManagementAccess,
     isLoading,
   };
 }
