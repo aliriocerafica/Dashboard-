@@ -186,7 +186,7 @@ export default function FinancePage() {
     const verified = sessionStorage.getItem("finance_passkey_verified");
     
     // Superadmin bypasses passkey requirement
-    if (currentUser === "superadmin") {
+    if (currentUser === "management@ardent.com") {
       setIsPasskeyVerified(true);
       setIsCheckingPasskey(false);
       return;

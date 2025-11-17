@@ -20,11 +20,11 @@ export interface User {
 const defaultUsers: User[] = [
   {
     id: "1",
-    username: "admin",
-    password: "dashboardforall@123",
+    username: "management.mid@ardent.com",
+    password: "managementMid2!@#",
     role: "admin",
     fullName: "System Administrator",
-    email: "admin@company.com",
+    email: "management.mid@ardent.com",
     isActive: true,
     createdAt: new Date().toISOString(),
   },
@@ -40,11 +40,11 @@ const defaultUsers: User[] = [
   },
   {
     id: "3",
-    username: "superadmin",
-    password: "superadmin@123",
+    username: "management@ardent.com",
+    password: "managementMain2!@#",
     role: "admin",
     fullName: "Super Administrator",
-    email: "superadmin@company.com",
+    email: "management@ardent.com",
     isActive: true,
     createdAt: new Date().toISOString(),
   },
@@ -135,7 +135,7 @@ export function isAdmin(username: string): boolean {
 
 // Check if user is superadmin (bypasses all restrictions)
 export function isSuperAdmin(username: string): boolean {
-  return username === "superadmin";
+  return username === "management@ardent.com";
 }
 
 // Force reset users to default (for debugging)
