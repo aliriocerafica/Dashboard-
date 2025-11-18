@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import {
+  useState,
+  useEffect,
+  Suspense,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LaptopCard from "@/app/components/cards/LaptopCard";
@@ -51,6 +58,10 @@ function LaptopInventoryContent() {
   const [selectedRam, setSelectedRam] = useState<string>(
     searchParams.get("ram") || "all"
   );
+
+  // Infinite scroll state
+  const [displayLimit, setDisplayLimit] = useState(12);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadLaptopData();
@@ -116,30 +127,76 @@ function LaptopInventoryContent() {
     new Set(laptopData?.laptops.map((l: any) => l.ram).filter(Boolean))
   ).sort();
 
-  const filteredLaptops = laptopData?.laptops.filter((laptop: any) => {
-    // Search filter
-    const matchesSearch =
-      laptop.laptopId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (laptop.brand || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (laptop.laptopModel || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (laptop.handler || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (laptop.status || "").toLowerCase().includes(searchTerm.toLowerCase());
+  // Memoize filtered laptops to prevent unnecessary recalculations
+  const filteredLaptops = useMemo(() => {
+    if (!laptopData?.laptops) return [];
 
-    // Status filter
-    const matchesStatus =
-      selectedStatus === "all" || laptop.status === selectedStatus;
+    const searchLower = searchTerm.toLowerCase();
 
-    // Brand filter
-    const matchesBrand =
-      selectedBrand === "all" || laptop.brand === selectedBrand;
+    return laptopData.laptops.filter((laptop: any) => {
+      // Search filter - optimized with early returns
+      if (searchTerm) {
+        const matchesSearch =
+          laptop.laptopId?.toLowerCase().includes(searchLower) ||
+          laptop.brand?.toLowerCase().includes(searchLower) ||
+          laptop.laptopModel?.toLowerCase().includes(searchLower) ||
+          laptop.handler?.toLowerCase().includes(searchLower) ||
+          laptop.status?.toLowerCase().includes(searchLower);
 
-    // RAM filter
-    const matchesRam = selectedRam === "all" || laptop.ram === selectedRam;
+        if (!matchesSearch) return false;
+      }
 
-    return matchesSearch && matchesStatus && matchesBrand && matchesRam;
-  });
+      // Status filter
+      if (selectedStatus !== "all" && laptop.status !== selectedStatus) {
+        return false;
+      }
+
+      // Brand filter
+      if (selectedBrand !== "all" && laptop.brand !== selectedBrand) {
+        return false;
+      }
+
+      // RAM filter
+      if (selectedRam !== "all" && laptop.ram !== selectedRam) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    laptopData?.laptops,
+    searchTerm,
+    selectedStatus,
+    selectedBrand,
+    selectedRam,
+  ]);
+
+  // Reset display limit when filters change
+  useEffect(() => {
+    setDisplayLimit(12);
+  }, [searchTerm, selectedStatus, selectedBrand, selectedRam]);
+
+  // Infinite scroll observer
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (target.isIntersecting) {
+      setDisplayLimit((prev) => prev + 12);
+    }
+  }, []);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0,
+    };
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (loaderRef.current) observer.observe(loaderRef.current);
+
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [handleObserver]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
@@ -373,7 +430,7 @@ function LaptopInventoryContent() {
             </div>
 
             {/* Laptop Cards Grid */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
                   All Laptops & Accessories
@@ -394,15 +451,28 @@ function LaptopInventoryContent() {
 
               {/* Laptop Cards */}
               {!loading && filteredLaptops && filteredLaptops.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredLaptops.map((laptop: any, index: number) => {
-                    // Create unique key combining laptopId, serial number, and index
-                    const uniqueKey = `${laptop.laptopId || "unknown"}-${
-                      laptop.laptopSn || "no-sn"
-                    }-${index}`;
-                    return <LaptopCard key={uniqueKey} laptop={laptop} />;
-                  })}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredLaptops
+                      .slice(0, displayLimit)
+                      .map((laptop: any, index: number) => {
+                        // Create unique key combining laptopId, serial number, and index
+                        const uniqueKey = `${laptop.laptopId || "unknown"}-${
+                          laptop.laptopSn || "no-sn"
+                        }-${index}`;
+                        return <LaptopCard key={uniqueKey} laptop={laptop} />;
+                      })}
+                  </div>
+                  {/* Loading sentinel */}
+                  {filteredLaptops.length > displayLimit && (
+                    <div
+                      ref={loaderRef}
+                      className="flex justify-center py-8 w-full"
+                    >
+                      <LoadingSpinner size="sm" text="Loading more..." />
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Empty State */}
