@@ -812,21 +812,23 @@ export default function ITPage() {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-purple-50 to-purple-100 rounded-t-2xl">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    All IT Tickets
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Complete ticket history with search and filter
-                  </p>
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      All IT Tickets
+                    </h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      Complete ticket history with search and filter
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-2 hover:bg-white/50 rounded-lg transition-colors"
-                >
-                  <XMarkIcon className="w-6 h-6 text-gray-500" />
-                </button>
               </div>
 
               {/* Search Bar */}
@@ -949,10 +951,10 @@ export default function ITPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600">
-                    Total: {actualTicketData.length} tickets | Filtered:{" "}
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total: <span className="font-semibold">{actualTicketData.length}</span> tickets | Filtered:{" "}
+                  <span className="font-semibold">
                     {
                       actualTicketData.filter(
                         (ticket) =>
@@ -969,16 +971,15 @@ export default function ITPage() {
                             ?.toLowerCase()
                             .includes(searchTerm.toLowerCase())
                       ).length
-                    }{" "}
-                    tickets
-                  </p>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Close
-                  </button>
-                </div>
+                    }
+                  </span>
+                </p>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
@@ -996,21 +997,23 @@ export default function ITPage() {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-2xl">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    All IT Tasks
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Complete task list with search and filter
-                  </p>
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      All IT Tasks
+                    </h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      Complete task list with search and filter
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsTaskModalOpen(false)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsTaskModalOpen(false)}
-                  className="p-2 hover:bg-white/50 rounded-lg transition-colors"
-                >
-                  <XMarkIcon className="w-6 h-6 text-gray-500" />
-                </button>
               </div>
 
               {/* Search Bar */}
@@ -1123,10 +1126,10 @@ export default function ITPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600">
-                    Total: {taskData.tasks.length} tasks | Filtered:{" "}
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total: <span className="font-semibold">{taskData.tasks.length}</span> tasks | Filtered:{" "}
+                  <span className="font-semibold">
                     {
                       taskData.tasks.filter(
                         (task) =>
@@ -1134,16 +1137,15 @@ export default function ITPage() {
                           task.assignee.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
                           task.status.toLowerCase().includes(taskSearchTerm.toLowerCase())
                       ).length
-                    }{" "}
-                    tasks
-                  </p>
-                  <button
-                    onClick={() => setIsTaskModalOpen(false)}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Close
-                  </button>
-                </div>
+                    }
+                  </span>
+                </p>
+                <button
+                  onClick={() => setIsTaskModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

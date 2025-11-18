@@ -14,9 +14,11 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   EyeIcon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
 
 interface DepartmentSummary {
   name: string;
@@ -41,6 +43,10 @@ export default function OverviewPage() {
   const [financeData, setFinanceData] = useState<any>(null);
   const [hrData, setHRData] = useState<any>(null);
   const [itData, setITData] = useState<any>(null);
+  const [dpoData, setDpoData] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<"completed" | "inProgress" | "pending" | null>(null);
+  const [modalSearchTerm, setModalSearchTerm] = useState("");
 
   useEffect(() => {
     fetchAllDepartmentData();
@@ -50,12 +56,13 @@ export default function OverviewPage() {
     setLoading(true);
     try {
       // Fetch all department data in parallel
-      const [sales, marketing, finance, hr, it] = await Promise.allSettled([
+      const [sales, marketing, finance, hr, it, dpo] = await Promise.allSettled([
         fetch("/api/get-client-payments").then((r) => r.json()),
         fetch("/api/get-marketing-gantt").then((r) => r.json()),
         fetch("/api/get-payroll-concerns").then((r) => r.json()),
         fetch("/api/get-payroll-concerns").then((r) => r.json()), // Using same for HR
         fetch("/api/get-it-tasks").then((r) => r.json()),
+        fetch("/api/get-dpo-overview").then((r) => r.json()),
       ]);
 
       if (sales.status === "fulfilled") {
@@ -77,6 +84,10 @@ export default function OverviewPage() {
       if (it.status === "fulfilled") {
         console.log("IT data:", it.value);
         setITData(it.value);
+      }
+      if (dpo.status === "fulfilled") {
+        console.log("DPO data:", dpo.value);
+        setDpoData(dpo.value);
       }
     } catch (error) {
       console.error("Error fetching department data:", error);
@@ -305,37 +316,44 @@ export default function OverviewPage() {
       });
     }
 
-    // President/Executive Summary
-    summaries.push({
-      name: "Executive",
-      icon: BuildingOffice2Icon,
-      color: "text-rose-600",
-      bgColor: "bg-rose-50",
-      metrics: {
-        total: 0,
-        completed: 0,
-        pending: 0,
-        inProgress: 0,
-        trend: 2.1,
-      },
-      link: "/president",
-    });
-
     // DPO Summary
-    summaries.push({
-      name: "DPO",
-      icon: ShieldCheckIcon,
-      color: "text-cyan-600",
-      bgColor: "bg-cyan-50",
-      metrics: {
-        total: 0,
-        completed: 0,
-        pending: 0,
-        inProgress: 0,
-        trend: 3.5,
-      },
-      link: "/dpo",
-    });
+    if (dpoData?.data?.summary) {
+      const summary = dpoData.data.summary;
+      const total = summary.totalTasks || 0;
+      const completed = summary.completedTasks || 0;
+      const pending = summary.pendingTasks || 0;
+      const overdue = summary.overdueTasks || 0;
+      
+      summaries.push({
+        name: "DPO",
+        icon: ShieldCheckIcon,
+        color: "text-cyan-600",
+        bgColor: "bg-cyan-50",
+        metrics: {
+          total,
+          completed,
+          pending,
+          inProgress: overdue, // Using overdue as inProgress for visibility
+          trend: summary.completionRate || 0,
+        },
+        link: "/dpo",
+      });
+    } else {
+      summaries.push({
+        name: "DPO",
+        icon: ShieldCheckIcon,
+        color: "text-cyan-600",
+        bgColor: "bg-cyan-50",
+        metrics: {
+          total: 0,
+          completed: 0,
+          pending: 0,
+          inProgress: 0,
+          trend: 0,
+        },
+        link: "/dpo",
+      });
+    }
 
     return summaries;
   };
@@ -371,6 +389,181 @@ export default function OverviewPage() {
     Pending: dept.metrics.pending,
     "In Progress": dept.metrics.inProgress,
   }));
+
+  // Get tasks by status across all departments
+  const getTasksByStatus = (status: "completed" | "inProgress" | "pending") => {
+    const tasks: Array<{ department: string; task: string; status: string; details: any }> = [];
+
+    // Sales tasks
+    if (salesData?.data?.payments && Array.isArray(salesData.data.payments)) {
+      salesData.data.payments.forEach((payment: any) => {
+        const paymentStatus = payment.paymentStatus?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (paymentStatus.includes("paid early") || paymentStatus.includes("paid on time")) {
+          taskStatus = "completed";
+        } else if (paymentStatus.includes("paid late")) {
+          taskStatus = "inProgress";
+        } else if (paymentStatus.includes("not yet paid")) {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "Sales",
+            task: payment.clientName || "Client Payment",
+            status: payment.paymentStatus || "Unknown",
+            details: payment,
+          });
+        }
+      });
+    }
+
+    // Marketing tasks
+    if (marketingData?.data?.items && Array.isArray(marketingData.data.items)) {
+      marketingData.data.items.forEach((item: any) => {
+        const itemStatus = item.status?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (itemStatus === "completed") {
+          taskStatus = "completed";
+        } else if (itemStatus === "ongoing" || itemStatus === "target") {
+          taskStatus = "inProgress";
+        } else {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "Marketing",
+            task: item.activity || "Marketing Activity",
+            status: item.status || "Unknown",
+            details: item,
+          });
+        }
+      });
+    }
+
+    // Finance tasks (payroll concerns)
+    if (financeData?.data?.concerns && Array.isArray(financeData.data.concerns)) {
+      financeData.data.concerns.forEach((concern: any) => {
+        const concernStatus = concern.status?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (concernStatus === "resolved") {
+          taskStatus = "completed";
+        } else if (concernStatus === "on process") {
+          taskStatus = "inProgress";
+        } else {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "Finance",
+            task: concern.concernType || "Payroll Concern",
+            status: concern.status || "Unknown",
+            details: concern,
+          });
+        }
+      });
+    }
+
+    // HR tasks (same as finance - payroll concerns)
+    if (hrData?.data?.concerns && Array.isArray(hrData.data.concerns)) {
+      hrData.data.concerns.forEach((concern: any) => {
+        const concernStatus = concern.status?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (concernStatus === "resolved") {
+          taskStatus = "completed";
+        } else if (concernStatus === "on process") {
+          taskStatus = "inProgress";
+        } else {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "HR",
+            task: concern.concernType || "HR Concern",
+            status: concern.status || "Unknown",
+            details: concern,
+          });
+        }
+      });
+    }
+
+    // IT tasks
+    if (itData?.data?.tasks && Array.isArray(itData.data.tasks)) {
+      itData.data.tasks.forEach((task: any) => {
+        const itStatus = task.status?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (itStatus === "completed") {
+          taskStatus = "completed";
+        } else if (itStatus === "in progress" || itStatus === "ongoing") {
+          taskStatus = "inProgress";
+        } else {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "IT",
+            task: task.troubleshootingType || "IT Task",
+            status: task.status || "Unknown",
+            details: task,
+          });
+        }
+      });
+    }
+
+    // DPO tasks
+    if (dpoData?.data?.tasks && Array.isArray(dpoData.data.tasks)) {
+      dpoData.data.tasks.forEach((task: any) => {
+        const dpoStatus = task.status?.toLowerCase() || "";
+        let taskStatus = "pending";
+        
+        if (dpoStatus === "completed" || task.dateCompleted) {
+          taskStatus = "completed";
+        } else if (dpoStatus === "in progress") {
+          taskStatus = "inProgress";
+        } else {
+          taskStatus = "pending";
+        }
+
+        if ((status === "completed" && taskStatus === "completed") ||
+            (status === "inProgress" && taskStatus === "inProgress") ||
+            (status === "pending" && taskStatus === "pending")) {
+          tasks.push({
+            department: "DPO",
+            task: task.taskName || "DPO Task",
+            status: task.status || "Unknown",
+            details: task,
+          });
+        }
+      });
+    }
+
+    return tasks;
+  };
+
+  const handleStatusClick = (status: "completed" | "inProgress" | "pending") => {
+    setSelectedStatus(status);
+    setModalSearchTerm(""); // Clear search when opening modal
+    setIsModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -413,7 +606,10 @@ export default function OverviewPage() {
             <p className="text-sm text-gray-500 mt-1">Across all departments</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div 
+            onClick={() => handleStatusClick("completed")}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Completed</span>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -424,7 +620,10 @@ export default function OverviewPage() {
             <p className="text-sm text-gray-500 mt-1">{completionRate}% completion rate</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div 
+            onClick={() => handleStatusClick("inProgress")}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">In Progress</span>
               <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -435,7 +634,10 @@ export default function OverviewPage() {
             <p className="text-sm text-gray-500 mt-1">Active items</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div 
+            onClick={() => handleStatusClick("pending")}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Pending</span>
               <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
@@ -450,18 +652,68 @@ export default function OverviewPage() {
         {/* Department Comparison Chart */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Department Performance Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={departmentChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="Completed" fill="#10b981" />
-              <Bar dataKey="In Progress" fill="#f59e0b" />
-              <Bar dataKey="Pending" fill="#ef4444" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {departmentSummaries.map((dept) => {
+              const deptData = [
+                { name: "Completed", value: dept.metrics.completed, color: "#10b981" },
+                { name: "In Progress", value: dept.metrics.inProgress, color: "#f59e0b" },
+                { name: "Pending", value: dept.metrics.pending, color: "#ef4444" },
+              ].filter(item => item.value > 0); // Only show segments with values
+              
+              const Icon = dept.icon;
+              const total = dept.metrics.total;
+              
+              return (
+                <div key={dept.name} className="flex flex-col items-center">
+                  <div className="relative">
+                    <ResponsiveContainer width={180} height={180}>
+                      <PieChart>
+                        <Pie
+                          data={deptData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={75}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {deptData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    {/* Center icon and count */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className={`w-10 h-10 ${dept.bgColor} rounded-full flex items-center justify-center mb-1`}>
+                        <Icon className={`w-5 h-5 ${dept.color}`} />
+                      </div>
+                      <span className="text-2xl font-bold text-gray-900">{total}</span>
+                      <span className="text-xs text-gray-500">Tasks</span>
+                    </div>
+                  </div>
+                  {/* Department name */}
+                  <h3 className="text-sm font-semibold text-gray-900 mt-3 mb-2">{dept.name}</h3>
+                  {/* Legend */}
+                  <div className="flex flex-col gap-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span className="text-gray-600">Completed: {dept.metrics.completed}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                      <span className="text-gray-600">In Progress: {dept.metrics.inProgress}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span className="text-gray-600">Pending: {dept.metrics.pending}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Department Cards Grid */}
@@ -568,6 +820,147 @@ export default function OverviewPage() {
           </button>
         </div>
       </div>
+
+      {/* Status Details Modal */}
+      {isModalOpen && selectedStatus && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Background overlay */}
+            <div 
+              className="fixed inset-0 bg-white/20 backdrop-blur-md transition-opacity"
+              onClick={() => setIsModalOpen(false)}
+            ></div>
+
+            {/* Modal panel */}
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      {selectedStatus === "completed" && "Completed Tasks"}
+                      {selectedStatus === "inProgress" && "In Progress Tasks"}
+                      {selectedStatus === "pending" && "Pending Tasks"}
+                    </h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      Complete task list with search and filter capabilities
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by department, task name, or status..."
+                    value={modalSearchTerm}
+                    onChange={(e) => setModalSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {getTasksByStatus(selectedStatus).filter(task => 
+                    task.department.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                    task.task.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                    task.status.toLowerCase().includes(modalSearchTerm.toLowerCase())
+                  ).length} of {getTasksByStatus(selectedStatus).length} tasks match your search
+                </p>
+              </div>
+
+              {/* Table */}
+              <div className="flex-1 overflow-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Department
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Task Name
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getTasksByStatus(selectedStatus)
+                      .filter(task => 
+                        task.department.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                        task.task.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                        task.status.toLowerCase().includes(modalSearchTerm.toLowerCase())
+                      ).length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="py-8 px-4 text-center text-sm text-gray-500">
+                          No tasks found matching your search
+                        </td>
+                      </tr>
+                    ) : (
+                      getTasksByStatus(selectedStatus)
+                        .filter(task => 
+                          task.department.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                          task.task.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                          task.status.toLowerCase().includes(modalSearchTerm.toLowerCase())
+                        )
+                        .map((task, index) => (
+                          <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="py-3 px-4">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {task.department}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-gray-900">
+                              {task.task}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                selectedStatus === "completed" 
+                                  ? "bg-green-100 text-green-800" 
+                                  : selectedStatus === "inProgress"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-orange-100 text-orange-800"
+                              }`}>
+                                {task.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer */}
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total: <span className="font-semibold">{getTasksByStatus(selectedStatus).length}</span> tasks | Filtered: <span className="font-semibold">
+                    {getTasksByStatus(selectedStatus).filter(task => 
+                      task.department.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                      task.task.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                      task.status.toLowerCase().includes(modalSearchTerm.toLowerCase())
+                    ).length}
+                  </span>
+                </p>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

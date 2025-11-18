@@ -535,21 +535,23 @@ export default function MarketingPage() {
 
               <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-slate-50 to-gray-50 rounded-t-2xl">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      All WIG Leads
-                    </h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Complete list of all leads with activities and search capabilities
-                    </p>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        All WIG Leads
+                      </h2>
+                      <p className="text-white/80 text-sm mt-1">
+                        Complete list of all leads with activities and search capabilities
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsLeadsModalOpen(false)}
+                      className="text-white hover:text-gray-200 transition-colors"
+                    >
+                      <XMarkIcon className="w-6 h-6" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIsLeadsModalOpen(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <XMarkIcon className="w-6 h-6 text-gray-500" />
-                  </button>
                 </div>
 
                 {/* Search Bar */}
@@ -663,25 +665,24 @@ export default function MarketingPage() {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Total: {data.leads.length} leads | Filtered:{" "}
+                <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    Total: <span className="font-semibold">{data.leads.length}</span> leads | Filtered:{" "}
+                    <span className="font-semibold">
                       {data.leads.filter(
                         (lead) =>
                           lead.leadNumber.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
                           lead.leadStatement.toLowerCase().includes(leadsSearchTerm.toLowerCase()) ||
                           lead.status.toLowerCase().includes(leadsSearchTerm.toLowerCase())
-                      ).length}{" "}
-                      leads
-                    </p>
-                    <button
-                      onClick={() => setIsLeadsModalOpen(false)}
-                      className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                    >
-                      Close
-                    </button>
-                  </div>
+                      ).length}
+                    </span>
+                  </p>
+                  <button
+                    onClick={() => setIsLeadsModalOpen(false)}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>
@@ -879,21 +880,23 @@ export default function MarketingPage() {
 
               <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-slate-50 to-gray-50 rounded-t-2xl">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      All Gantt Items
-                    </h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Complete list of all Gantt items with search and filter capabilities
-                    </p>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        All Gantt Items
+                      </h2>
+                      <p className="text-white/80 text-sm mt-1">
+                        Complete list of all Gantt items with search and filter capabilities
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsGanttModalOpen(false)}
+                      className="text-white hover:text-gray-200 transition-colors"
+                    >
+                      <XMarkIcon className="w-6 h-6" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIsGanttModalOpen(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <XMarkIcon className="w-6 h-6 text-gray-500" />
-                  </button>
                 </div>
 
                 {/* Search Bar */}
@@ -1011,26 +1014,25 @@ export default function MarketingPage() {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      Total: {ganttData.items.length} items | Filtered:{" "}
+                <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    Total: <span className="font-semibold">{ganttData.items.length}</span> items | Filtered:{" "}
+                    <span className="font-semibold">
                       {ganttData.items.filter(
                         (it) =>
                           it.name.toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
                           (it.status || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
                           (it.start || "").toLowerCase().includes(ganttSearchTerm.toLowerCase()) ||
                           (it.end || "").toLowerCase().includes(ganttSearchTerm.toLowerCase())
-                      ).length}{" "}
-                      items
-                    </p>
-                    <button
-                      onClick={() => setIsGanttModalOpen(false)}
-                      className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                    >
-                      Close
-                    </button>
-                  </div>
+                      ).length}
+                    </span>
+                  </p>
+                  <button
+                    onClick={() => setIsGanttModalOpen(false)}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                  >
+                    Close
+                  </button>
               </div>
             </div>
           </div>
