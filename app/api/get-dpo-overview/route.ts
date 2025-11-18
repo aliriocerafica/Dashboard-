@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         // Check if task is overdue
         if (task.targetDateOfCompletion) {
           const targetDate = new Date(task.targetDateOfCompletion);
-          if (targetDate < today && status !== "completed") {
+          if (targetDate < today) {
             overdueTasks++;
           }
         }
