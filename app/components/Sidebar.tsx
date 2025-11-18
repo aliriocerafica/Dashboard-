@@ -18,6 +18,7 @@ import {
   XMarkIcon,
   BuildingOffice2Icon,
   ShieldCheckIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
@@ -271,6 +272,26 @@ export default function Sidebar() {
               <HomeIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
               {!isSidebarCollapsed && (
                 <span className="relative z-10">Home</span>
+              )}
+            </Link>
+
+            {/* Executive Overview Link */}
+            <Link
+              href="/overview"
+              className={`flex items-center text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+                isSidebarCollapsed
+                  ? "justify-center px-2 py-3"
+                  : "gap-3 px-4 py-3"
+              } ${
+                isActiveLink("/overview")
+                  ? "bg-linear-to-r from-purple-50 to-blue-50 text-purple-600 border-l-4 border-purple-600"
+                  : "text-gray-700 bg-transparent hover:text-purple-600"
+              }`}
+              title={isSidebarCollapsed ? "Executive Overview" : ""}
+            >
+              <EyeIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+              {!isSidebarCollapsed && (
+                <span className="relative z-10">Executive Overview</span>
               )}
             </Link>
 
@@ -566,6 +587,20 @@ export default function Sidebar() {
                 >
                   <HomeIcon className="w-5 h-5" />
                   <span className="relative z-10">Home</span>
+                </Link>
+
+                {/* Executive Overview Link */}
+                <Link
+                  href="/overview"
+                  className={`nav-sliding-bg flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    isActiveLink("/overview")
+                      ? "bg-linear-to-r from-purple-50 to-blue-50 text-purple-600 border-l-4 border-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <EyeIcon className="w-5 h-5" />
+                  <span className="relative z-10">Executive Overview</span>
                 </Link>
 
                 {/* How It Works Link */}

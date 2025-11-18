@@ -112,7 +112,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <button
@@ -139,7 +139,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
               {/* Avatar */}
               <div className="flex justify-center mb-6">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
                   {username.charAt(0).toUpperCase()}
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                   {user?.fullName || username}
                 </h2>
                 <p
-                  className="text-sm text-gray-600 mt-1 break-words px-2"
+                  className="text-sm text-gray-600 mt-1 wrap-break-word px-2"
                   title={user?.email || username}
                 >
                   {user?.email || username}
@@ -315,7 +315,7 @@ export default function ProfilePage() {
                 {/* Error Message */}
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                    <ExclamationTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <ExclamationTriangleIcon className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-red-900">Error</h4>
                       <p className="text-sm text-red-700 mt-1">{error}</p>
@@ -326,7 +326,7 @@ export default function ProfilePage() {
                 {/* Success Message */}
                 {success && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-                    <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircleIcon className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-green-900">Success</h4>
                       <p className="text-sm text-green-700 mt-1">{success}</p>
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
                       <UserGroupIcon className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
@@ -400,7 +400,7 @@ export default function ProfilePage() {
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                     <CheckCircleIcon className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
