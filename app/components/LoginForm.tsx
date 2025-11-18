@@ -95,7 +95,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   return (
     <div className="min-h-screen flex relative overflow-hidden">
       {/* Animated Background Gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-red-50 via-pink-50 to-orange-50">
+      <div className="fixed inset-0 bg-linear-to-br from-red-50 via-pink-50 to-orange-50">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyMjEsMjEyLDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-40"></div>
         
         {/* Floating Orbs */}
@@ -119,7 +119,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         </div>
         
         {/* Modern Gradient Overlay with animation */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6d74]/90 via-red-500/85 to-pink-600/90 z-10"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-[#ff6d74]/90 via-red-500/85 to-pink-600/90 z-10"></div>
         
         {/* Animated Overlay Effects */}
         <div className="absolute inset-0 z-10">
@@ -167,15 +167,15 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
           {/* Glassmorphism Card Container */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
           {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#ff6d74]/20 to-red-400/20 rounded-full blur-3xl -z-10"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink-400/20 to-orange-400/20 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-linear-to-br from-[#ff6d74]/20 to-red-400/20 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-linear-to-tr from-pink-400/20 to-orange-400/20 rounded-full blur-3xl -z-10"></div>
 
             {/* Form Header */}
             <div className="text-center mb-8">
             {/* Animated Lock Icon */}
             <div className="relative inline-block mb-4">
-              <div className={`absolute inset-0 bg-gradient-to-r ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl blur-xl opacity-50 animate-pulse transition-all duration-500`}></div>
-              <div className={`relative flex items-center justify-center w-16 h-16 bg-gradient-to-br ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl shadow-xl transition-all duration-500 transform ${isFormFilled ? 'scale-110' : 'scale-100'}`}>
+              <div className={`absolute inset-0 bg-linear-to-r ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl blur-xl opacity-50 animate-pulse transition-all duration-500`}></div>
+              <div className={`relative flex items-center justify-center w-16 h-16 bg-linear-to-br ${isFormFilled ? 'from-green-500 to-emerald-500' : 'from-[#ff6d74] to-red-500'} rounded-2xl shadow-xl transition-all duration-500 transform ${isFormFilled ? 'scale-110' : 'scale-100'}`}>
                 {isFormFilled ? (
                   <LockOpenIcon className="w-8 h-8 text-white animate-bounce" />
                 ) : (
@@ -184,7 +184,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
               </div>
             </div>
             
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-red-900 to-[#ff6d74] bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold bg-linear-to-r from-gray-900 via-red-900 to-[#ff6d74] bg-clip-text text-transparent mb-2">
               Welcome Back
             </h1>
             <p className="text-sm text-gray-600 flex items-center justify-center gap-2">
@@ -224,7 +224,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                     autoComplete="username"
                   />
                   {focusedField === 'username' && (
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
+                    <div className="absolute inset-0 rounded-xl bg-linear-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
                   )}
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                     )}
                   </button>
                   {focusedField === 'password' && (
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
+                    <div className="absolute inset-0 rounded-xl bg-linear-to-r from-[#ff6d74]/10 to-red-500/10 -z-10 blur-sm"></div>
                   )}
                 </div>
               </div>
@@ -285,7 +285,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-[#ff6d74] peer-checked:to-red-500 transition-all duration-300 shadow-inner"></div>
+                    <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-linear-to-r peer-checked:from-[#ff6d74] peer-checked:to-red-500 transition-all duration-300 shadow-inner"></div>
                     <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-4 shadow-md"></div>
                   </div>
                   <span className="ml-3 text-sm text-gray-700 font-medium group-hover:text-[#ff6d74] transition-colors">
@@ -302,8 +302,8 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
               {/* Error Message */}
               {error && (
-                <div className="relative overflow-hidden bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm animate-shake shadow-lg">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10"></div>
+                <div className="relative overflow-hidden bg-linear-to-r from-red-50 to-pink-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm animate-shake shadow-lg">
+                  <div className="absolute inset-0 bg-linear-to-r from-red-500/10 to-pink-500/10"></div>
                   <div className="relative flex items-center gap-2">
                     <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -320,12 +320,12 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                 className={`relative w-full py-4 px-6 rounded-xl text-white font-bold text-lg overflow-hidden transition-all duration-300 transform ${
                   isLoading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#ff6d74] via-red-500 to-pink-600 hover:from-[#ff5964] hover:via-red-600 hover:to-pink-700 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                    : "bg-linear-to-r from-[#ff6d74] via-red-500 to-pink-600 hover:from-[#ff5964] hover:via-red-600 hover:to-pink-700 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                 }`}
               >
                 {/* Animated background on hover */}
                 {!isLoading && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#ff8b91] via-red-400 to-pink-400 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-[#ff8b91] via-red-400 to-pink-400 opacity-0 hover:opacity-20 transition-opacity duration-300"></div>
                 )}
                 
                 <span className="relative flex items-center justify-center gap-3">

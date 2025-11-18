@@ -140,13 +140,13 @@ export default function HomePage() {
             >
               <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl border border-gray-100 p-4 sm:p-5 relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 {/* Background gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-linear-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Content */}
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-4">
                     <div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${dept.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`w-12 h-12 sm:w-14 sm:h-14 bg-linear-to-br ${dept.color} rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
                       <dept.icon className="w-6 h-6 sm:w-7 sm:h-7" />
                     </div>
@@ -184,19 +184,19 @@ export default function HomePage() {
             Quick Overview
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">8</div>
               <div className="text-xs sm:text-sm text-white/90 font-medium">Departments</div>
             </div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+            <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">24/7</div>
               <div className="text-xs sm:text-sm text-white/90 font-medium">Real-time Data</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">100%</div>
               <div className="text-xs sm:text-sm text-white/90 font-medium">Secure Access</div>
             </div>
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
+            <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl shadow-md p-4 sm:p-5 text-center transform transition-all duration-300 hover:scale-105">
               <div className="text-2xl sm:text-3xl font-bold text-white mb-1">∞</div>
               <div className="text-xs sm:text-sm text-white/90 font-medium">Scalable</div>
             </div>

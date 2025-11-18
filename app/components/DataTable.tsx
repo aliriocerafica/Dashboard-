@@ -177,7 +177,7 @@ export default function DataTable({ data }: DataTableProps) {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+              <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold text-white">

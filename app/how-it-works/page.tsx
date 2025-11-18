@@ -45,10 +45,10 @@ export default function HowItWorksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 text-white shadow-xl">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-700 rounded-xl sm:rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 text-white shadow-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center backdrop-blur-sm flex-shrink-0">
               <InformationCircleIcon className="w-8 h-8 sm:w-10 sm:h-10" />
@@ -68,7 +68,7 @@ export default function HowItWorksPage() {
         </div>
 
         {/* How It Works Section - SVG at the top */}
-        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 lg:p-12 mb-6 sm:mb-8">
+        <div className="bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 lg:p-12 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-6">
             <InformationCircleIcon className="w-8 h-8 text-blue-600" />
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -208,7 +208,7 @@ export default function HowItWorksPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-blue-50 to-purple-50 rounded-t-2xl">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">
                       How It Works - System Workflow
@@ -246,7 +246,7 @@ export default function HowItWorksPage() {
                   </p>
                   <button
                     onClick={() => setIsImageViewOpen(false)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Close
                   </button>
@@ -620,7 +620,7 @@ export default function HowItWorksPage() {
         </div>
 
         {/* Support */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white mb-4 sm:mb-6">
+        <div className="bg-linear-to-r from-purple-600 to-purple-700 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-3">
             <ComputerDesktopIcon className="w-6 h-6 sm:w-8 sm:h-8" />
             <h2 className="text-lg sm:text-2xl font-bold">Need Help?</h2>

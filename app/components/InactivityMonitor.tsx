@@ -106,7 +106,7 @@ export default function InactivityMonitor() {
         {/* Modal */}
         <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
           {/* Header */}
-          <div className="flex items-start justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50">
+          <div className="flex items-start justify-between p-6 border-b border-gray-200 bg-linear-to-r from-amber-50 to-orange-50">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 pt-0.5">
                 <ExclamationTriangleIcon className="w-8 h-8 text-amber-600" />
@@ -126,7 +126,7 @@ export default function InactivityMonitor() {
           <div className="p-6">
             <div className="mb-6">
               <p className="text-gray-700 mb-4">Your session will expire in:</p>
-              <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg p-4 text-center">
+              <div className="bg-linear-to-r from-amber-100 to-orange-100 rounded-lg p-4 text-center">
                 <div className="text-4xl font-bold text-amber-600 font-mono">
                   {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
                   {String(remainingSeconds % 60).padStart(2, "0")}
@@ -173,7 +173,7 @@ export default function InactivityMonitor() {
                     }
                   );
                 }}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                className="flex-1 px-4 py-2.5 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <div className="flex items-center justify-center gap-2">
                   <CheckCircleIcon className="w-5 h-5" />

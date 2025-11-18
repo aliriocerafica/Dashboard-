@@ -15,7 +15,7 @@ import {
   DashboardStats,
 } from "../lib/sheets";
 import { isAuthenticated, setAuthenticated } from "../lib/auth";
-import { cache } from "../lib/cache";
+import { dataCache } from "../lib/cache";
 import LoadingSpinner from "../components/LoadingSpinner";
 import AuthGuard from "../lib/auth-guard";
 
@@ -53,7 +53,7 @@ export default function SalesPage() {
 
       // Only check cache if not forcing refresh
       if (!forceRefresh) {
-        const cachedData = cache.get<SalesData[]>(cacheKey);
+        const cachedData = dataCache.get(cacheKey);
         if (cachedData) {
           setData(cachedData);
           setStats(calculateStats(cachedData));
@@ -62,7 +62,7 @@ export default function SalesPage() {
         }
       } else {
         // Clear cache when forcing refresh
-        cache.delete(cacheKey);
+        dataCache.clear(cacheKey);
       }
 
       console.log("Fetching Sales data from:", GOOGLE_SHEET_URL);
@@ -85,7 +85,7 @@ export default function SalesPage() {
       setStats(calculateStats(sheetData));
 
       // Cache the data for 5 minutes
-      cache.set(cacheKey, sheetData, 5 * 60 * 1000);
+      dataCache.set(cacheKey, sheetData, 5 * 60 * 1000);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load data";

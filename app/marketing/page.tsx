@@ -291,25 +291,25 @@ export default function MarketingPage() {
           <div className="space-y-6">
             {/* Summary Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white">
+              <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white">
                 <div className="text-sm font-medium text-white/90 mb-2">Total Leads</div>
                 <div className="text-3xl font-bold text-white mt-1">
                   {data.summary.totalLeads}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
+              <div className="bg-linear-to-br from-purple-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
                 <div className="text-sm font-medium text-white/90 mb-2">Total Activities</div>
                 <div className="text-3xl font-bold text-white mt-1">
                   {data.summary.totalActivities}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 shadow-lg text-white">
+              <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 shadow-lg text-white">
                 <div className="text-sm font-medium text-white/90 mb-2">Completed Leads</div>
                 <div className="text-3xl font-bold text-white mt-1">
                   {data.summary.leadsByStatus["Completed"] || 0}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl p-6 shadow-lg text-white">
+              <div className="bg-linear-to-br from-orange-500 to-amber-600 rounded-xl p-6 shadow-lg text-white">
                 <div className="text-sm font-medium text-white/90 mb-2">In Progress</div>
                 <div className="text-3xl font-bold text-white mt-1">
                   {data.summary.leadsByStatus["Drafting"] || 0}
@@ -535,7 +535,7 @@ export default function MarketingPage() {
 
               <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                 {/* Modal Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white">
@@ -721,17 +721,17 @@ export default function MarketingPage() {
                       const getStatusColor = (status: string) => {
                         const statusLower = status.toLowerCase();
                         if (statusLower === "completed") {
-                          return "bg-gradient-to-br from-green-500 to-green-600";
+                          return "bg-linear-to-br from-green-500 to-green-600";
                         } else if (statusLower === "ongoing" || statusLower === "on-going") {
-                          return "bg-gradient-to-br from-blue-500 to-blue-600";
+                          return "bg-linear-to-br from-blue-500 to-blue-600";
                         } else if (statusLower === "on hold" || statusLower === "on-hold") {
-                          return "bg-gradient-to-br from-yellow-500 to-amber-600";
+                          return "bg-linear-to-br from-yellow-500 to-amber-600";
                         } else if (statusLower === "delayed") {
-                          return "bg-gradient-to-br from-red-500 to-red-600";
+                          return "bg-linear-to-br from-red-500 to-red-600";
                         } else if (statusLower === "target") {
-                          return "bg-gradient-to-br from-purple-500 to-indigo-600";
+                          return "bg-linear-to-br from-purple-500 to-indigo-600";
                         } else {
-                          return "bg-gradient-to-br from-gray-500 to-gray-600";
+                          return "bg-linear-to-br from-gray-500 to-gray-600";
                         }
                       };
 
@@ -880,7 +880,7 @@ export default function MarketingPage() {
 
               <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                 {/* Modal Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white">

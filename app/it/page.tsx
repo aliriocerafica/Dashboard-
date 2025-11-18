@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import LoadingSpinner from "../components/LoadingSpinner";
 import LoginForm from "../components/LoginForm";
 import ITProgressStats from "../components/ITProgressStats";
@@ -21,6 +22,18 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const GOOGLE_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1OO2MhxCnpLYM3d2IuX7EFqVtGOZ4HvhE2SCgVei5hvs/edit?gid=489896504#gid=489896504";
@@ -65,13 +78,17 @@ export default function ITPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // IT Task states
   const [taskData, setTaskData] = useState<ITTaskData | null>(null);
   const [taskLoading, setTaskLoading] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [taskSearchTerm, setTaskSearchTerm] = useState("");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
+  // Monthly Resolution Time Modal
+  const [isMonthlyResolutionModalOpen, setIsMonthlyResolutionModalOpen] =
+    useState(false);
 
   // Check authentication on mount
   useEffect(() => {
@@ -153,9 +170,12 @@ export default function ITPage() {
     try {
       setTaskLoading(true);
       setTaskError(null);
-      const response = await fetch(`/api/get-it-tasks?timestamp=${Date.now()}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(
+        `/api/get-it-tasks?timestamp=${Date.now()}`,
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch task data: ${response.status}`);
@@ -169,7 +189,9 @@ export default function ITPage() {
 
       setTaskData(result.data);
     } catch (err) {
-      setTaskError(err instanceof Error ? err.message : "Failed to load task data");
+      setTaskError(
+        err instanceof Error ? err.message : "Failed to load task data"
+      );
       console.error("Error loading task data:", err);
     } finally {
       setTaskLoading(false);
@@ -244,10 +266,97 @@ export default function ITPage() {
     return !isNaN(date.getTime());
   });
 
+  // Parse time string (e.g., "18m 52s") to total seconds
+  const parseTimeToSeconds = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    let totalSeconds = 0;
+    const minutesMatch = timeStr.match(/(\d+)m/);
+    const secondsMatch = timeStr.match(/(\d+)s/);
+    if (minutesMatch) {
+      totalSeconds += parseInt(minutesMatch[1]) * 60;
+    }
+    if (secondsMatch) {
+      totalSeconds += parseInt(secondsMatch[1]);
+    }
+    return totalSeconds;
+  };
+
+  // Format seconds to time string (e.g., "18m 52s")
+  const formatSecondsToTime = (seconds: number): string => {
+    if (seconds === 0) return "0s";
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (minutes > 0 && remainingSeconds > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m`;
+    } else {
+      return `${remainingSeconds}s`;
+    }
+  };
+
+  // Calculate monthly average resolution times
+  const calculateMonthlyAverages = () => {
+    const monthlyData: Record<
+      string,
+      { totalSeconds: number; count: number; monthName: string }
+    > = {};
+
+    actualTicketData.forEach((ticket) => {
+      if (
+        !ticket.timestamp ||
+        !ticket.timeResolved ||
+        ticket.status?.toLowerCase() !== "resolved"
+      ) {
+        return;
+      }
+
+      try {
+        const date = new Date(ticket.timestamp);
+        if (isNaN(date.getTime())) return;
+
+        const monthKey = `${date.getFullYear()}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}`;
+        const monthName = date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        });
+
+        const resolutionSeconds = parseTimeToSeconds(ticket.timeResolved);
+        if (resolutionSeconds > 0) {
+          if (!monthlyData[monthKey]) {
+            monthlyData[monthKey] = { totalSeconds: 0, count: 0, monthName };
+          }
+          monthlyData[monthKey].totalSeconds += resolutionSeconds;
+          monthlyData[monthKey].count += 1;
+        }
+      } catch (error) {
+        console.error("Error processing ticket:", error);
+      }
+    });
+
+    // Convert to array and calculate averages
+    const monthlyAverages = Object.entries(monthlyData)
+      .map(([key, data]) => {
+        const avgSeconds = Math.round(data.totalSeconds / data.count);
+        return {
+          month: data.monthName || key,
+          monthKey: key,
+          averageTime: formatSecondsToTime(avgSeconds),
+          averageSeconds: avgSeconds,
+          count: data.count,
+        };
+      })
+      .sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+
+    return monthlyAverages;
+  };
+
   const handleRefresh = () => {
     if (activeTab === "itUpdate") {
       loadData();
-    } else {
+    } else if (activeTab === "itTask") {
       loadTaskData();
     }
   };
@@ -295,7 +404,11 @@ export default function ITPage() {
               </span>
             </button>
             <a
-              href={activeTab === "itUpdate" ? GOOGLE_SHEET_URL : "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdFvtYrlz0LFExRnEoD2-c9K-8mmv0bkj5y-yEDIHEsdKiqYJdb_H7ioceOZWRe46m0tEl_n4KEsV1/pub?gid=297970600&single=true&output=csv"}
+              href={
+                activeTab === "itUpdate"
+                  ? GOOGLE_SHEET_URL
+                  : "https://docs.google.com/spreadsheets/d/e/2PACX-1vSdFvtYrlz0LFExRnEoD2-c9K-8mmv0bkj5y-yEDIHEsdKiqYJdb_H7ioceOZWRe46m0tEl_n4KEsV1/pub?gid=297970600&single=true&output=csv"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
@@ -342,6 +455,12 @@ export default function ITPage() {
               >
                 IT Task
               </button>
+              <Link
+                href="/laptop-inventory"
+                className="py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                Laptop Inventory
+              </Link>
             </nav>
           </div>
         </div>
@@ -351,262 +470,277 @@ export default function ITPage() {
           <>
             {/* Row 1: KPI tiles (6 cols) */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
-          {/* Total Tickets */}
-          <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
-            <div className="flex items-center justify-between mb-2">
-              <TicketIcon className="w-8 h-8 opacity-80" />
-              <div className="text-sm font-medium opacity-90">
-                Total Tickets
+              {/* Total Tickets */}
+              <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <TicketIcon className="w-8 h-8 opacity-80" />
+                  <div className="text-sm font-medium opacity-90">
+                    Total Tickets
+                  </div>
+                </div>
+                <div className="text-4xl font-bold mb-1">
+                  {stats.totalTickets}
+                </div>
+                <div className="text-sm opacity-80">All time</div>
+              </div>
+
+              {/* Resolved Tickets */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
+                  <div className="text-sm font-medium text-gray-600">
+                    Resolved
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-gray-900 mb-1">
+                  {stats.resolvedTickets}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {stats.unresolvedTickets} pending
+                </div>
+              </div>
+
+              {/* Avg Resolution Time */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 relative flex flex-col">
+                <div className="flex items-center justify-between mb-2">
+                  <ClockIcon className="w-8 h-8 text-blue-600" />
+                  <div className="text-sm font-medium text-gray-600">
+                    Avg Time
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-gray-900 mb-1">
+                  {stats.avgResolutionTime}
+                </div>
+                <div className="text-sm text-gray-500 mb-4">Per ticket</div>
+                <button
+                  onClick={() => setIsMonthlyResolutionModalOpen(true)}
+                  className="w-full px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-auto"
+                  title="View monthly summary"
+                >
+                  Summary
+                </button>
+              </div>
+
+              {/* Employee Rating */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <StarIcon className="w-8 h-8 text-amber-500" />
+                  <div className="text-sm font-medium text-gray-600">
+                    Rating
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-gray-900 mb-1">
+                  {stats.satisfactionRate}%
+                </div>
+                <div className="text-sm text-gray-500">Satisfaction</div>
+              </div>
+
+              {/* Laptop Release */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <ComputerDesktopIcon className="w-8 h-8 text-indigo-600" />
+                  <div className="text-sm font-medium text-gray-600">
+                    Laptop Release
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-gray-900 mb-1">
+                  {stats.laptopReleases}
+                </div>
+                <div className="text-sm text-gray-500">Total releases</div>
+              </div>
+
+              {/* Peripheral Release */}
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <TicketIcon className="w-8 h-8 text-cyan-600" />
+                  <div className="text-sm font-medium text-gray-600">
+                    Peripheral Release
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-gray-900 mb-1">
+                  {stats.peripheralReleases}
+                </div>
+                <div className="text-sm text-gray-500">Total releases</div>
               </div>
             </div>
-            <div className="text-4xl font-bold mb-1">{stats.totalTickets}</div>
-            <div className="text-sm opacity-80">All time</div>
-          </div>
 
-          {/* Resolved Tickets */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
-              <div className="text-sm font-medium text-gray-600">Resolved</div>
+            {/* Row 2: Weekly Progress Stats */}
+            <div className="mb-4">
+              <ITProgressStats data={actualTicketData} />
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {stats.resolvedTickets}
-            </div>
-            <div className="text-sm text-gray-500">
-              {stats.unresolvedTickets} pending
-            </div>
-          </div>
 
-          {/* Avg Resolution Time */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <ClockIcon className="w-8 h-8 text-blue-600" />
-              <div className="text-sm font-medium text-gray-600">Avg Time</div>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {stats.avgResolutionTime}
-            </div>
-            <div className="text-sm text-gray-500">Per ticket</div>
-          </div>
-
-          {/* Employee Rating */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <StarIcon className="w-8 h-8 text-amber-500" />
-              <div className="text-sm font-medium text-gray-600">Rating</div>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {stats.satisfactionRate}%
-            </div>
-            <div className="text-sm text-gray-500">Satisfaction</div>
-          </div>
-
-          {/* Laptop Release */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <ComputerDesktopIcon className="w-8 h-8 text-indigo-600" />
-              <div className="text-sm font-medium text-gray-600">
-                Laptop Release
+            {/* Row 3: Ticket Types + Recent Tickets */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
+              {/* Troubleshooting Types */}
+              <div className="xl:col-span-2">
+                <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Troubleshooting Types
+                  </h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {Object.entries(
+                      actualTicketData.reduce((acc, item) => {
+                        if (item.troubleshootingType) {
+                          const types = item.troubleshootingType
+                            .split(",")
+                            .map((t) => t.trim());
+                          types.forEach((type) => {
+                            acc[type] = (acc[type] || 0) + 1;
+                          });
+                        }
+                        return acc;
+                      }, {} as Record<string, number>)
+                    )
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([type, count]) => (
+                        <div
+                          key={type}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm text-gray-700 truncate">
+                            {type}
+                          </span>
+                          <span className="text-xs font-semibold bg-purple-600 text-white px-2 py-0.5 rounded-full">
+                            {count}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {stats.laptopReleases}
-            </div>
-            <div className="text-sm text-gray-500">Total releases</div>
-          </div>
 
-          {/* Peripheral Release */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <TicketIcon className="w-8 h-8 text-cyan-600" />
-              <div className="text-sm font-medium text-gray-600">
-                Peripheral Release
-              </div>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {stats.peripheralReleases}
-            </div>
-            <div className="text-sm text-gray-500">Total releases</div>
-          </div>
-        </div>
-
-        {/* Row 2: Weekly Progress Stats */}
-        <div className="mb-4">
-          <ITProgressStats data={actualTicketData} />
-        </div>
-
-        {/* Row 3: Ticket Types + Recent Tickets */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
-          {/* Troubleshooting Types */}
-          <div className="xl:col-span-2">
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                Troubleshooting Types
-              </h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {Object.entries(
-                  actualTicketData.reduce((acc, item) => {
-                    if (item.troubleshootingType) {
-                      const types = item.troubleshootingType
-                        .split(",")
-                        .map((t) => t.trim());
-                      types.forEach((type) => {
-                        acc[type] = (acc[type] || 0) + 1;
-                      });
-                    }
-                    return acc;
-                  }, {} as Record<string, number>)
-                )
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([type, count]) => (
-                    <div
-                      key={type}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-sm text-gray-700 truncate">
-                        {type}
-                      </span>
-                      <span className="text-xs font-semibold bg-purple-600 text-white px-2 py-0.5 rounded-full">
-                        {count}
+              {/* Weekly Summary */}
+              <div>
+                <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                    Summary
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Resolved</span>
+                      <span className="text-lg font-bold text-emerald-600">
+                        {stats.resolvedTickets}
                       </span>
                     </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Weekly Summary */}
-          <div>
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                Summary
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Resolved</span>
-                  <span className="text-lg font-bold text-emerald-600">
-                    {stats.resolvedTickets}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Unresolved</span>
-                  <span className="text-lg font-bold text-red-600">
-                    {stats.unresolvedTickets}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total</span>
-                  <span className="text-lg font-bold text-gray-900">
-                    {stats.totalTickets}
-                  </span>
-                </div>
-                <div className="pt-3 border-t border-gray-200">
-                  <div className="text-xs text-gray-500 mb-1">
-                    Satisfaction Rate
-                  </div>
-                  <div className="text-2xl font-bold text-purple-600">
-                    {stats.satisfactionRate}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Row 4: Recent Tickets Table */}
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Recent Tickets
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {actualTicketData.length} Total
-              </p>
-            </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
-            >
-              + View All
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Name
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Account
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Type
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Time
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-700">
-                    Rating
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {actualTicketData.slice(0, 10).map((ticket, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="py-3 px-2 text-gray-600">
-                      {ticket.timestamp.split(",")[0]}
-                    </td>
-                    <td className="py-3 px-2 text-gray-900 font-medium truncate max-w-xs">
-                      {ticket.fullName || "N/A"}
-                    </td>
-                    <td className="py-3 px-2 text-gray-600 truncate max-w-xs">
-                      {ticket.account}
-                    </td>
-                    <td className="py-3 px-2 text-gray-600 truncate max-w-xs">
-                      {ticket.troubleshootingType.split(",")[0]}
-                    </td>
-                    <td className="py-3 px-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          ticket.status === "Resolved"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {ticket.status}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Unresolved</span>
+                      <span className="text-lg font-bold text-red-600">
+                        {stats.unresolvedTickets}
                       </span>
-                    </td>
-                    <td className="py-3 px-2 text-gray-600">
-                      {ticket.timeResolved || "N/A"}
-                    </td>
-                    <td className="py-3 px-2 text-gray-600">
-                      {ticket.employeeRating || "N/A"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {actualTicketData.length > 10 && (
-            <div className="px-2 py-3 bg-gray-50/50 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center">
-                Showing 10 of {actualTicketData.length} results
-              </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Total</span>
+                      <span className="text-lg font-bold text-gray-900">
+                        {stats.totalTickets}
+                      </span>
+                    </div>
+                    <div className="pt-3 border-t border-gray-200">
+                      <div className="text-xs text-gray-500 mb-1">
+                        Satisfaction Rate
+                      </div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {stats.satisfactionRate}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Row 4: Recent Tickets Table */}
+            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Recent Tickets
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {actualTicketData.length} Total
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                >
+                  + View All
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Date
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Name
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Account
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Type
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Time
+                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                        Rating
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {actualTicketData.slice(0, 10).map((ticket, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-3 px-2 text-gray-600">
+                          {ticket.timestamp.split(",")[0]}
+                        </td>
+                        <td className="py-3 px-2 text-gray-900 font-medium truncate max-w-xs">
+                          {ticket.fullName || "N/A"}
+                        </td>
+                        <td className="py-3 px-2 text-gray-600 truncate max-w-xs">
+                          {ticket.account}
+                        </td>
+                        <td className="py-3 px-2 text-gray-600 truncate max-w-xs">
+                          {ticket.troubleshootingType.split(",")[0]}
+                        </td>
+                        <td className="py-3 px-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              ticket.status === "Resolved"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {ticket.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-gray-600">
+                          {ticket.timeResolved || "N/A"}
+                        </td>
+                        <td className="py-3 px-2 text-gray-600">
+                          {ticket.employeeRating || "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {actualTicketData.length > 10 && (
+                <div className="px-2 py-3 bg-gray-50/50 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 text-center">
+                    Showing 10 of {actualTicketData.length} results
+                  </p>
+                </div>
+              )}
+            </div>
           </>
         )}
 
@@ -640,52 +774,72 @@ export default function ITPage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                   {/* Total Tasks */}
-                  <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <TicketIcon className="w-8 h-8 opacity-80" />
-                      <div className="text-sm font-medium opacity-90">Total Tasks</div>
+                      <div className="text-sm font-medium opacity-90">
+                        Total Tasks
+                      </div>
                     </div>
-                    <div className="text-4xl font-bold mb-1">{taskData.summary.totalTasks}</div>
+                    <div className="text-4xl font-bold mb-1">
+                      {taskData.summary.totalTasks}
+                    </div>
                     <div className="text-sm opacity-80">All tasks</div>
                   </div>
 
                   {/* Completed */}
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <CheckCircleIcon className="w-8 h-8 opacity-80" />
-                      <div className="text-sm font-medium opacity-90">Completed</div>
+                      <div className="text-sm font-medium opacity-90">
+                        Completed
+                      </div>
                     </div>
-                    <div className="text-4xl font-bold mb-1">{taskData.summary.completed}</div>
+                    <div className="text-4xl font-bold mb-1">
+                      {taskData.summary.completed}
+                    </div>
                     <div className="text-sm opacity-80">Finished</div>
                   </div>
 
                   {/* In Progress */}
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <ClockIcon className="w-8 h-8 opacity-80" />
-                      <div className="text-sm font-medium opacity-90">In Progress</div>
+                      <div className="text-sm font-medium opacity-90">
+                        In Progress
+                      </div>
                     </div>
-                    <div className="text-4xl font-bold mb-1">{taskData.summary.inProgress}</div>
+                    <div className="text-4xl font-bold mb-1">
+                      {taskData.summary.inProgress}
+                    </div>
                     <div className="text-sm opacity-80">Active</div>
                   </div>
 
                   {/* Ongoing */}
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <ArrowPathIcon className="w-8 h-8 opacity-80" />
-                      <div className="text-sm font-medium opacity-90">Ongoing</div>
+                      <div className="text-sm font-medium opacity-90">
+                        Ongoing
+                      </div>
                     </div>
-                    <div className="text-4xl font-bold mb-1">{taskData.summary.ongoing}</div>
+                    <div className="text-4xl font-bold mb-1">
+                      {taskData.summary.ongoing}
+                    </div>
                     <div className="text-sm opacity-80">In progress</div>
                   </div>
 
                   {/* To Do */}
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <StarIcon className="w-8 h-8 opacity-80" />
-                      <div className="text-sm font-medium opacity-90">To Do</div>
+                      <div className="text-sm font-medium opacity-90">
+                        To Do
+                      </div>
                     </div>
-                    <div className="text-4xl font-bold mb-1">{taskData.summary.toDo}</div>
+                    <div className="text-4xl font-bold mb-1">
+                      {taskData.summary.toDo}
+                    </div>
                     <div className="text-sm opacity-80">Pending</div>
                   </div>
                 </div>
@@ -737,52 +891,52 @@ export default function ITPage() {
                       </thead>
                       <tbody>
                         {taskData.tasks.slice(0, 5).map((task, index) => {
-                            const getStatusColor = (status: string) => {
-                              const statusLower = status.toLowerCase();
-                              if (statusLower === "completed") {
-                                return "bg-green-100 text-green-700";
-                              } else if (statusLower === "in progress") {
-                                return "bg-blue-100 text-blue-700";
-                              } else if (statusLower === "ongoing") {
-                                return "bg-purple-100 text-purple-700";
-                              } else if (statusLower === "to do") {
-                                return "bg-orange-100 text-orange-700";
-                              }
-                              return "bg-gray-100 text-gray-700";
-                            };
+                          const getStatusColor = (status: string) => {
+                            const statusLower = status.toLowerCase();
+                            if (statusLower === "completed") {
+                              return "bg-green-100 text-green-700";
+                            } else if (statusLower === "in progress") {
+                              return "bg-blue-100 text-blue-700";
+                            } else if (statusLower === "ongoing") {
+                              return "bg-purple-100 text-purple-700";
+                            } else if (statusLower === "to do") {
+                              return "bg-orange-100 text-orange-700";
+                            }
+                            return "bg-gray-100 text-gray-700";
+                          };
 
-                            return (
-                              <tr
-                                key={index}
-                                className="border-b border-gray-100 hover:bg-purple-50/50 transition-colors"
-                              >
-                                <td className="py-3 px-2 text-gray-900 font-medium">
-                                  {task.taskName || "N/A"}
-                                </td>
-                                <td className="py-3 px-2 text-gray-600">
-                                  {task.assignee || "N/A"}
-                                </td>
-                                <td className="py-3 px-2 text-gray-600">
-                                  {task.startDate || "N/A"}
-                                </td>
-                                <td className="py-3 px-2 text-gray-600">
-                                  {task.deadline || "N/A"}
-                                </td>
-                                <td className="py-3 px-2">
-                                  <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                      task.status
-                                    )}`}
-                                  >
-                                    {task.status || "N/A"}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-2 text-gray-600">
-                                  {task.dateCompleted || "N/A"}
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b border-gray-100 hover:bg-purple-50/50 transition-colors"
+                            >
+                              <td className="py-3 px-2 text-gray-900 font-medium">
+                                {task.taskName || "N/A"}
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {task.assignee || "N/A"}
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {task.startDate || "N/A"}
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {task.deadline || "N/A"}
+                              </td>
+                              <td className="py-3 px-2">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                    task.status
+                                  )}`}
+                                >
+                                  {task.status || "N/A"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {task.dateCompleted || "N/A"}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -812,7 +966,7 @@ export default function ITPage() {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+              <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold text-white">
@@ -953,7 +1107,11 @@ export default function ITPage() {
               {/* Modal Footer */}
               <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Total: <span className="font-semibold">{actualTicketData.length}</span> tickets | Filtered:{" "}
+                  Total:{" "}
+                  <span className="font-semibold">
+                    {actualTicketData.length}
+                  </span>{" "}
+                  tickets | Filtered:{" "}
                   <span className="font-semibold">
                     {
                       actualTicketData.filter(
@@ -997,7 +1155,7 @@ export default function ITPage() {
 
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+              <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold text-white">
@@ -1032,9 +1190,15 @@ export default function ITPage() {
                   {
                     taskData.tasks.filter(
                       (task) =>
-                        task.taskName.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                        task.assignee.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                        task.status.toLowerCase().includes(taskSearchTerm.toLowerCase())
+                        task.taskName
+                          .toLowerCase()
+                          .includes(taskSearchTerm.toLowerCase()) ||
+                        task.assignee
+                          .toLowerCase()
+                          .includes(taskSearchTerm.toLowerCase()) ||
+                        task.status
+                          .toLowerCase()
+                          .includes(taskSearchTerm.toLowerCase())
                     ).length
                   }{" "}
                   of {taskData.tasks.length} tasks match your search
@@ -1070,9 +1234,15 @@ export default function ITPage() {
                     {taskData.tasks
                       .filter(
                         (task) =>
-                          task.taskName.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          task.assignee.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          task.status.toLowerCase().includes(taskSearchTerm.toLowerCase())
+                          task.taskName
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase()) ||
+                          task.assignee
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase()) ||
+                          task.status
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase())
                       )
                       .map((task, index) => {
                         const getStatusColor = (status: string) => {
@@ -1128,20 +1298,218 @@ export default function ITPage() {
               {/* Modal Footer */}
               <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Total: <span className="font-semibold">{taskData.tasks.length}</span> tasks | Filtered:{" "}
+                  Total:{" "}
+                  <span className="font-semibold">{taskData.tasks.length}</span>{" "}
+                  tasks | Filtered:{" "}
                   <span className="font-semibold">
                     {
                       taskData.tasks.filter(
                         (task) =>
-                          task.taskName.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          task.assignee.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          task.status.toLowerCase().includes(taskSearchTerm.toLowerCase())
+                          task.taskName
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase()) ||
+                          task.assignee
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase()) ||
+                          task.status
+                            .toLowerCase()
+                            .includes(taskSearchTerm.toLowerCase())
                       ).length
                     }
                   </span>
                 </p>
                 <button
                   onClick={() => setIsTaskModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Monthly Average Resolution Time Modal */}
+      {isMonthlyResolutionModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
+              onClick={() => setIsMonthlyResolutionModalOpen(false)}
+            ></div>
+
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+              {/* Modal Header */}
+              <div className="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Average Resolution Time per Month
+                    </h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      Monthly breakdown of average ticket resolution times
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsMonthlyResolutionModalOpen(false)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-auto p-6">
+                {(() => {
+                  const monthlyAverages = calculateMonthlyAverages();
+
+                  if (monthlyAverages.length === 0) {
+                    return (
+                      <div className="text-center py-12">
+                        <ClockIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 text-lg">
+                          No resolution time data available
+                        </p>
+                        <p className="text-gray-500 text-sm mt-2">
+                          Resolved tickets with resolution times are needed to
+                          display monthly averages.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                      {/* Chart */}
+                      <div className="bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                          Monthly Average Resolution Time Trend
+                        </h3>
+                        <ResponsiveContainer width="100%" height={400}>
+                          <LineChart data={monthlyAverages}>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              className="stroke-gray-200"
+                            />
+                            <XAxis
+                              dataKey="month"
+                              className="text-sm text-gray-600"
+                              angle={-45}
+                              textAnchor="end"
+                              height={80}
+                            />
+                            <YAxis
+                              className="text-sm text-gray-600"
+                              label={{
+                                value: "Time (seconds)",
+                                angle: -90,
+                                position: "insideLeft",
+                              }}
+                            />
+                            <Tooltip
+                              cursor={{ fill: "transparent" }}
+                              contentStyle={{
+                                backgroundColor: "white",
+                                borderColor: "#e5e7eb",
+                                borderRadius: "0.5rem",
+                                fontSize: "0.875rem",
+                                padding: "0.5rem 0.75rem",
+                                boxShadow:
+                                  "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+                              }}
+                              formatter={(value: number) => {
+                                const minutes = Math.floor(value / 60);
+                                const seconds = value % 60;
+                                if (minutes > 0 && seconds > 0) {
+                                  return `${minutes}m ${seconds}s`;
+                                } else if (minutes > 0) {
+                                  return `${minutes}m`;
+                                } else {
+                                  return `${seconds}s`;
+                                }
+                              }}
+                              labelStyle={{
+                                fontWeight: "bold",
+                                marginBottom: "0.25rem",
+                              }}
+                            />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="averageSeconds"
+                              name="Average Resolution Time"
+                              stroke="#3b82f6"
+                              strokeWidth={3}
+                              dot={{ fill: "#3b82f6", r: 5 }}
+                              activeDot={{ r: 8 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Table */}
+                      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-200">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Monthly Breakdown
+                          </h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 sticky top-0">
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Month
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Average Resolution Time
+                                </th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                                  Tickets Resolved
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {monthlyAverages.map((month, index) => (
+                                <tr
+                                  key={month.monthKey}
+                                  className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors"
+                                >
+                                  <td className="py-3 px-4 text-gray-900 font-medium">
+                                    {month.month}
+                                  </td>
+                                  <td className="py-3 px-4 text-gray-600">
+                                    <span className="font-semibold text-blue-600">
+                                      {month.averageTime}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-gray-600">
+                                    {month.count}{" "}
+                                    {month.count === 1 ? "ticket" : "tickets"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total months:{" "}
+                  <span className="font-semibold">
+                    {calculateMonthlyAverages().length}
+                  </span>
+                </p>
+                <button
+                  onClick={() => setIsMonthlyResolutionModalOpen(false)}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
                 >
                   Close

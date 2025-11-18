@@ -14,7 +14,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
   return (
     <>
       {/* Total Leads */}
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
+      <div className="bg-linear-to-br from-blue-500 to-blue-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <p className="text-xs font-medium text-white/80 mb-1">Total Leads</p>
@@ -27,7 +27,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       </div>
 
       {/* Ready to Engage */}
-      <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
+      <div className="bg-linear-to-br from-green-500 to-green-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <p className="text-xs font-medium text-white/80 mb-1">Ready to Engage</p>
@@ -40,7 +40,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       </div>
 
       {/* In Development */}
-      <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
+      <div className="bg-linear-to-br from-purple-500 to-purple-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <p className="text-xs font-medium text-white/80 mb-1">In Development</p>
@@ -53,7 +53,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       </div>
 
       {/* Needs Review */}
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
+      <div className="bg-linear-to-br from-orange-500 to-orange-600 p-4 rounded-2xl shadow-md hover:shadow-xl transform transition-all duration-300 hover:scale-105">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <p className="text-xs font-medium text-white/80 mb-1">Needs Review</p>

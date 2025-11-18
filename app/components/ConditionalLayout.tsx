@@ -34,6 +34,7 @@ export default function ConditionalLayout({
     "/admin",
     "/profile",
     "/home",
+    "/laptop-inventory",
   ].includes(pathname);
 
   // Pages that should never show sidebar

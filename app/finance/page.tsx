@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
+import TabNavigation, { Tab } from "../components/navigation/TabNavigation";
+import PayrollTab from "./components/PayrollTab";
 import {
+  EyeIcon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
   BanknotesIcon,
   CheckCircleIcon,
   ClockIcon,
   ArrowPathIcon,
-  EyeIcon,
-  XMarkIcon,
-  MagnifyingGlassIcon,
   ArrowPathRoundedSquareIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -32,8 +34,6 @@ export default function FinancePage() {
   const [qbData, setQbData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
@@ -280,23 +280,11 @@ export default function FinancePage() {
     }
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    const lowerStatus = status.toLowerCase();
-    if (lowerStatus === "resolved") {
-      return "bg-green-100 text-green-800";
-    } else if (lowerStatus === "pending") {
-      return "bg-orange-100 text-orange-800";
-    } else if (lowerStatus === "on process" || lowerStatus === "onprocess") {
-      return "bg-blue-100 text-blue-800";
-    } else {
-      return "bg-gray-100 text-gray-800";
-    }
-  };
 
   // Show loading while checking passkey
   if (isCheckingPasskey) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <LoadingSpinner size="lg" text="Checking access..." />
       </div>
     );
@@ -305,11 +293,11 @@ export default function FinancePage() {
   // Show passkey modal if not verified
   if (!isPasskeyVerified) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-gray-100">
           {/* Lock Icon */}
           <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full p-6">
+            <div className="bg-linear-to-br from-blue-500 to-indigo-600 rounded-full p-6">
               <svg
                 className="w-12 h-12 text-white"
                 fill="none"
@@ -424,7 +412,7 @@ export default function FinancePage() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              className="w-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
             >
               Verify & Access
             </button>
@@ -481,463 +469,27 @@ export default function FinancePage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab("payroll")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "payroll"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Payroll Concerns
-              </button>
-              <button
-                onClick={() => setActiveTab("clientPayments")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "clientPayments"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Client Payment Update
-              </button>
-              <button
-                onClick={() => setActiveTab("attendanceBonus")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === "attendanceBonus"
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Quarterly Bonus
-              </button>
-            </nav>
-          </div>
-        </div>
+        <TabNavigation
+          tabs={[
+            { id: "payroll", label: "Payroll Concerns" },
+            { id: "clientPayments", label: "Client Payment Update" },
+            { id: "attendanceBonus", label: "Quarterly Bonus" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          color="emerald"
+        />
 
         {/* Payroll Concerns Tab */}
         {activeTab === "payroll" && (
-          <div className="space-y-6">
-            {loading ? (
-              <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-                <LoadingSpinner size="lg" text="Loading payroll concerns..." />
-              </div>
-            ) : error ? (
-              <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
-                <div className="text-red-600 text-6xl mb-4">⚠️</div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  Error Loading Data
-                </h2>
-                <p className="text-gray-600 mb-6">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl transition-colors font-medium"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : payrollData ? (
-              <>
-                {/* Summary Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Total Concerns */}
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <BanknotesIcon className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">
-                      {payrollData.summary.totalConcerns}
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Total Concerns
-                    </div>
-                  </div>
-
-                  {/* Resolved Concerns */}
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <CheckCircleIcon className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">
-                      {payrollData.summary.resolvedConcerns}
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Resolved Concerns
-                    </div>
-                  </div>
-
-                  {/* Pending Concerns */}
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <ClockIcon className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">
-                      {payrollData.summary.pendingConcerns}
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      Pending
-                    </div>
-                  </div>
-
-                  {/* On Process Concerns */}
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <ArrowPathIcon className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-white mb-1">
-                      {payrollData.summary.onProcessConcerns}
-                    </div>
-                    <div className="text-sm font-medium text-white/90">
-                      On Process
-                    </div>
-                  </div>
-                </div>
-
-                {/* Concerns Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        All Payroll Concerns
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Complete list of all submitted concerns
-                        {lastUpdated && (
-                          <span className="ml-2 text-xs">
-                            • Last updated: {lastUpdated.toLocaleTimeString()}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ArrowPathRoundedSquareIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
-                      </button>
-                      {payrollData.concerns.length > 5 && (
-                        <button
-                          onClick={() => setIsModalOpen(true)}
-                          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
-                        >
-                          <span className="text-lg">+</span>
-                          View All
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ID
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Payroll Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Type of Concern
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Details
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date Resolved
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {payrollData.concerns.length > 0 ? (
-                          payrollData.concerns.slice(0, 5).map((concern: any) => (
-                            <tr key={concern.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {concern.id}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {concern.payrollDate || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                {concern.concernType || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                {concern.details || "N/A"}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {concern.status && concern.status.trim() !== "" ? (
-                                  <span
-                                    className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
-                                      concern.status
-                                    )}`}
-                                  >
-                                    {concern.status}
-                                  </span>
-                                ) : (
-                                  <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    N/A
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {concern.dateResolved && concern.dateResolved.trim() !== "" ? concern.dateResolved : "N/A"}
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                              <td
-                                colSpan={6}
-                                className="px-6 py-8 text-center text-sm text-gray-500"
-                              >
-                                No concerns found
-                              </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Modal for View All Concerns */}
-                {isModalOpen && (
-                  <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex min-h-screen items-center justify-center p-4">
-                      <div
-                        className="fixed inset-0 bg-black/20 backdrop-blur-md transition-opacity"
-                        onClick={() => setIsModalOpen(false)}
-                      ></div>
-
-                      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h2 className="text-2xl font-bold text-white">
-                                All Payroll Concerns
-                              </h2>
-                              <p className="text-white/80 text-sm mt-1">
-                                Complete list of all submitted concerns with search and filter
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => setIsModalOpen(false)}
-                              className="text-white hover:text-gray-200 transition-colors"
-                            >
-                              <XMarkIcon className="w-6 h-6" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Search Bar */}
-                        <div className="p-6 border-b border-gray-200">
-                          <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              placeholder="Search by email, concern type, status, or details..."
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <p className="text-sm text-gray-500 mt-2">
-                            {
-                              payrollData.concerns.filter(
-                                (concern: any) =>
-                                  concern.email
-                                    ?.toLowerCase()
-                                    .includes(searchTerm.toLowerCase()) ||
-                                  concern.concernType
-                                    ?.toLowerCase()
-                                    .includes(searchTerm.toLowerCase()) ||
-                                  concern.status
-                                    ?.toLowerCase()
-                                    .includes(searchTerm.toLowerCase()) ||
-                                  concern.details
-                                    ?.toLowerCase()
-                                    .includes(searchTerm.toLowerCase()) ||
-                                  concern.payrollDate
-                                    ?.toLowerCase()
-                                    .includes(searchTerm.toLowerCase())
-                              ).length
-                            }{" "}
-                            of {payrollData.concerns.length} concerns match your search
-                          </p>
-                        </div>
-
-                        {/* Modal Body */}
-                        <div className="flex-1 overflow-auto">
-                          <table className="w-full text-sm">
-                            <thead className="bg-gray-50 sticky top-0">
-                              <tr className="border-b border-gray-200">
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  ID
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Payroll Date
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Type of Concern
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Details
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Status
-                                </th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                                  Date Resolved
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {payrollData.concerns
-                                .filter(
-                                  (concern: any) =>
-                                    concern.email
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.concernType
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.status
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.details
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.payrollDate
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase())
-                                ).length > 0 ? (
-                                payrollData.concerns
-                                  .filter(
-                                    (concern: any) =>
-                                      concern.email
-                                        ?.toLowerCase()
-                                        .includes(searchTerm.toLowerCase()) ||
-                                      concern.concernType
-                                        ?.toLowerCase()
-                                        .includes(searchTerm.toLowerCase()) ||
-                                      concern.status
-                                        ?.toLowerCase()
-                                        .includes(searchTerm.toLowerCase()) ||
-                                      concern.details
-                                        ?.toLowerCase()
-                                        .includes(searchTerm.toLowerCase()) ||
-                                      concern.payrollDate
-                                        ?.toLowerCase()
-                                        .includes(searchTerm.toLowerCase())
-                                  )
-                                  .map((concern: any) => (
-                                  <tr
-                                    key={concern.id}
-                                    className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors"
-                                  >
-                                    <td className="py-3 px-4 text-gray-900 font-medium">
-                                      {concern.id}
-                                    </td>
-                                    <td className="py-3 px-4 text-gray-600">
-                                      {concern.payrollDate || "N/A"}
-                                    </td>
-                                    <td className="py-3 px-4 text-gray-600">
-                                      {concern.concernType || "N/A"}
-                                    </td>
-                                    <td className="py-3 px-4 text-gray-600 max-w-xs truncate">
-                                      {concern.details || "N/A"}
-                                    </td>
-                                    <td className="py-3 px-4">
-                                      {concern.status && concern.status.trim() !== "" ? (
-                                        <span
-                                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
-                                            concern.status
-                                          )}`}
-                                        >
-                                          {concern.status}
-                                        </span>
-                                      ) : (
-                                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                          N/A
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="py-3 px-4 text-gray-600">
-                                      {concern.dateResolved && concern.dateResolved.trim() !== "" ? concern.dateResolved : "N/A"}
-                                    </td>
-                                  </tr>
-                                  ))
-                              ) : (
-                                <tr>
-                                  <td
-                                    colSpan={6}
-                                    className="py-8 px-4 text-center text-sm text-gray-500"
-                                  >
-                                    No concerns found matching your search
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Modal Footer */}
-                        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
-                          <p className="text-sm text-gray-600">
-                            Total: <span className="font-semibold">{payrollData.concerns.length}</span> concerns | Filtered:{" "}
-                            <span className="font-semibold">
-                              {
-                                payrollData.concerns.filter(
-                                  (concern: any) =>
-                                    concern.email
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.concernType
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.status
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.details
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase()) ||
-                                    concern.payrollDate
-                                      ?.toLowerCase()
-                                      .includes(searchTerm.toLowerCase())
-                                ).length
-                              }
-                            </span>
-                          </p>
-                          <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : null}
-          </div>
+          <PayrollTab
+            payrollData={payrollData}
+            loading={loading}
+            error={error}
+            isRefreshing={isRefreshing}
+            lastUpdated={lastUpdated}
+            onRefresh={handleRefresh}
+          />
         )}
 
         {/* Client Payment Update Tab */}
@@ -966,7 +518,7 @@ export default function FinancePage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {/* Total Clients */}
-                  <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         <BanknotesIcon className="w-6 h-6 text-white" />
@@ -981,7 +533,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Paid Early */}
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         <CheckCircleIcon className="w-6 h-6 text-white" />
@@ -996,7 +548,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Paid Late */}
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         <ClockIcon className="w-6 h-6 text-white" />
@@ -1011,7 +563,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Not Yet Paid */}
-                  <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-red-500 to-red-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         <ArrowPathIcon className="w-6 h-6 text-white" />
@@ -1026,7 +578,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Total Payments */}
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         <BanknotesIcon className="w-6 h-6 text-white" />
@@ -1161,7 +713,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Search Bar */}
-                  <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-blue-50 to-indigo-50">
                     <div className="relative">
                       <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
@@ -1247,7 +799,7 @@ export default function FinancePage() {
                             <div className="grid grid-cols-2 gap-3 mb-5">
                               {/* Total Invoices - Clickable */}
                               <div 
-                                className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                className="bg-linear-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFilteredClientName(clientName);
@@ -1270,7 +822,7 @@ export default function FinancePage() {
 
                               {/* Paid Early - Clickable */}
                               <div 
-                                className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                className="bg-linear-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFilteredClientName(clientName);
@@ -1293,7 +845,7 @@ export default function FinancePage() {
 
                               {/* Paid Late - Clickable */}
                               <div 
-                                className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                className="bg-linear-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFilteredClientName(clientName);
@@ -1316,7 +868,7 @@ export default function FinancePage() {
 
                               {/* Not Yet Paid - Clickable */}
                               <div 
-                                className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                className="bg-linear-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFilteredClientName(clientName);
@@ -1339,7 +891,7 @@ export default function FinancePage() {
                               </div>
                             
                             {/* Latest Payment Info */}
-                            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-4 border border-gray-200">
+                            <div className="bg-linear-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-4 border border-gray-200">
                               <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Latest Payment</h5>
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center">
@@ -1392,11 +944,11 @@ export default function FinancePage() {
                       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                         {/* Modal Header */}
                         <div className={`flex items-center justify-between p-6 border-b border-gray-200 rounded-t-2xl ${
-                          filteredPaymentStatus === "Paid Early" ? "bg-gradient-to-r from-green-50 to-green-100" :
-                          filteredPaymentStatus === "Paid Late" ? "bg-gradient-to-r from-orange-50 to-orange-100" :
-                          filteredPaymentStatus === "Not Yet Paid" ? "bg-gradient-to-r from-red-50 to-red-100" :
-                          filteredPaymentStatus === "All" ? "bg-gradient-to-r from-indigo-50 to-indigo-100" :
-                          "bg-gradient-to-r from-blue-50 to-blue-100"
+                          filteredPaymentStatus === "Paid Early" ? "bg-linear-to-r from-green-50 to-green-100" :
+                          filteredPaymentStatus === "Paid Late" ? "bg-linear-to-r from-orange-50 to-orange-100" :
+                          filteredPaymentStatus === "Not Yet Paid" ? "bg-linear-to-r from-red-50 to-red-100" :
+                          filteredPaymentStatus === "All" ? "bg-linear-to-r from-indigo-50 to-indigo-100" :
+                          "bg-linear-to-r from-blue-50 to-blue-100"
                         }`}>
                           <div>
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -1479,7 +1031,7 @@ export default function FinancePage() {
                               return (
                                 <div
                                       key={idx}
-                                  className={`bg-gradient-to-br rounded-xl p-5 border-2 shadow-md hover:shadow-xl transition-all duration-200 ${cardColorClass}`}
+                                  className={`bg-linear-to-br rounded-xl p-5 border-2 shadow-md hover:shadow-xl transition-all duration-200 ${cardColorClass}`}
                                 >
                                   {/* Coverage Date Header */}
                                   <div className="flex items-center justify-between mb-4">
@@ -1559,11 +1111,11 @@ export default function FinancePage() {
                             <button
                               onClick={() => setIsFilteredModalOpen(false)}
                               className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg text-white ${
-                                filteredPaymentStatus === "Paid Early" ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800" :
-                                filteredPaymentStatus === "Paid Late" ? "bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800" :
-                                filteredPaymentStatus === "Not Yet Paid" ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800" :
-                                filteredPaymentStatus === "All" ? "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800" :
-                                "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                                filteredPaymentStatus === "Paid Early" ? "bg-linear-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800" :
+                                filteredPaymentStatus === "Paid Late" ? "bg-linear-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800" :
+                                filteredPaymentStatus === "Not Yet Paid" ? "bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800" :
+                                filteredPaymentStatus === "All" ? "bg-linear-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800" :
+                                "bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                               }`}
                             >
                               Close
@@ -1586,7 +1138,7 @@ export default function FinancePage() {
                       
                       <div className="relative bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
                         {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-between">
+                        <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-blue-600 to-indigo-600 flex items-center justify-between">
                           <div>
                             <h2 className="text-xl font-bold text-white">
                               Payment Status by Client - Full View
@@ -1684,7 +1236,7 @@ export default function FinancePage() {
                           </div>
                           <button
                             onClick={() => setIsChartModalOpen(false)}
-                            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                            className="px-6 py-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                           >
                             Close
                           </button>
@@ -1708,7 +1260,7 @@ export default function FinancePage() {
                   onClick={() => setQuarterlyBonusTab("teamContinuity")}
                   className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all ${
                     quarterlyBonusTab === "teamContinuity"
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                      ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
@@ -1718,7 +1270,7 @@ export default function FinancePage() {
                   onClick={() => setQuarterlyBonusTab("qb")}
                   className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all ${
                     quarterlyBonusTab === "qb"
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                      ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
@@ -1753,7 +1305,7 @@ export default function FinancePage() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                   {/* Total Teams */}
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1770,7 +1322,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* With Bonus */}
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <CheckCircleIcon className="w-5 h-5 text-white" />
@@ -1785,7 +1337,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Without Bonus */}
-                  <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <XMarkIcon className="w-5 h-5 text-white" />
@@ -1800,7 +1352,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Total October */}
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <BanknotesIcon className="w-5 h-5 text-white" />
@@ -1815,7 +1367,7 @@ export default function FinancePage() {
                   </div>
 
                   {/* Hired/Resigned October */}
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
+                  <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-2">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <ArrowPathIcon className="w-5 h-5 text-white" />
@@ -1939,7 +1491,7 @@ export default function FinancePage() {
                           <tr key={index} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                <div className="flex-shrink-0 w-10 h-10 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                                   <span className="text-white font-bold text-sm">
                                     {team.account.substring(0, 2)}
                                   </span>
@@ -1974,7 +1526,7 @@ export default function FinancePage() {
                           </tr>
                         ))}
                         {/* Totals Row */}
-                        <tr className="bg-gradient-to-r from-gray-50 to-blue-50 font-bold border-t-2 border-gray-300">
+                        <tr className="bg-linear-to-r from-gray-50 to-blue-50 font-bold border-t-2 border-gray-300">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                             TOTAL
                           </td>
@@ -1992,7 +1544,7 @@ export default function FinancePage() {
                           </td>
                         </tr>
                         {/* Hired/Resigned Row */}
-                        <tr className="bg-gradient-to-r from-gray-50 to-orange-50 font-semibold">
+                        <tr className="bg-linear-to-r from-gray-50 to-orange-50 font-semibold">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                             Hired/Resigned
                           </td>
@@ -2029,7 +1581,7 @@ export default function FinancePage() {
 
                       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-blue-50 to-blue-100 rounded-t-2xl">
                           <div>
                             <h2 className="text-2xl font-bold text-gray-900">
                               All Teams - Continuity Bonus
@@ -2096,7 +1648,7 @@ export default function FinancePage() {
                                   <tr key={index} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
                                     <td className="py-3 px-4">
                                       <div className="flex items-center">
-                                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                                           <span className="text-white font-bold text-sm">
                                             {team.account.substring(0, 2)}
                                           </span>
@@ -2142,7 +1694,7 @@ export default function FinancePage() {
                             </p>
                             <button
                               onClick={() => setIsTeamContinuityModalOpen(false)}
-                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                              className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                             >
                               Close
                             </button>
@@ -2183,7 +1735,7 @@ export default function FinancePage() {
                     {/* Summary Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
                       {/* Total Employees */}
-                      <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2200,7 +1752,7 @@ export default function FinancePage() {
                       </div>
 
                       {/* Total Bonus Payout */}
-                      <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <BanknotesIcon className="w-5 h-5 text-white" />
@@ -2215,7 +1767,7 @@ export default function FinancePage() {
                       </div>
 
                       {/* Avg Bonus */}
-                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2232,7 +1784,7 @@ export default function FinancePage() {
                       </div>
 
                       {/* Regular */}
-                      <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <CheckCircleIcon className="w-5 h-5 text-white" />
@@ -2247,7 +1799,7 @@ export default function FinancePage() {
                       </div>
 
                       {/* Probationary */}
-                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <ClockIcon className="w-5 h-5 text-white" />
@@ -2262,7 +1814,7 @@ export default function FinancePage() {
                       </div>
 
                       {/* Resigned */}
-                      <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
+                      <div className="bg-linear-to-br from-red-500 to-red-600 rounded-xl p-4 shadow-lg text-white">
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <XMarkIcon className="w-5 h-5 text-white" />
@@ -2448,7 +2000,7 @@ export default function FinancePage() {
 
                           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
                             {/* Modal Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl">
+                            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-linear-to-r from-blue-50 to-blue-100 rounded-t-2xl">
                               <div>
                                 <h2 className="text-2xl font-bold text-gray-900">
                                   All Employees - Quarterly Bonus
@@ -2610,7 +2162,7 @@ export default function FinancePage() {
                                 </p>
                                 <button
                                   onClick={() => setIsQbModalOpen(false)}
-                                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                                  className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
                                 >
                                   Close
                                 </button>

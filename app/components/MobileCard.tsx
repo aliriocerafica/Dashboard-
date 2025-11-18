@@ -53,9 +53,9 @@ export const MobileCard: React.FC<MobileCardProps> = ({
 
   const variantClass =
     variant === "gradient"
-      ? `bg-gradient-to-br ${gradientClasses[color]} text-white border-0`
+      ? `bg-linear-to-br ${gradientClasses[color]} text-white border-0`
       : variant === "colored"
-      ? `bg-gradient-to-br ${colorClasses[color]} border-2`
+      ? `bg-linear-to-br ${colorClasses[color]} border-2`
       : "bg-white border border-gray-100";
 
   return (
@@ -174,7 +174,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({
 
   return (
     <MobileCard className="overflow-hidden">
-      <div className={`px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r ${headerColors[headerColor]} flex items-center justify-between`}>
+      <div className={`px-4 sm:px-6 py-3 sm:py-4 bg-linear-to-r ${headerColors[headerColor]} flex items-center justify-between`}>
         <h3 className="text-base sm:text-lg font-bold text-white">{title}</h3>
         {action && (
           <button
