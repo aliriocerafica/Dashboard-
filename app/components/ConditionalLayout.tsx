@@ -37,8 +37,8 @@ export default function ConditionalLayout({
     "/laptop-inventory",
   ].includes(pathname);
 
-  // Pages that should never show sidebar
-  const noSidebarPages = ["/splash", "/login"];
+  // Pages that should never show sidebar or dashboard chrome
+  const noSidebarPages = ["/splash", "/login", "/employee-portal"];
 
   // Check if current page requires authentication
   const requiresAuth = isProtectedPage;
@@ -120,7 +120,14 @@ export default function ConditionalLayout({
     );
   }
 
-  // Otherwise, show content without sidebar
+  // Otherwise, show content without sidebar.
+  // For special pages in noSidebarPages, we also hide mobile chrome completely.
+  const hideChrome = noSidebarPages.includes(pathname);
+
+  if (hideChrome) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {children}
